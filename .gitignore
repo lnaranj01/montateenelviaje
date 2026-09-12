@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/data/_backups/
 
 # next.js
 /.next/

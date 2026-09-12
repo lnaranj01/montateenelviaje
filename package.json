@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
@@ -34,6 +34,7 @@
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vite": "^8.3.0",
     "vitest": "^5.0.0"
   }
 }
