@@ -1,7 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+const AUTH_STORAGE_KEY = 'montateenelviaje-auth';
 
 type FormErrors = {
   email?: string;
@@ -15,6 +17,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (window.localStorage.getItem(AUTH_STORAGE_KEY) === 'true') {
+      router.replace('/');
+    }
+  }, [router]);
 
   function validateForm() {
     const nextErrors: FormErrors = {};
@@ -48,6 +56,7 @@ export default function LoginPage() {
     const isDemoUser = email.trim().toLowerCase() === 'demo@montateenelviaje.com' && password === 'demo1234';
 
     if (isDemoUser) {
+      window.localStorage.setItem(AUTH_STORAGE_KEY, 'true');
       router.push('/');
       return;
     }
