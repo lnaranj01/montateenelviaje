@@ -2,9 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-const AUTH_STORAGE_KEY = 'montateenelviaje-auth';
+import { createClient } from '@/lib/supabase/client';
 
 const features = [
   'Planifica rutas con estilo',
@@ -16,20 +16,51 @@ const features = [
 export default function HomePage() {
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const isAuthenticated = window.localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
+    let isActive = true;
 
-    if (!isAuthenticated) {
+    try {
+      void createClient()
+        .auth.getUser()
+        .then(({ data, error }) => {
+          if (!isActive) {
+            return;
+          }
+
+          if (error || !data.user) {
+            router.replace('/login');
+            return;
+          }
+
+          setIsAdmin(data.user.app_metadata.role === 'admin');
+          setIsReady(true);
+        })
+        .catch(() => {
+          if (isActive) {
+            router.replace('/login');
+          }
+        });
+    } catch {
       router.replace('/login');
-      return;
     }
 
-    setIsReady(true);
+    return () => {
+      isActive = false;
+    };
   }, [router]);
 
   if (!isReady) {
     return null;
+  }
+
+  async function handleSignOut() {
+    const { error } = await createClient().auth.signOut();
+
+    if (!error) {
+      router.replace('/login');
+    }
   }
 
   return (
@@ -40,8 +71,25 @@ export default function HomePage() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-4xl rounded-3xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl shadow-cyan-950/30 backdrop-blur"
       >
-        <div className="mb-8 inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-          Montate en el viaje
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+            Montate en el viaje
+          </div>
+          {isAdmin && (
+            <Link
+              className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+              href="/admin/usuarios"
+            >
+              Usuarios
+            </Link>
+          )}
+          <button
+            className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            onClick={handleSignOut}
+            type="button"
+          >
+            Cerrar sesión
+          </button>
         </div>
 
         <h1 className="mb-4 text-4xl font-black tracking-tight text-white sm:text-5xl">

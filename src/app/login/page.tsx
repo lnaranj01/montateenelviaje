@@ -2,8 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-const AUTH_STORAGE_KEY = 'montateenelviaje-auth';
+import { createClient } from '@/lib/supabase/client';
 
 type FormErrors = {
   email?: string;
@@ -19,9 +18,33 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (window.localStorage.getItem(AUTH_STORAGE_KEY) === 'true') {
-      router.replace('/');
-    }
+    let isActive = true;
+
+    void Promise.resolve()
+      .then(() => createClient().auth.getUser())
+      .then(({ data, error }) => {
+        if (!isActive) {
+          return;
+        }
+
+        if (error) {
+          const message = error.message.toLowerCase().includes('api key')
+            ? 'La clave publishable de Supabase no es válida.'
+            : 'No se pudo verificar la sesión con Supabase.';
+          setErrors({ credentials: message });
+        } else if (data.user) {
+          router.replace('/');
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setErrors({ credentials: 'No se pudo conectar con Supabase. Revisa su configuración.' });
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, [router]);
 
   function validateForm() {
@@ -50,19 +73,26 @@ export default function LoginPage() {
     }
 
     setIsSubmitting(true);
+    try {
+      const { error } = await createClient().auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    // TODO: conectar con la API real donde iría la llamada de verdad.
-    const isDemoUser = email.trim().toLowerCase() === 'demo@montateenelviaje.com' && password === 'demo1234';
+      if (error) {
+        const message = error.message.toLowerCase().includes('api key')
+          ? 'La clave publishable de Supabase no es válida.'
+          : 'Correo o contraseña incorrectos.';
+        setErrors({ credentials: message });
+        return;
+      }
 
-    if (isDemoUser) {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, 'true');
-      router.push('/');
-      return;
+      router.replace('/');
+    } catch {
+      setErrors({ credentials: 'No se pudo conectar con Supabase. Revisa la URL y la clave publishable.' });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setErrors({ credentials: 'Correo o contraseña incorrectos' });
-    setIsSubmitting(false);
   }
 
   return (
