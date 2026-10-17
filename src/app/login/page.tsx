@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -166,6 +167,12 @@ export default function LoginPage() {
           <a className="block text-center text-sm font-medium text-cyan-300 transition hover:text-cyan-200" href="#">
             Olvidé mi contraseña
           </a>
+          <p className="text-center text-sm text-slate-400">
+            ¿No tienes cuenta?{' '}
+            <Link className="font-semibold text-cyan-300 transition hover:text-cyan-200" href="/registro">
+              Crear cuenta
+            </Link>
+          </p>
         </form>
       </section>
     </main>
