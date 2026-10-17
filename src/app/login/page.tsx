@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
+  const [recoveryNotice, setRecoveryNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -48,6 +49,15 @@ export default function LoginPage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    const mensaje = sessionStorage.getItem('mensaje-recuperacion-contrasena');
+
+    if (mensaje) {
+      setRecoveryNotice(mensaje);
+      sessionStorage.removeItem('mensaje-recuperacion-contrasena');
+    }
+  }, []);
+
   function validateForm() {
     const nextErrors: FormErrors = {};
 
@@ -74,6 +84,7 @@ export default function LoginPage() {
     }
 
     setIsSubmitting(true);
+    setRecoveryNotice('');
     try {
       const { error } = await createClient().auth.signInWithPassword({
         email: email.trim(),
@@ -164,9 +175,10 @@ export default function LoginPage() {
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <a className="block text-center text-sm font-medium text-cyan-300 transition hover:text-cyan-200" href="#">
-            Olvidé mi contraseña
-          </a>
+          {recoveryNotice && <p className="text-center text-sm text-emerald-300" role="status">{recoveryNotice}</p>}
+          <Link className="block text-center text-sm font-medium text-cyan-300 transition hover:text-cyan-200" href="/recuperar-contrasena">
+            ¿Olvidaste tu contraseña?
+          </Link>
           <p className="text-center text-sm text-slate-400">
             ¿No tienes cuenta?{' '}
             <Link className="font-semibold text-cyan-300 transition hover:text-cyan-200" href="/registro">
