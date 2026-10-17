@@ -22,5 +22,6 @@ describe('Home page', () => {
     expect(await screen.findByRole('heading', { name: /Bienvenido a tu próximo viaje/i })).toBeInTheDocument();
     expect(screen.getByText(/Montate en el viaje/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Usuarios' })).toHaveAttribute('href', '/admin/usuarios');
+    expect(screen.getByRole('link', { name: 'Cambiar contraseña' })).toHaveAttribute('href', '/cuenta/contrasena');
   });
 });

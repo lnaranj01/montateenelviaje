@@ -75,6 +75,12 @@ export default function HomePage() {
           <div className="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
             Montate en el viaje
           </div>
+          <Link
+            className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            href="/cuenta/contrasena"
+          >
+            Cambiar contraseña
+          </Link>
           {isAdmin && (
             <Link
               className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
