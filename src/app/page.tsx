@@ -106,6 +106,13 @@ export default function HomePage() {
           Ya estás dentro de la app y puedes empezar a organizar tus rutas, destinos y planes de forma centralizada.
         </p>
 
+        <Link
+          className="mb-8 inline-flex min-h-11 items-center justify-center rounded-lg bg-primario px-5 py-3 text-sm font-semibold text-white transition hover:bg-primario/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento"
+          href="/viajes"
+        >
+          Abrir organizador de viajes
+        </Link>
+
         <div className="grid gap-4 sm:grid-cols-2">
           {features.map((feature, index) => (
             <motion.div

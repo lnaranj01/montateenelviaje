@@ -110,10 +110,10 @@ El prefijo para importar desde `src/lib/` es `@/lib/...`.
 ## 5. Autenticación
 
 - Implementación: Supabase Auth con correo y contraseña. `@supabase/ssr` crea clientes de navegador y servidor; la sesión se conserva en cookies.
-- Archivos principales: `src/lib/supabase/{client,server,config,admin}.ts`, `src/lib/auth/admin.ts`, `src/app/login/page.tsx`, `src/app/page.tsx` y `src/proxy.ts`.
-- No existe un adaptador central `obtenerSesion()`. Las páginas consultan `createClient().auth.getUser()`; Supabase devuelve el usuario autenticado en `data.user`. `getAdminContext()` devuelve un contexto administrativo o un estado 401/403/503.
+- Archivos principales: `src/lib/supabase/{client,server,config,admin}.ts`, `src/lib/auth/{admin,sesion}.ts`, `src/app/login/page.tsx`, `src/app/page.tsx`, `src/app/viajes/layout.tsx` y `src/proxy.ts`.
+- `obtenerSesion()` centraliza la lectura de la sesión en servidor; `getAdminContext()` devuelve un contexto administrativo o un estado 401/403/503.
 - Login: `/login` (`src/app/login/page.tsx`).
-- Después de iniciar sesión se navega a `/viajes` (`src/app/login/page.tsx`); la pantalla aún está pendiente de P06.
+- Después de iniciar sesión se navega a `/viajes` (`src/app/login/page.tsx`), ahora protegida por su layout de servidor.
 - Cierre de sesión: `src/app/page.tsx`, `handleSignOut()` llama `auth.signOut()` y, si no hay error, navega a `/login` (líneas 58-62).
 - Protección/actualización de sesión: `src/proxy.ts` ejecuta `supabase.auth.getClaims()`, actualiza cookies y protege `/viajes/*` y `/api/viajes/*`. La API sin sesión responde 401 en JSON.
 - El proyecto actual también tiene registro y páginas administrativas con comprobación del rol `admin`; el módulo nuevo no debe reescribir estas funciones.
@@ -177,11 +177,12 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 
 | Elemento | Estado actual |
 |---|---|
-| `app/viajes` | No existe; tampoco `src/app/viajes`. |
+| `app/viajes` | `src/app/viajes/layout.tsx` protege la ruta y muestra navegación/cierre de sesión; `src/app/viajes/page.tsx` presenta la lista base. El formulario y las acciones se incorporan en P07. |
 | `app/api/viajes` | Hay rutas protegidas para sesión, listado/creación, detalle/edición/eliminación, alternancia de estado y resumen. |
 | `lib/dataService.ts` | Conserva las operaciones de recuperación de contraseña y exporta la fachada de datos de viajes. |
-| `components/ui` | No existe; tampoco `src/components/ui`. |
-| `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación y cierre de sesión; el enlace administrativo depende del rol. |
+| `components/ui` | Componentes reutilizables en `src/components/ui/`: `Boton`, `Campo`, `Tarjeta`, `Insignia`, `Aviso`, `Modal` y `EstadoVacio`. |
+| `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación, cierre de sesión y enlace a `/viajes`; el enlace administrativo depende del rol. |
+| `src/components/viajes` | Navegación autenticada, contador, tarjetas, insignia de estado y lista cliente con carga, error y estado vacío. |
 | Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. P04 deja cinco viajes demo aislados bajo `device_id = dev-demo-0001`; `npm run db:limpiar -- --demo` los elimina. |
 
 ## 12. Decisiones derivadas

@@ -8,7 +8,7 @@
 | P03 Servidor | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión) | 2026-10-31 |
 | P04 Datos | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
 | P05 API | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31 |
-| P06 Interfaz base y lista | pendiente | | | |
+| P06 Interfaz base y lista | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista) | 2026-10-31 |
 | P07 Formulario, editar, eliminar, completar y aceptación | pendiente | | | |
 | P08 Opcional: filtros y resumen | pendiente | | | |
 
@@ -97,3 +97,13 @@
 - **Verificación autenticada en el navegador local:** POST creó con HTTP 201; GET lista y detalle, PATCH edición, PATCH completar, GET resumen y DELETE respondieron HTTP 200; el POST con fin anterior al inicio respondió HTTP 422 `FECHA_FIN_ANTERIOR`. El dispositivo UUID de aceptación quedó sin el viaje temporal.
 - **Comandos y resultados:** `npm.cmd test` y `npm.cmd run build` correctos; `npm.cmd run type-check`, ESLint enfocado y `git diff --check` correctos.
 - **Pendientes:** P05 completo; fase 4 cerrada. La siguiente fase es P06 (interfaz base y lista).
+
+### P06 · Interfaz base, encabezado y lista de viajes
+
+- **Archivos creados:** componentes UI reutilizables (`Boton`, `Campo`, `Tarjeta`, `Insignia`, `Aviso`, `Modal`, `EstadoVacio`), componentes de viajes para navegación, contador, tarjetas, estados y lista, además de `src/app/viajes/layout.tsx`, `src/app/viajes/page.tsx` y pruebas de la lista.
+- **Archivos modificados:** tokens visuales de Tailwind 4 en `src/app/globals.css`, enlace al organizador en el landing existente y documentación de estado.
+- **Experiencia implementada:** layout servidor protegido con `obtenerSesion()` y redirección al login, encabezado azul con correo y cierre de sesión, carga de viajes desde `/api/viajes?deviceId=...`, contador, tarjetas, mensaje vacío, estados de carga/error y reintento. Los controles de las tarjetas permanecen deshabilitados hasta P07.
+- **Verificación local:** con sesión iniciada, `/viajes` mostró el encabezado, correo, contador en cero y el mensaje acordado de lista vacía. A 390 px no hubo desbordamiento horizontal; la vista conserva su composición móvil.
+- **Pruebas automatizadas:** tres pruebas nuevas cubren lista vacía, representación de viaje y recuperación de error; `npm.cmd test`: 45 pruebas en 14 archivos correctas.
+- **Comandos y resultados:** `npm.cmd run type-check`, `npm.cmd run build`, ESLint enfocado y `git diff --check`: correctos.
+- **Pendientes:** P06 completo; continuar con P07 (formulario y acciones de viajes).
