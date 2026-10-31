@@ -9,7 +9,7 @@
 | P04 Datos | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
 | P05 API | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31 |
 | P06 Interfaz base y lista | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista) | 2026-10-31 |
-| P07 Formulario, editar, eliminar, completar y aceptación | pendiente | | | |
+| P07 Formulario, editar, eliminar, completar y aceptación | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (55 pruebas en 16 archivos; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
 | P08 Opcional: filtros y resumen | pendiente | | | |
 
 ## Bitácora
@@ -107,3 +107,15 @@
 - **Pruebas automatizadas:** tres pruebas nuevas cubren lista vacía, representación de viaje y recuperación de error; `npm.cmd test`: 45 pruebas en 14 archivos correctas.
 - **Comandos y resultados:** `npm.cmd run type-check`, `npm.cmd run build`, ESLint enfocado y `git diff --check`: correctos.
 - **Pendientes:** P06 completo; continuar con P07 (formulario y acciones de viajes).
+
+### P07 · Formulario, acciones y aceptación
+
+- **Archivos creados:** `FormularioViaje` y sus pruebas, `respuestaApi.ts`, `doc/ACEPTACION.md`, `doc/checkpoints/FASE_5_COMPLETADA.md` y `doc/checkpoints/FASE_6_COMPLETADA.md`.
+- **Archivos modificados:** formulario y lista de `/viajes`, acciones de tarjetas, accesibilidad del modal, `README.md`, `doc/ESTADO_ACTUAL.md` y este estado de ejecución.
+- **Interfaz:** el formulario crea y edita en la misma página; la validación usa las reglas de negocio, muestra el error de fechas junto a la fecha de fin y envía el presupuesto como entero. Las acciones completar/reactivar refrescan la lista y el contador; eliminar requiere confirmar en el modal.
+- **Auditoría según el plan:** las ocho operaciones de `/api/viajes/*` llaman `exigirSesion()`; las operaciones de datos filtran por `device_id`; no se encontraron fechas comparadas como objetos locales ni mensajes nuevos en inglés. No se agregaron comentarios de código innecesarios. `.env.local` está ignorado y no está versionado; la búsqueda de asignaciones no encontró credenciales en archivos versionados.
+- **Prueba de datos:** `npm.cmd run probar:flujo`: 14 pasos `OK`, 0 fallas; `npm.cmd run db:limpiar -- --prueba`: 0 filas de prueba residuales.
+- **Aceptación manual local:** se creó, editó, completó y reactivó un viaje; se canceló una eliminación (el registro permaneció) y luego se confirmó (contador volvió a cero).
+- **Pruebas automatizadas:** `npm.cmd test`: 55 pruebas en 16 archivos correctas, incluidas validación decimal/negativa, errores de API, acciones de tarjeta y teclado/foco del modal.
+- **Comandos y resultados:** `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check`: correctos.
+- **Aceptación pendiente:** ejecutar A-01 a A-14 en el despliegue de Vercel y completar sus columnas de resultado/evidencia en `doc/ACEPTACION.md`. A-15 queda para P08.

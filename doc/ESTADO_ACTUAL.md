@@ -42,7 +42,7 @@ Versiones declaradas en `package.json`:
 
 ## 3. Estructura existente
 
-El proyecto utiliza `src/`. No existen carpetas `components/` ni `src/components/`.
+El proyecto utiliza `src/`; los componentes reutilizables están en `src/components/ui/` y los componentes de viajes en `src/components/viajes/`.
 
 ```text
 src/
@@ -177,12 +177,13 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 
 | Elemento | Estado actual |
 |---|---|
-| `app/viajes` | `src/app/viajes/layout.tsx` protege la ruta y muestra navegación/cierre de sesión; `src/app/viajes/page.tsx` presenta la lista base. El formulario y las acciones se incorporan en P07. |
+| `app/viajes` | `src/app/viajes/layout.tsx` protege la ruta y muestra navegación/cierre de sesión; `src/app/viajes/page.tsx` integra el formulario, contador, lista y acciones CRUD. |
 | `app/api/viajes` | Hay rutas protegidas para sesión, listado/creación, detalle/edición/eliminación, alternancia de estado y resumen. |
 | `lib/dataService.ts` | Conserva las operaciones de recuperación de contraseña y exporta la fachada de datos de viajes. |
 | `components/ui` | Componentes reutilizables en `src/components/ui/`: `Boton`, `Campo`, `Tarjeta`, `Insignia`, `Aviso`, `Modal` y `EstadoVacio`. |
 | `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación, cierre de sesión y enlace a `/viajes`; el enlace administrativo depende del rol. |
-| `src/components/viajes` | Navegación autenticada, contador, tarjetas, insignia de estado y lista cliente con carga, error y estado vacío. |
+| `src/components/viajes` | Navegación autenticada, formulario de crear/editar, contador, tarjetas con completar/reactivar y eliminación confirmada, insignia de estado y lista cliente con carga/error/estado vacío. |
+| `doc/ACEPTACION.md` | Casos A-01 a A-15 documentados; A-01 a A-14 pendientes de ejecución en el despliegue de Vercel y A-15 pendiente de P08. |
 | Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. P04 deja cinco viajes demo aislados bajo `device_id = dev-demo-0001`; `npm run db:limpiar -- --demo` los elimina. |
 
 ## 12. Decisiones derivadas

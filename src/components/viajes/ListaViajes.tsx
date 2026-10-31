@@ -6,8 +6,15 @@ import { Boton } from "@/components/ui/Boton";
 import { EstadoVacio } from "@/components/ui/EstadoVacio";
 import { ContadorViajes } from "@/components/viajes/ContadorViajes";
 import { TarjetaViaje } from "@/components/viajes/TarjetaViaje";
+import type { AccionViaje } from "@/components/viajes/TarjetaViaje";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import type { Viaje } from "@/lib/datos/tipos";
+
+interface ListaViajesProps {
+  revision: number;
+  alEditar: (viaje: Viaje) => void;
+  alCambiar: (accion: AccionViaje, viaje: Viaje) => void;
+}
 
 type RespuestaLista = {
   ok: true;
@@ -76,7 +83,11 @@ function mensajeDeErrorApi(valor: unknown): string | null {
   return null;
 }
 
-export function ListaViajes() {
+export function ListaViajes({
+  alCambiar,
+  alEditar,
+  revision,
+}: ListaViajesProps) {
   const deviceId = useDeviceId();
   const [viajes, setViajes] = useState<Viaje[]>([]);
   const [total, setTotal] = useState<number | null>(null);
@@ -132,9 +143,11 @@ export function ListaViajes() {
         }
 
         setMensajeError(
-          error instanceof Error
-            ? error.message
-            : "No se pudieron cargar tus viajes. Inténtalo de nuevo.",
+          error instanceof TypeError
+            ? "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo."
+            : error instanceof Error
+              ? error.message
+              : "No se pudieron cargar tus viajes. Inténtalo de nuevo.",
         );
         setEstado("error");
       }
@@ -142,7 +155,7 @@ export function ListaViajes() {
 
     void cargarViajes(idDispositivo);
     return () => controlador.abort();
-  }, [deviceId, intento]);
+  }, [deviceId, intento, revision]);
 
   if (!deviceId || estado === "cargando") {
     return (
@@ -190,7 +203,12 @@ export function ListaViajes() {
         <ul className="grid list-none gap-4 p-0 md:grid-cols-2">
           {viajes.map((viaje) => (
             <li key={viaje.id}>
-              <TarjetaViaje viaje={viaje} />
+              <TarjetaViaje
+                alCambiar={alCambiar}
+                alEditar={alEditar}
+                deviceId={deviceId}
+                viaje={viaje}
+              />
             </li>
           ))}
         </ul>

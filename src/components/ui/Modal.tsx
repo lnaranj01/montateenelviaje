@@ -84,7 +84,9 @@ export function Modal({ abierto, alCerrar, children, titulo }: ModalProps) {
         tabIndex={-1}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
-          <h2 className="text-xl font-bold">{titulo}</h2>
+          <h2 className="text-xl font-bold" id={tituloId}>
+            {titulo}
+          </h2>
           <Boton
             aria-label="Cerrar diálogo"
             className="min-h-10 px-3"

@@ -4,8 +4,8 @@ import { useId, type InputHTMLAttributes } from "react";
 
 interface CampoProps extends InputHTMLAttributes<HTMLInputElement> {
   etiqueta: string;
-  error?: string;
-  ayuda?: string;
+  error?: string | undefined;
+  ayuda?: string | undefined;
 }
 
 export function Campo({
