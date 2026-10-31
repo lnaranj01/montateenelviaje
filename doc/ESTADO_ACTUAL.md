@@ -28,6 +28,7 @@ Versiones declaradas en `package.json`:
 | `format` | `prettier --write "src/**/*.{ts,tsx,css}"` |
 | `type-check` | `tsc --noEmit` |
 | `test` | `vitest run` |
+| `test:ver` | `vitest` |
 | `test:watch` | `vitest` |
 | `test:coverage` | `vitest run --coverage` |
 | `db:migrar` | `node scripts/migrar.mjs` |
@@ -58,10 +59,15 @@ src/
 │   └── pruebas existentes junto a varias páginas y rutas
 ├── lib/
 │   ├── auth/admin.ts
+│   ├── config/viajes.ts
+│   ├── reglas/{errores,fechas,viaje}.ts
 │   ├── supabase/{admin,client,config,server}.ts
 │   └── {correo,dataService,json-store,plantillasCorreo,tokenRecuperacion,urlBase}.ts
 ├── proxy.ts
 └── test/setup.ts
+
+tests/
+└── reglas/{ayudas.ts,fechas.test.ts,viaje.test.ts}
 
 supabase/
 ├── migrations/
@@ -141,7 +147,7 @@ SUPABASE_URL
 VERCEL_OIDC_TOKEN
 ```
 
-Hay tres URLs PostgreSQL. Aunque la variable `POSTGRES_URL_NON_POOLING` se llame así, su host es `aws-0-us-east-1.pooler.supabase.com` y su puerto es 5432: corresponde al pooler compartido en modo sesión, no a una conexión directa. `POSTGRES_URL` usa el mismo host por el puerto 6543 (pooler compartido en modo transacción). `POSTGRES_PRISMA_URL` también usa el puerto 6543. `DATABASE_URL` no figura entre los nombres. Inicialmente la verificación falló con `SELF_SIGNED_CERT_IN_CHAIN`; se descargó el certificado raíz desde Supabase Database Settings > SSL Configuration y la consulta de solo lectura se completó con verificación TLS activa (`rejectUnauthorized: true`). Resultado: `public.viajes` no existe todavía. El certificado se encuentra localmente fuera del repositorio; no se modificó `.env.local` ni se copió el certificado al repositorio.
+Hay tres URLs PostgreSQL. Aunque la variable `POSTGRES_URL_NON_POOLING` se llame así, su host es `aws-0-us-east-1.pooler.supabase.com` y su puerto es 5432: corresponde al pooler compartido en modo sesión, no a una conexión directa. `POSTGRES_URL` usa el mismo host por el puerto 6543 (pooler compartido en modo transacción). `POSTGRES_PRISMA_URL` también usa el puerto 6543. `DATABASE_URL` no figura entre los nombres. Inicialmente la verificación falló con `SELF_SIGNED_CERT_IN_CHAIN`; se descargó el certificado raíz desde Supabase Database Settings > SSL Configuration y las consultas posteriores se hicieron con verificación TLS activa (`rejectUnauthorized: true`). La tabla `public.viajes` se creó durante P01. El certificado está localmente fuera del repositorio; no se modificó `.env.local` ni se copió el certificado al repositorio.
 
 ## 9. Estilos
 
@@ -152,7 +158,7 @@ Hay tres URLs PostgreSQL. Aunque la variable `POSTGRES_URL_NON_POOLING` se llame
 
 ## 10. Pruebas
 
-Vitest (`vitest.config.ts`, `npm test`); hay pruebas de páginas y rutas existentes bajo `src/`.
+Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node desde `tests/**/*.test.ts`; un proyecto adicional conserva `jsdom` y ejecuta las pruebas existentes en `src/`. En P02 pasaron 18 pruebas nuevas T-01 a T-18 y las 10 pruebas existentes (28 en total).
 
 ## 11. Conflictos con el plan
 

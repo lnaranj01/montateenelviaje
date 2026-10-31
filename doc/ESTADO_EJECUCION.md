@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | P00 Auditoría | completado | Correcto (`npm.cmd run build`) | No ejecutados (P00 no los requiere) | 2026-10-31 |
 | P01 Base de datos | completado | Correcto (`npm.cmd run build`) | Correcto (`npm.cmd run db:verificar`; 0 fallas) | 2026-10-31 |
-| P02 Reglas de negocio | pendiente | | | |
+| P02 Reglas de negocio | completado | Correcto (`npm.cmd run build`) | Correcto (28 pruebas en 9 archivos; 18 nuevas) | 2026-10-31 |
 | P03 Servidor | pendiente | | | |
 | P04 Datos | pendiente | | | |
 | P05 API | pendiente | | | |
@@ -41,3 +41,14 @@
   - `node --check` sobre los scripts de conexión, migración y verificación: correcto.
 - **Problemas y resolución:** se usó el certificado raíz de Supabase a través de `PGSSLROOTCERT`, con validación de servidor activada (`rejectUnauthorized: true`). No se desactivó TLS ni se almacenó el certificado en el repositorio. La conexión usa el endpoint configurado `POSTGRES_URL_NON_POOLING` (pooler de sesión).
 - **Pendientes:** no hay pendientes para P01. El checkpoint contiene la salida íntegra del verificador.
+
+### P02 · Reglas de negocio y pruebas unitarias
+
+- **Archivos creados:** `src/lib/config/viajes.ts`, `src/lib/reglas/errores.ts`, `src/lib/reglas/fechas.ts`, `src/lib/reglas/viaje.ts`, `tests/reglas/ayudas.ts`, `tests/reglas/fechas.test.ts`, `tests/reglas/viaje.test.ts`, `doc/checkpoints/FASE_2_COMPLETADA.md`.
+- **Archivos modificados:** `package.json` (script `test:ver`), `vitest.config.ts` (proyecto Node para reglas y jsdom para preservar las pruebas existentes), `doc/ESTADO_ACTUAL.md`, `doc/ESTADO_EJECUCION.md`.
+- **Comandos y resultados:**
+  - `npm.cmd test -- --reporter=dot`: 9 archivos y 28 pruebas pasaron; incluye los 18 casos T-01 a T-18 y las 10 pruebas preexistentes.
+  - `npm.cmd run build`: correcto después de ajustar los accesos a índices requeridos por `noUncheckedIndexedAccess`.
+  - `git diff --check`: correcto.
+- **Problemas y resolución:** la configuración anterior solo incluía `src/` y usaba jsdom. Vitest quedó configurado con Node para las reglas y un proyecto jsdom para la suite preexistente. Una primera configuración ejecutó dos veces los casos de reglas; se eliminó el proyecto duplicado y la suite final pasó una sola vez. El primer build reportó índices posiblemente indefinidos al descomponer fechas; se añadieron guardas y el build posterior pasó.
+- **Pendientes:** ninguno para P02. Las pruebas nuevas cubren exactamente T-01 a T-18; el checkpoint contiene el resumen de ejecución.

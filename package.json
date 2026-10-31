@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
+    "test:ver": "vitest",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:migrar": "node scripts/migrar.mjs",
