@@ -35,7 +35,7 @@ export default function LoginPage() {
             : 'No se pudo verificar la sesión con Supabase.';
           setErrors({ credentials: message });
         } else if (data.user) {
-          router.replace('/');
+          router.replace('/viajes');
         }
       })
       .catch(() => {
@@ -99,7 +99,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace('/');
+      router.replace('/viajes');
     } catch {
       setErrors({ credentials: 'No se pudo conectar con Supabase. Revisa la URL y la clave publishable.' });
     } finally {

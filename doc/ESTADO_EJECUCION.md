@@ -5,7 +5,7 @@
 | P00 Auditoría | completado | Correcto (`npm.cmd run build`) | No ejecutados (P00 no los requiere) | 2026-10-31 |
 | P01 Base de datos | completado | Correcto (`npm.cmd run build`) | Correcto (`npm.cmd run db:verificar`; 0 fallas) | 2026-10-31 |
 | P02 Reglas de negocio | completado | Correcto (`npm.cmd run build`) | Correcto (28 pruebas en 9 archivos; 18 nuevas) | 2026-10-31 |
-| P03 Servidor | pendiente | | | |
+| P03 Servidor | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión) | 2026-10-31 |
 | P04 Datos | pendiente | | | |
 | P05 API | pendiente | | | |
 | P06 Interfaz base y lista | pendiente | | | |
@@ -52,3 +52,19 @@
   - `git diff --check`: correcto.
 - **Problemas y resolución:** la configuración anterior solo incluía `src/` y usaba jsdom. Vitest quedó configurado con Node para las reglas y un proyecto jsdom para la suite preexistente. Una primera configuración ejecutó dos veces los casos de reglas; se eliminó el proyecto duplicado y la suite final pasó una sola vez. El primer build reportó índices posiblemente indefinidos al descomponer fechas; se añadieron guardas y el build posterior pasó.
 - **Pendientes:** ninguno para P02. Las pruebas nuevas cubren exactamente T-01 a T-18; el checkpoint contiene el resumen de ejecución.
+
+### P03 · Infraestructura del servidor
+
+- **Archivos creados:** `src/lib/db/conexion.ts`, `src/lib/auth/sesion.ts`, `src/lib/deviceId.ts`, `src/lib/hooks/useDeviceId.ts`, `src/lib/http/respuestas.ts`, `src/lib/validacion/esquemas.ts`, `src/lib/formato.ts`, `src/app/api/viajes/sesion/route.ts`, `doc/checkpoints/FASE_3_COMPLETADA.md`.
+- **Archivos modificados:** `src/proxy.ts`, `src/app/login/page.tsx`, `package.json`, `package-lock.json`.
+- **Comandos y resultados:**
+  - `npm.cmd test`: 9 archivos y 28 pruebas pasaron.
+  - `npm.cmd run build`: correcto; Next.js compiló, validó TypeScript y generó `/api/viajes/sesion`.
+  - `npm.cmd run type-check`: correcto.
+  - ESLint enfocado sobre los módulos nuevos: correcto. El lint del archivo de login también detecta una regla preexistente `react-hooks/set-state-in-effect` en el aviso de recuperación, fuera del cambio solicitado.
+  - Verificación local sin sesión: `GET /api/viajes/sesion` responde 401 con `NO_AUTORIZADO` y `Cache-Control: no-store`; `/viajes` redirige a `/login`; `/login` responde 200.
+  - Verificación con sesión en el navegador local: `GET /api/viajes/sesion` responde 200 con el correo de la sesión.
+- **Protección y login:** el proxy conserva la renovación de cookies, redirige páginas `/viajes/*` sin sesión y responde 401 JSON a `/api/viajes/*`. Las dos redirecciones posteriores al login ahora apuntan a `/viajes`.
+- **Nota UX:** `/viajes` responde 404 con sesión hasta implementar su interfaz en P06; es temporal y esperado en P03. El endpoint de aceptación es `/api/viajes/sesion`.
+- **Dependencia:** se añadió `@types/pg` para que TypeScript pueda comprobar la integración existente con `pg`.
+- **Pendientes:** ninguno para P03. La conexión Postgres mantiene `rejectUnauthorized: true`; cuando se requiera el certificado raíz local, se proporciona mediante `PGSSLROOTCERT`, sin copiar credenciales o certificados al repositorio.
