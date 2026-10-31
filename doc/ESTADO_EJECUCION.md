@@ -1,0 +1,43 @@
+# Estado de ejecución · Organizador de Viajes
+
+| Prompt | Estado | Build | Tests | Fecha de cierre |
+|---|---|---|---|---|
+| P00 Auditoría | completado | Correcto (`npm.cmd run build`) | No ejecutados (P00 no los requiere) | 2026-10-31 |
+| P01 Base de datos | completado | Correcto (`npm.cmd run build`) | Correcto (`npm.cmd run db:verificar`; 0 fallas) | 2026-10-31 |
+| P02 Reglas de negocio | pendiente | | | |
+| P03 Servidor | pendiente | | | |
+| P04 Datos | pendiente | | | |
+| P05 API | pendiente | | | |
+| P06 Interfaz base y lista | pendiente | | | |
+| P07 Formulario, editar, eliminar, completar y aceptación | pendiente | | | |
+| P08 Opcional: filtros y resumen | pendiente | | | |
+
+## Bitácora
+
+### P00 · Auditoría del repositorio y archivos de control
+
+- **Archivos creados:** `doc/ESTADO_ACTUAL.md`, `.github/copilot-instructions.md`, `doc/ESTADO_EJECUCION.md`, `doc/checkpoints/FASE_0_COMPLETADA.md`.
+- **Archivos modificados:** ninguno.
+- **Comandos y resultados:**
+  - `npm run build`: bloqueado por la política de PowerShell al intentar cargar `npm.ps1`; no llegó a ejecutar el build.
+  - `npm.cmd run build`: correcto; Next.js 16.3.5 compiló, completó TypeScript, generó páginas y optimizó la aplicación.
+  - `node .\node_modules\next\dist\bin\next dev --hostname 127.0.0.1 --port 3000`: servidor local iniciado correctamente en `http://127.0.0.1:3000`.
+  - `Invoke-WebRequest http://127.0.0.1:3000/login`: respondió HTTP 200.
+  - Consulta PostgreSQL de solo lectura para `public.viajes`: el primer intento falló (`SELF_SIGNED_CERT_IN_CHAIN`). Tras descargar el certificado raíz desde Supabase Database Settings > SSL Configuration, se volvió a consultar con `rejectUnauthorized: true`: `public.viajes` no existe.
+  - Se verificó el tipo de endpoint por host y puerto, sin imprimir credenciales: `POSTGRES_URL_NON_POOLING` usa el pooler de sesión (5432), y `POSTGRES_URL`/`POSTGRES_PRISMA_URL` usan el pooler de transacción (6543); no se identificó una conexión directa.
+- **Problemas y resolución:** se usó `npm.cmd` para superar el bloqueo local de PowerShell. El certificado raíz de Supabase permitió consultar el esquema manteniendo la validación TLS; la tabla `public.viajes` no existe, que es lo esperado antes de P01. Se corrigió la descripción inicial: el nombre `POSTGRES_URL_NON_POOLING` no significa que el endpoint actual sea directo.
+- **Pendientes al cierre de P00:** P01 debía comprobar/aplicar la tabla; quedó completado en la sección siguiente usando TLS verificado.
+
+### P01 · Base de datos del módulo
+
+- **Archivos creados:** `supabase/migrations/20261031000000_viajes_tabla.sql`, `scripts/db-client.mjs`, `scripts/migrar.mjs`, `scripts/verificar-bd.mjs`, `doc/checkpoints/FASE_1_COMPLETADA.md`.
+- **Archivos modificados:** `package.json`, `doc/ESTADO_ACTUAL.md`, `doc/ESTADO_EJECUCION.md`.
+- **Base de datos:** la migración de perfiles `20261003000000_create_profiles.sql` ya estaba aplicada; se confirmó por sus columnas, RLS, políticas y trigger, y se registró en `_migrations` sin reejecutarla. Se aplicó `20261031000000_viajes_tabla.sql` en una transacción.
+- **Comandos y resultados:**
+  - `$env:PGSSLROOTCERT='C:\Users\Estudiantes\Downloads\prod-ca-2021.crt'; npm.cmd run db:migrar`: perfiles omitidos por ya aplicados; migración de viajes aplicada.
+  - `$env:PGSSLROOTCERT='C:\Users\Estudiantes\Downloads\prod-ca-2021.crt'; npm.cmd run db:verificar`: 0 fallas. Tabla existente, 0 filas, tres CHECK presentes, RLS activo, sin políticas públicas, permisos de lectura revocados, y cinco casos de integridad correctos; la transacción terminó con `ROLLBACK`.
+  - Segunda ejecución de `npm.cmd run db:migrar`: omitió ambas migraciones por estar registradas; `npm.cmd run db:verificar` volvió a terminar con 0 fallas y 0 filas.
+  - `npm.cmd run build`: correcto.
+  - `node --check` sobre los scripts de conexión, migración y verificación: correcto.
+- **Problemas y resolución:** se usó el certificado raíz de Supabase a través de `PGSSLROOTCERT`, con validación de servidor activada (`rejectUnauthorized: true`). No se desactivó TLS ni se almacenó el certificado en el repositorio. La conexión usa el endpoint configurado `POSTGRES_URL_NON_POOLING` (pooler de sesión).
+- **Pendientes:** no hay pendientes para P01. El checkpoint contiene la salida íntegra del verificador.
