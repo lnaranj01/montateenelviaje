@@ -26,6 +26,6 @@ export interface ResumenViajes {
 }
 
 export interface FiltrosListadoViajes {
-  estado?: EstadoViaje;
-  orden?: "inicio" | "reciente";
+  estado?: EstadoViaje | undefined;
+  orden?: "inicio" | "reciente" | undefined;
 }

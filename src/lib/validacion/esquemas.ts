@@ -7,6 +7,7 @@ import {
 } from "@/lib/config/viajes";
 
 export const esquemaDeviceId = z.uuid();
+export const esquemaIdViaje = z.uuid();
 
 export const esquemaViaje = z.object({
   destino: z.string().trim().min(DESTINO_MIN).max(DESTINO_MAX),
@@ -20,6 +21,16 @@ export const esquemaFiltros = z.object({
   orden: z.enum(["inicio", "reciente"]).optional(),
 });
 
+export const esquemaViajeConDeviceId = esquemaViaje.extend({
+  deviceId: esquemaDeviceId,
+});
+
+export const esquemaDeviceIdCuerpo = z.object({
+  deviceId: esquemaDeviceId,
+});
+
 export type DeviceId = z.infer<typeof esquemaDeviceId>;
+export type IdViaje = z.infer<typeof esquemaIdViaje>;
 export type DatosViajeValidos = z.infer<typeof esquemaViaje>;
+export type DatosViajeConDeviceId = z.infer<typeof esquemaViajeConDeviceId>;
 export type FiltrosViaje = z.infer<typeof esquemaFiltros>;

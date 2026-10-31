@@ -28,3 +28,13 @@ Fecha de cierre: 2026-10-31.
 - ESLint enfocado y `git diff --check`: correctos.
 
 Las operaciones PostgreSQL se ejecutaron con `PGSSLROOTCERT` configurado fuera del repositorio y verificación TLS activa (`rejectUnauthorized: true`). Los cinco ejemplos quedan aislados bajo `device_id = dev-demo-0001`; se pueden retirar con `npm.cmd run db:limpiar -- --demo`.
+
+## P05 · API protegida
+
+- Rutas implementadas: GET/POST `/api/viajes`; GET/PATCH/DELETE `/api/viajes/[id]`; PATCH `/api/viajes/[id]/completar`; GET `/api/viajes/resumen`.
+- Cada handler exige sesión antes de procesar la solicitud, usa `conManejoDeErrores`, valida UUID, query y cuerpo, marca `dynamic = "force-dynamic"` y responde con `Cache-Control: no-store`.
+- Pruebas de rutas: 13 casos pasaron, incluyendo 201 al crear, 401 sin sesión, datos/UUID inválidos, params asíncronos, 404, 422 y contratos de respuesta.
+- Sin sesión, GET y POST `/api/viajes` respondieron HTTP 401.
+- Con sesión, el recorrido API local de create/list/get/edit/complete/summary/delete pasó con estados `201, 200, 200, 200, 200, 200, 200`; fechas invertidas respondió HTTP 422 `FECHA_FIN_ANTERIOR`. El viaje temporal se eliminó y la lista final confirmó que no quedó.
+- `npm.cmd test`: 13 archivos, 42 pruebas correctas (incluye las 13 pruebas nuevas de API).
+- `npm.cmd run type-check`, `npm.cmd run build`, ESLint enfocado y `git diff --check`: correctos.

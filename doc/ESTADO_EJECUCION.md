@@ -7,7 +7,7 @@
 | P02 Reglas de negocio | completado | Correcto (`npm.cmd run build`) | Correcto (28 pruebas en 9 archivos; 18 nuevas) | 2026-10-31 |
 | P03 Servidor | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión) | 2026-10-31 |
 | P04 Datos | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
-| P05 API | pendiente | | | |
+| P05 API | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31 |
 | P06 Interfaz base y lista | pendiente | | | |
 | P07 Formulario, editar, eliminar, completar y aceptación | pendiente | | | |
 | P08 Opcional: filtros y resumen | pendiente | | | |
@@ -86,3 +86,14 @@
   - ESLint enfocado y `git diff --check`: correctos.
 - **TLS y muestras:** las pruebas reales usaron el certificado externo por `PGSSLROOTCERT` y mantuvieron `rejectUnauthorized: true`. Los cinco ejemplos permanecen aislados en `dev-demo-0001`; pueden borrarse con `npm.cmd run db:limpiar -- --demo`.
 - **Pendientes:** P04 completo. La fase 4 sigue abierta hasta P05 (API).
+
+### P05 · API de viajes
+
+- **Archivos creados:** `src/app/api/viajes/route.ts`, `src/app/api/viajes/[id]/route.ts`, `src/app/api/viajes/[id]/completar/route.ts`, `src/app/api/viajes/resumen/route.ts`, y pruebas para cada handler.
+- **Archivos modificados:** `src/lib/validacion/esquemas.ts` (esquemas de `deviceId`, UUID de viaje y cuerpos), `src/lib/datos/tipos.ts` (tipos de filtros compatibles con `exactOptionalPropertyTypes`), `doc/ESTADO_ACTUAL.md`, `doc/ESTADO_EJECUCION.md`, `doc/checkpoints/FASE_4_COMPLETADA.md`.
+- **Rutas implementadas:** GET/POST `/api/viajes`; GET/PATCH/DELETE `/api/viajes/[id]`; PATCH `/api/viajes/[id]/completar`; GET `/api/viajes/resumen`. Todas son dinámicas, requieren sesión como primera instrucción, validan UUID/query/cuerpo con Zod, llaman la fachada `dataService` y devuelven el formato `no-store`.
+- **Pruebas automatizadas:** 13 tests en cuatro archivos cubren creación 201, lista y filtros, esquema y UUID inválidos, params Promise, actualización, eliminación, alternancia, resumen, errores 404/422 y autorización antes de llamar a datos.
+- **Verificación anónima local:** GET y POST `/api/viajes` respondieron HTTP 401 JSON antes de acceder a PostgreSQL.
+- **Verificación autenticada en el navegador local:** POST creó con HTTP 201; GET lista y detalle, PATCH edición, PATCH completar, GET resumen y DELETE respondieron HTTP 200; el POST con fin anterior al inicio respondió HTTP 422 `FECHA_FIN_ANTERIOR`. El dispositivo UUID de aceptación quedó sin el viaje temporal.
+- **Comandos y resultados:** `npm.cmd test` y `npm.cmd run build` correctos; `npm.cmd run type-check`, ESLint enfocado y `git diff --check` correctos.
+- **Pendientes:** P05 completo; fase 4 cerrada. La siguiente fase es P06 (interfaz base y lista).

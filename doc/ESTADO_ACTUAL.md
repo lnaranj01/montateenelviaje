@@ -51,7 +51,8 @@ src/
 │   ├── api/
 │   │   ├── admin/{access,users}/route.ts
 │   │   ├── auth/{recuperar,restablecer}/route.ts
-│   │   ├── viajes/sesion/route.ts
+│   │   ├── viajes/{route.ts,sesion/route.ts,resumen/route.ts}
+│   │   ├── viajes/[id]/{route.ts,completar/route.ts}
 │   │   ├── correo/prueba/route.ts
 │   │   └── health/route.ts
 │   ├── cuenta/contrasena/page.tsx
@@ -177,7 +178,7 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 | Elemento | Estado actual |
 |---|---|
 | `app/viajes` | No existe; tampoco `src/app/viajes`. |
-| `app/api/viajes` | Solo existe `src/app/api/viajes/sesion/route.ts`; las operaciones CRUD se agregan en P05. |
+| `app/api/viajes` | Hay rutas protegidas para sesión, listado/creación, detalle/edición/eliminación, alternancia de estado y resumen. |
 | `lib/dataService.ts` | Conserva las operaciones de recuperación de contraseña y exporta la fachada de datos de viajes. |
 | `components/ui` | No existe; tampoco `src/components/ui`. |
 | `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación y cierre de sesión; el enlace administrativo depende del rol. |
