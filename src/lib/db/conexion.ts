@@ -4,7 +4,15 @@ import { Pool, types, type PoolClient, type QueryResultRow } from "pg";
 
 types.setTypeParser(1082, (valor) => valor);
 types.setTypeParser(1114, (valor) => valor);
-types.setTypeParser(20, (valor) => Number.parseInt(valor, 10));
+types.setTypeParser(20, (valor) => {
+  const numero = Number.parseInt(valor, 10);
+
+  if (!Number.isSafeInteger(numero)) {
+    throw new RangeError('El valor PostgreSQL excede el rango entero seguro de JavaScript.');
+  }
+
+  return numero;
+});
 
 const globalParaPool = globalThis as typeof globalThis & { poolViajes?: Pool };
 const cadenaConexion =

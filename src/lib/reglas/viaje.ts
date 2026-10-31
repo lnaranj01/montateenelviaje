@@ -1,4 +1,8 @@
-import { DESTINO_MIN, PRESUPUESTO_MINIMO } from '@/lib/config/viajes';
+import {
+  DESTINO_MAX,
+  DESTINO_MIN,
+  PRESUPUESTO_MINIMO,
+} from '@/lib/config/viajes';
 import { ErrorDeNegocio } from '@/lib/reglas/errores';
 import { esFechaValida, finNoAnteriorAInicio } from '@/lib/reglas/fechas';
 
@@ -12,7 +16,8 @@ export type DatosValidacionViaje = {
 };
 
 export function validarViaje(datos: DatosValidacionViaje): void {
-  if (datos.destino.trim().length < DESTINO_MIN) {
+  const longitudDestino = datos.destino.trim().length;
+  if (longitudDestino < DESTINO_MIN || longitudDestino > DESTINO_MAX) {
     throw new ErrorDeNegocio('DATOS_INVALIDOS');
   }
 

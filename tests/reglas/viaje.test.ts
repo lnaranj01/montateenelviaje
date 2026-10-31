@@ -23,6 +23,13 @@ describe('reglas de viaje', () => {
     esperarCodigo(() => validarViaje({ ...viajeValido, destino: 'A' }), 'DATOS_INVALIDOS');
   });
 
+  it('rechaza un destino que supera los 160 caracteres', () => {
+    esperarCodigo(
+      () => validarViaje({ ...viajeValido, destino: 'A'.repeat(161) }),
+      'DATOS_INVALIDOS',
+    );
+  });
+
   it('T-11: rechaza un presupuesto negativo', () => {
     esperarCodigo(() => validarViaje({ ...viajeValido, presupuesto: -1 }), 'DATOS_INVALIDOS');
   });

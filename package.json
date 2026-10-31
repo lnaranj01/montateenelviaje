@@ -14,7 +14,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:migrar": "node scripts/migrar.mjs",
-    "db:verificar": "node scripts/verificar-bd.mjs"
+    "db:verificar": "node scripts/verificar-bd.mjs",
+    "db:limpiar": "node scripts/limpiar-prueba.mjs",
+    "probar:flujo": "tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/probar-flujo.ts",
+    "db:demo": "tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-demo.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -42,6 +45,7 @@
     "pg": "^8.23.1",
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vercel": "^64.5.0",
     "vite": "^8.3.0",

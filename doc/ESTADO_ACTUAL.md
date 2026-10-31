@@ -16,6 +16,7 @@ Versiones declaradas en `package.json`:
 | zod | `^4.6.2` |
 | @supabase/supabase-js | `^2.117.2` |
 | vitest | `^5.0.0` |
+| tsx | `^4.23.15` (en `devDependencies`) |
 
 ## 2. Scripts de `package.json`
 
@@ -33,6 +34,9 @@ Versiones declaradas en `package.json`:
 | `test:coverage` | `vitest run --coverage` |
 | `db:migrar` | `node scripts/migrar.mjs` |
 | `db:verificar` | `node scripts/verificar-bd.mjs` |
+| `db:limpiar` | `node scripts/limpiar-prueba.mjs` |
+| `probar:flujo` | `tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/probar-flujo.ts` |
+| `db:demo` | `tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-demo.ts` |
 
 `node_modules/` existe. El script `dev` intenta renovar `VERCEL_OIDC_TOKEN` desde Vercel y escribirlo en `.env.local`; para la prueba local de P00 se inició Next directamente. Los scripts de base usan `PGSSLROOTCERT` (si se define) para verificar el certificado TLS de PostgreSQL.
 
@@ -47,6 +51,7 @@ src/
 │   ├── api/
 │   │   ├── admin/{access,users}/route.ts
 │   │   ├── auth/{recuperar,restablecer}/route.ts
+│   │   ├── viajes/sesion/route.ts
 │   │   ├── correo/prueba/route.ts
 │   │   └── health/route.ts
 │   ├── cuenta/contrasena/page.tsx
@@ -60,6 +65,8 @@ src/
 ├── lib/
 │   ├── auth/admin.ts
 │   ├── config/viajes.ts
+│   ├── datos/{tipos,viajes}.ts
+│   ├── db/conexion.ts
 │   ├── reglas/{errores,fechas,viaje}.ts
 │   ├── supabase/{admin,client,config,server}.ts
 │   └── {correo,dataService,json-store,plantillasCorreo,tokenRecuperacion,urlBase}.ts
@@ -80,6 +87,11 @@ scripts/
 ├── migrar.mjs
 ├── verificar-bd.mjs
 ├── apply-profiles-migration.mjs
+├── cargar-demo.ts
+├── limpiar-prueba.mjs
+├── probar-flujo.ts
+├── server-only.ts
+├── tsconfig.scripts.json
 └── tokenVercel.mjs
 ```
 
@@ -100,17 +112,17 @@ El prefijo para importar desde `src/lib/` es `@/lib/...`.
 - Archivos principales: `src/lib/supabase/{client,server,config,admin}.ts`, `src/lib/auth/admin.ts`, `src/app/login/page.tsx`, `src/app/page.tsx` y `src/proxy.ts`.
 - No existe un adaptador central `obtenerSesion()`. Las páginas consultan `createClient().auth.getUser()`; Supabase devuelve el usuario autenticado en `data.user`. `getAdminContext()` devuelve un contexto administrativo o un estado 401/403/503.
 - Login: `/login` (`src/app/login/page.tsx`).
-- Después de iniciar sesión se navega a `/` (`src/app/login/page.tsx`, líneas 38 y 102); la página raíz comprueba el usuario y envía a `/login` si no existe sesión. No redirige a `/viajes`.
+- Después de iniciar sesión se navega a `/viajes` (`src/app/login/page.tsx`); la pantalla aún está pendiente de P06.
 - Cierre de sesión: `src/app/page.tsx`, `handleSignOut()` llama `auth.signOut()` y, si no hay error, navega a `/login` (líneas 58-62).
-- Protección/actualización de sesión: `src/proxy.ts` ejecuta `supabase.auth.getClaims()` y actualiza cookies. Su `matcher` es `'/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'`. No contiene una redirección de autorización específica para `/viajes`.
+- Protección/actualización de sesión: `src/proxy.ts` ejecuta `supabase.auth.getClaims()`, actualiza cookies y protege `/viajes/*` y `/api/viajes/*`. La API sin sesión responde 401 en JSON.
 - El proyecto actual también tiene registro y páginas administrativas con comprobación del rol `admin`; el módulo nuevo no debe reescribir estas funciones.
 
 ## 6. Acceso a datos
 
 - Clientes Supabase existentes: cliente de navegador (`createBrowserClient`), servidor (`createServerClient`) y administrador (`createClient` de `@supabase/supabase-js`).
-- `pg` está declarado en `devDependencies` y lo usa `scripts/apply-profiles-migration.mjs` mediante `Client` para aplicar/verificar la migración de perfiles. No hay un pool ni archivo de conexión para la aplicación en `src/`.
+- `pg` está declarado en `devDependencies`; `scripts/apply-profiles-migration.mjs` lo usa mediante `Client`, y la aplicación usa el pool TLS de `src/lib/db/conexion.ts`.
 - `scripts/db-client.mjs` comparte el cliente `pg` de los scripts de migración/verificación. La conexión se selecciona entre las URLs `POSTGRES_*` y verifica TLS.
-- `src/lib/dataService.ts` existe y gestiona operaciones de recuperación de contraseña mediante Supabase RPC; no es aún la fachada de datos de viajes.
+- `src/lib/dataService.ts` conserva las operaciones de recuperación de contraseña y agrega la fachada pública de viajes implementada en `src/lib/datos/viajes.ts`. Todas las operaciones de datos filtran por `device_id`.
 
 ## 7. Migraciones
 
@@ -165,11 +177,11 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 | Elemento | Estado actual |
 |---|---|
 | `app/viajes` | No existe; tampoco `src/app/viajes`. |
-| `app/api/viajes` | No existe; tampoco `src/app/api/viajes`. |
-| `lib/dataService.ts` | Sí existe como `src/lib/dataService.ts`; es de recuperación de contraseña, no de viajes. |
+| `app/api/viajes` | Solo existe `src/app/api/viajes/sesion/route.ts`; las operaciones CRUD se agregan en P05. |
+| `lib/dataService.ts` | Conserva las operaciones de recuperación de contraseña y exporta la fachada de datos de viajes. |
 | `components/ui` | No existe; tampoco `src/components/ui`. |
 | `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación y cierre de sesión; el enlace administrativo depende del rol. |
-| Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. P01 comprobó 0 filas antes de las pruebas, las cuales terminaron en rollback. |
+| Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. P04 deja cinco viajes demo aislados bajo `device_id = dev-demo-0001`; `npm run db:limpiar -- --demo` los elimina. |
 
 ## 12. Decisiones derivadas
 

@@ -6,7 +6,7 @@
 | P01 Base de datos | completado | Correcto (`npm.cmd run build`) | Correcto (`npm.cmd run db:verificar`; 0 fallas) | 2026-10-31 |
 | P02 Reglas de negocio | completado | Correcto (`npm.cmd run build`) | Correcto (28 pruebas en 9 archivos; 18 nuevas) | 2026-10-31 |
 | P03 Servidor | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión) | 2026-10-31 |
-| P04 Datos | pendiente | | | |
+| P04 Datos | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
 | P05 API | pendiente | | | |
 | P06 Interfaz base y lista | pendiente | | | |
 | P07 Formulario, editar, eliminar, completar y aceptación | pendiente | | | |
@@ -68,3 +68,21 @@
 - **Nota UX:** `/viajes` responde 404 con sesión hasta implementar su interfaz en P06; es temporal y esperado en P03. El endpoint de aceptación es `/api/viajes/sesion`.
 - **Dependencia:** se añadió `@types/pg` para que TypeScript pueda comprobar la integración existente con `pg`.
 - **Pendientes:** ninguno para P03. La conexión Postgres mantiene `rejectUnauthorized: true`; cuando se requiera el certificado raíz local, se proporciona mediante `PGSSLROOTCERT`, sin copiar credenciales o certificados al repositorio.
+
+### P04 · Datos: viajes
+
+- **Archivos creados:** `src/lib/datos/tipos.ts`, `src/lib/datos/viajes.ts`, `scripts/limpiar-prueba.mjs`, `scripts/probar-flujo.ts`, `scripts/cargar-demo.ts`, `scripts/tsconfig.scripts.json`, `scripts/server-only.ts`, `doc/checkpoints/FASE_4_COMPLETADA.md`.
+- **Archivos modificados:** `src/lib/dataService.ts` (conserva sus exports de recuperación de contraseña y añade la fachada de viajes), `src/lib/reglas/viaje.ts` (también rechaza destinos mayores a 160 caracteres), `src/lib/db/conexion.ts` (rechaza conversiones BIGINT fuera del rango seguro), `tests/reglas/viaje.test.ts`, `package.json`, `package-lock.json`, `doc/ESTADO_ACTUAL.md`, `doc/ESTADO_EJECUCION.md`.
+- **Capa de datos:** listar (filtro opcional de estado, orden reciente/inicio y límite 500), contar, obtener por dispositivo e id, crear Planeado, editar, eliminar, alternar estado y resumir. Todas las consultas usan parámetros y filtran por `device_id`; el cambio de estado es una actualización atómica.
+- **Scripts:** `db:limpiar` acepta `--prueba` y `--demo`; `probar:flujo` usa exclusivamente `dataService`, limpia ambos dispositivos antes/después y cierra el pool; `db:demo` reemplaza la muestra del dispositivo `dev-demo-0001`.
+- **Comandos y resultados:**
+  - `$env:PGSSLROOTCERT='C:\Users\Estudiantes\Downloads\prod-ca-2021.crt'; npm.cmd run probar:flujo`: 14 pasos `OK`, 0 fallas; incluye aislamiento del dispositivo, fechas y validación. Los registros de `dev-test-*` se limpiaron al finalizar.
+  - `npm.cmd run db:demo`: generó e imprimió 5 viajes (Cartagena, Medellín, Eje Cafetero, San Andrés y Bogotá), con Medellín y San Andrés completados.
+  - `npm.cmd run db:limpiar -- --prueba`: 0 filas de prueba residuales.
+  - `npm.cmd run db:verificar`: 0 fallas; tabla, checks, RLS, permisos e integridad correctos; la transacción de verificación terminó en `ROLLBACK`.
+  - `npm.cmd test`: 9 archivos, 29 pruebas correctas (incluye el límite de 160 caracteres).
+  - `npm.cmd run type-check`: correcto después de finalizar el build.
+  - `npm.cmd run build`: correcto.
+  - ESLint enfocado y `git diff --check`: correctos.
+- **TLS y muestras:** las pruebas reales usaron el certificado externo por `PGSSLROOTCERT` y mantuvieron `rejectUnauthorized: true`. Los cinco ejemplos permanecen aislados en `dev-demo-0001`; pueden borrarse con `npm.cmd run db:limpiar -- --demo`.
+- **Pendientes:** P04 completo. La fase 4 sigue abierta hasta P05 (API).
