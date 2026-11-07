@@ -1,110 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Aviso } from "@/components/ui/Aviso";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
 import { Tarjeta } from "@/components/ui/Tarjeta";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { formatearPesos } from "@/lib/formato";
 import { duracionDias, finNoAnteriorAInicio } from "@/lib/reglas/fechas";
+import {
+  calcularServiciosPlanViaje,
+  catalogoServiciosViaje,
+  validarServiciosPlanViaje,
+} from "@/lib/reglas/planViaje";
 
 type PasoDemo = "busqueda" | "opciones" | "revision" | "finalizada";
-type UnidadOferta = "viajero" | "noche" | "dia";
-
+type OfertaDemo = (typeof catalogoServiciosViaje)[number];
 const MAXIMO_PRESUPUESTO_COP = 1_000_000_000_000;
-
-interface OfertaDemo {
-  id: string;
-  categoria: string;
-  nombre: string;
-  descripcion: string;
-  proporcionPresupuestoDiario: number;
-  unidad: UnidadOferta;
-}
-
-const ofertasDemo: OfertaDemo[] = [
-  {
-    id: "vuelo-economico",
-    categoria: "Vuelos",
-    nombre: "Vuelo nacional de muestra",
-    descripcion: "Ejemplo de vuelo ida y vuelta por viajero.",
-    proporcionPresupuestoDiario: 0.9,
-    unidad: "viajero",
-  },
-  {
-    id: "vuelo-flexible",
-    categoria: "Vuelos",
-    nombre: "Vuelo flexible de muestra",
-    descripcion: "Ejemplo de tarifa flexible por viajero.",
-    proporcionPresupuestoDiario: 1.56,
-    unidad: "viajero",
-  },
-  {
-    id: "hospedaje-sencillo",
-    categoria: "Hospedaje",
-    nombre: "Hospedaje de muestra",
-    descripcion: "Alojamiento ficticio; tarifa por noche.",
-    proporcionPresupuestoDiario: 0.3,
-    unidad: "noche",
-  },
-  {
-    id: "hospedaje-central",
-    categoria: "Hospedaje",
-    nombre: "Hospedaje central de muestra",
-    descripcion: "Opción ficticia; tarifa por noche.",
-    proporcionPresupuestoDiario: 0.48,
-    unidad: "noche",
-  },
-  {
-    id: "carro-compacto",
-    categoria: "Carros",
-    nombre: "Carro compacto de muestra",
-    descripcion: "Alquiler ficticio; tarifa por día.",
-    proporcionPresupuestoDiario: 0.18,
-    unidad: "dia",
-  },
-  {
-    id: "carro-familiar",
-    categoria: "Carros",
-    nombre: "Carro familiar de muestra",
-    descripcion: "Alquiler ficticio; tarifa por día.",
-    proporcionPresupuestoDiario: 0.315,
-    unidad: "dia",
-  },
-  {
-    id: "tour-cultural",
-    categoria: "Tours y actividades",
-    nombre: "Tour cultural de muestra",
-    descripcion: "Actividad ficticia; tarifa por viajero.",
-    proporcionPresupuestoDiario: 0.195,
-    unidad: "viajero",
-  },
-  {
-    id: "tour-aventura",
-    categoria: "Tours y actividades",
-    nombre: "Tour de aventura de muestra",
-    descripcion: "Actividad ficticia; tarifa por viajero.",
-    proporcionPresupuestoDiario: 0.39,
-    unidad: "viajero",
-  },
-  {
-    id: "kit-esencial",
-    categoria: "Artículos esenciales",
-    nombre: "Kit de viaje de muestra",
-    descripcion: "Artículos ficticios; ejemplo por viajero.",
-    proporcionPresupuestoDiario: 0.135,
-    unidad: "viajero",
-  },
-  {
-    id: "kit-completo",
-    categoria: "Artículos esenciales",
-    nombre: "Kit completo de muestra",
-    descripcion: "Artículos ficticios; ejemplo por viajero.",
-    proporcionPresupuestoDiario: 0.33,
-    unidad: "viajero",
-  },
-];
 
 const categorias = [
   "Vuelos",
@@ -114,44 +28,9 @@ const categorias = [
   "Artículos esenciales",
 ];
 
-function unidadesPara(
-  oferta: OfertaDemo,
-  noches: number,
-  dias: number,
-  viajeros: number,
-): number {
-  if (oferta.unidad === "noche") {
-    return noches;
-  }
-
-  if (oferta.unidad === "dia") {
-    return dias;
-  }
-
-  return viajeros;
-}
-
-function precioOferta(
-  oferta: OfertaDemo,
-  presupuesto: number,
-  noches: number,
-  dias: number,
-  viajeros: number,
-): number {
-  const presupuestoDiarioPorViajero = presupuesto / dias / viajeros;
-  const precioPorViajeroDia =
-    presupuestoDiarioPorViajero * oferta.proporcionPresupuestoDiario;
-  const precioPorUnidad = Math.max(
-    1_000,
-    Math.round(precioPorViajeroDia / 1_000) * 1_000,
-  );
-  const cantidadUnidades = unidadesPara(oferta, noches, dias, viajeros);
-  const cantidadViajeros = oferta.unidad === "viajero" ? 1 : viajeros;
-
-  return precioPorUnidad * cantidadUnidades * cantidadViajeros;
-}
-
 export function PlanificadorViajeDemo() {
+  const deviceId = useDeviceId();
+  const router = useRouter();
   const [paso, setPaso] = useState<PasoDemo>("busqueda");
   const [destino, setDestino] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
@@ -161,6 +40,10 @@ export function PlanificadorViajeDemo() {
   const [selecciones, setSelecciones] = useState<Record<string, string>>({});
   const [errorFechas, setErrorFechas] = useState("");
   const [errorPresupuesto, setErrorPresupuesto] = useState("");
+  const [guardandoPlan, setGuardandoPlan] = useState(false);
+  const [mensajeGuardado, setMensajeGuardado] = useState("");
+  const [errorGuardado, setErrorGuardado] = useState("");
+  const [requiereSesion, setRequiereSesion] = useState(false);
 
   const dias =
     fechaInicio && fechaFin && finNoAnteriorAInicio(fechaInicio, fechaFin)
@@ -168,13 +51,21 @@ export function PlanificadorViajeDemo() {
       : 0;
   const noches = Math.max(dias - 1, 0);
   const presupuestoNumero = Number(presupuesto);
-  const ofertasElegidas = ofertasDemo.filter(
+  const ofertasElegidas = catalogoServiciosViaje.filter(
     (oferta) => selecciones[oferta.categoria] === oferta.id,
   );
-  const totalEjemplo = ofertasElegidas.reduce(
-    (total, oferta) =>
-      total +
-      precioOferta(oferta, presupuestoNumero, noches, dias, Number(viajeros)),
+  const serviciosElegidos = ofertasElegidas.map((oferta) => oferta.id);
+  const serviciosCalculados =
+    dias > 0 && serviciosElegidos.length > 0
+      ? calcularServiciosPlanViaje(serviciosElegidos, {
+          presupuesto: presupuestoNumero,
+          dias,
+          noches,
+          viajeros: Number(viajeros),
+        })
+      : [];
+  const totalEjemplo = serviciosCalculados.reduce(
+    (total, servicio) => total + servicio.precio,
     0,
   );
   const saldoEjemplo = presupuestoNumero - totalEjemplo;
@@ -229,6 +120,66 @@ export function PlanificadorViajeDemo() {
     setPaso("busqueda");
     setSelecciones({});
     setErrorFechas("");
+  }
+
+  async function guardarPlan() {
+    if (!deviceId || !validarServiciosPlanViaje(serviciosElegidos)) {
+      setErrorGuardado(
+        "No se pudo preparar el plan. Selecciona al menos un servicio e inténtalo de nuevo.",
+      );
+      return;
+    }
+
+    setGuardandoPlan(true);
+    setErrorGuardado("");
+    setMensajeGuardado("");
+
+    try {
+      const respuesta = await fetch("/api/viajes/planes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deviceId,
+          destino,
+          fechaInicio,
+          fechaFin,
+          presupuesto: presupuestoNumero,
+          viajeros: Number(viajeros),
+          servicios: serviciosElegidos,
+        }),
+      });
+      const cuerpo: unknown = await respuesta.json();
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 401) {
+          setRequiereSesion(true);
+        }
+        const mensaje =
+          typeof cuerpo === "object" &&
+          cuerpo !== null &&
+          "error" in cuerpo &&
+          typeof cuerpo.error === "object" &&
+          cuerpo.error !== null &&
+          "mensaje" in cuerpo.error &&
+          typeof cuerpo.error.mensaje === "string"
+            ? cuerpo.error.mensaje
+            : "No se pudo guardar el plan. Inténtalo de nuevo.";
+        throw new Error(mensaje);
+      }
+
+      setMensajeGuardado("Plan guardado. Volviendo a tus viajes…");
+      router.push("/viajes?planGuardado=1");
+    } catch (error) {
+      setErrorGuardado(
+        error instanceof TypeError
+          ? "No se pudo conectar al guardar el plan. Revisa tu conexión e inténtalo de nuevo."
+          : error instanceof Error
+            ? error.message
+            : "No se pudo guardar el plan. Inténtalo de nuevo.",
+      );
+    } finally {
+      setGuardandoPlan(false);
+    }
   }
 
   return (
@@ -425,7 +376,7 @@ export function PlanificadorViajeDemo() {
                     );
                   }
 
-                  const opciones = ofertasDemo.filter(
+                  const opciones = catalogoServiciosViaje.filter(
                     (oferta) => oferta.categoria === categoria,
                   );
 
@@ -437,13 +388,10 @@ export function PlanificadorViajeDemo() {
                       </h3>
                       <div className="grid gap-3 md:grid-cols-2">
                         {opciones.map((oferta) => {
-                          const precio = precioOferta(
-                            oferta,
-                            presupuestoNumero,
-                            noches,
-                            dias,
-                            Number(viajeros),
-                          );
+                          const precio =
+                            serviciosCalculados.find(
+                              (servicio) => servicio.id === oferta.id,
+                            )?.precio ?? 0;
                           const elegida = selecciones[categoria] === oferta.id;
 
                           return (
@@ -574,13 +522,9 @@ export function PlanificadorViajeDemo() {
                       <span>{oferta.nombre}</span>
                       <strong>
                         {formatearPesos(
-                          precioOferta(
-                            oferta,
-                            presupuestoNumero,
-                            noches,
-                            dias,
-                            Number(viajeros),
-                          ),
+                          serviciosCalculados.find(
+                            (servicio) => servicio.id === oferta.id,
+                          )?.precio ?? 0,
                         )}{" "}
                         COP
                       </strong>
@@ -602,7 +546,41 @@ export function PlanificadorViajeDemo() {
                   Este resumen usa precios inventados. No es una cotización ni
                   una compra, y no se enviaron datos a proveedores.
                 </Aviso>
+                <Aviso tipo="informacion">
+                  Puedes guardar esta selección en tus viajes para consultarla
+                  después. Quedará marcada como plan de ejemplo, no como compra.
+                </Aviso>
+                {errorGuardado && (
+                  <Aviso tipo="error">
+                    {errorGuardado}{" "}
+                    {requiereSesion && (
+                      <Link
+                        className="font-bold underline underline-offset-2"
+                        href="/login"
+                      >
+                        Inicia sesión y vuelve a armar el plan para guardarlo.
+                      </Link>
+                    )}
+                  </Aviso>
+                )}
+                {mensajeGuardado && (
+                  <Aviso
+                    className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
+                    tipo="informacion"
+                  >
+                    {mensajeGuardado}
+                  </Aviso>
+                )}
                 <div className="flex flex-wrap gap-3">
+                  <Boton
+                    className="rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-800 to-cyan-800"
+                    disabled={guardandoPlan || !deviceId}
+                    onClick={() => void guardarPlan()}
+                  >
+                    {guardandoPlan
+                      ? "Guardando plan…"
+                      : "Guardar en mis viajes"}
+                  </Boton>
                   <Boton
                     onClick={() => setPaso("opciones")}
                     variante="secundario"

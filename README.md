@@ -10,6 +10,8 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 - Completar, reactivar y eliminar viajes con confirmación.
 - Filtrar por estado, ordenar por fecha de inicio o creación y consultar el resumen de todos los viajes.
 - Persistencia de los registros en PostgreSQL. `localStorage` conserva solamente el identificador UUID del dispositivo.
+- El planificador demo permite guardar una selección de servicios de ejemplo en PostgreSQL; aparece en **Planes y compras guardados** en `/viajes` y se identifica claramente como un plan, no como una compra o reserva.
+- Guardar un plan requiere iniciar sesión. Sus precios se vuelven a calcular en el servidor; no hay disponibilidad, reservas ni cobros reales.
 - La fecha de fin no puede ser anterior a la fecha de inicio; un viaje de un solo día sí está permitido.
 
 ## Siguiente iniciativa
@@ -43,7 +45,7 @@ Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuel
 
    El panel administrativo requiere `SUPABASE_SERVICE_ROLE_KEY`. El envío de correos es opcional y utiliza `RESEND_API_KEY` y `RESEND_FROM`. El script de desarrollo puede sincronizar `VERCEL_OIDC_TOKEN` desde Vercel; no agregues tokens ni claves al repositorio.
 
-3. Aplica la migración de base de datos y ejecuta la aplicación:
+3. Aplica las migraciones pendientes de la base de datos y ejecuta la aplicación. La migración `20261107000000_planes_guardados.sql` crea la tabla de planes guardados:
 
    ```bash
    npm run db:migrar

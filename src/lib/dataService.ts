@@ -155,9 +155,15 @@ export {
   obtenerResumen,
   obtenerViaje,
 } from "@/lib/datos/viajes";
+export {
+  crearPlanGuardado,
+  listarPlanesGuardados,
+} from "@/lib/datos/planesGuardados";
 export type {
+  DatosPlanGuardado,
   DatosViaje,
   FiltrosListadoViajes,
+  PlanGuardado,
   ResumenViajes,
   Viaje,
 } from "@/lib/datos/tipos";

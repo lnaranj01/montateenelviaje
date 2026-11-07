@@ -1,6 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlanificadorViajeDemo } from "@/components/viajes/PlanificadorViajeDemo";
+
+const navegacion = vi.hoisted(() => ({ push: vi.fn() }));
 
 vi.mock("next/link", () => ({
   default: ({
@@ -12,6 +14,10 @@ vi.mock("next/link", () => ({
       {children}
     </a>
   ),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => navegacion,
 }));
 
 afterEach(() => {
@@ -120,6 +126,38 @@ describe("PlanificadorViajeDemo", () => {
     expect(screen.getByText("$ 10.000.000 COP")).toBeInTheDocument();
     expect(screen.getByLabelText("Total seleccionado")).toHaveTextContent(
       /25\.000\.000.*COP/,
+    );
+  });
+
+  it("guarda los servicios elegidos para mostrarlos en mis viajes", async () => {
+    const fetchEspiado = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({ ok: true, datos: { id: "plan-guardado" } }),
+        {
+          status: 201,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+    render(<PlanificadorViajeDemo />);
+    completarBusqueda("2000000");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Elegir Vuelo nacional de muestra" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Revisar mi plan" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guardar en mis viajes" }),
+    );
+
+    await waitFor(() => {
+      expect(navegacion.push).toHaveBeenCalledWith("/viajes?planGuardado=1");
+    });
+    expect(fetchEspiado).toHaveBeenCalledWith(
+      "/api/viajes/planes",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining('"servicios":["vuelo-economico"]'),
+      }),
     );
   });
 

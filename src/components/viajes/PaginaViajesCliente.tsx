@@ -7,6 +7,7 @@ import { Tarjeta } from "@/components/ui/Tarjeta";
 import { FiltrosViajes } from "@/components/viajes/FiltrosViajes";
 import { FormularioViaje } from "@/components/viajes/FormularioViaje";
 import { ListaViajes } from "@/components/viajes/ListaViajes";
+import { PlanesGuardados } from "@/components/viajes/PlanesGuardados";
 import { ResumenViajes } from "@/components/viajes/ResumenViajes";
 import type { AccionViaje } from "@/components/viajes/TarjetaViaje";
 import type { Viaje } from "@/lib/datos/tipos";
@@ -73,6 +74,8 @@ export function PaginaViajesCliente({
             Armar viaje según presupuesto (demo)
           </Link>
         </section>
+
+        <PlanesGuardados />
 
         <section aria-labelledby="titulo-formulario" id="formulario-viaje">
           <div className="mb-3">
