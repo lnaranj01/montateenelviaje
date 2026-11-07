@@ -118,7 +118,7 @@
 - **Aceptación manual local:** se creó, editó, completó y reactivó un viaje; se canceló una eliminación (el registro permaneció) y luego se confirmó (contador volvió a cero).
 - **Pruebas automatizadas:** `npm.cmd test`: 55 pruebas en 16 archivos correctas, incluidas validación decimal/negativa, errores de API, acciones de tarjeta y teclado/foco del modal.
 - **Comandos y resultados:** `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check`: correctos.
-- **Aceptación en Vercel:** A-01 a A-14 aprobadas en [producción](https://montateenelviaje.vercel.app); resultados y evidencias en [doc/ACEPTACION.md](./ACEPTACION.md). El primer intento detectó `SELF_SIGNED_CERT_IN_CHAIN` porque faltaba `PGSSLROOTCERT` en producción. Se configuró el certificado raíz de Supabase en Vercel y se redeplegó la versión actual, manteniendo `rejectUnauthorized: true`. Se verificaron la lista, las operaciones y la persistencia; al terminar, el contador quedó en 0 y no quedaron registros de prueba. A-15 se reserva para P08.
+- **Aceptación en Vercel:** A-01 a A-14 aprobadas en [producción](https://montateenelviaje.vercel.app); resultados y evidencias en [doc/ACEPTACION.md](./ACEPTACION.md). El primer intento detectó `SELF_SIGNED_CERT_IN_CHAIN` porque faltaba `PGSSLROOTCERT` en producción. Se configuró el certificado raíz de Supabase en Vercel y se redeplegó la versión actual, manteniendo `rejectUnauthorized: true`. Se verificaron la lista, las operaciones y la persistencia; al terminar, el contador quedó en 0 y no quedaron registros de prueba. A-15 se aprobó en P08.
 
 ### P08 · Filtros, orden y resumen
 
