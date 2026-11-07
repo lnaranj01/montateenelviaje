@@ -84,15 +84,46 @@ describe("PlanificadorViajeDemo", () => {
       screen.getByRole("button", { name: "Elegir Vuelo flexible de muestra" }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Elegir Hospedaje de muestra" }),
+      screen.getByRole("button", {
+        name: "Elegir Hospedaje central de muestra",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Elegir Carro familiar de muestra" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Elegir Tour de aventura de muestra",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Elegir Kit completo de muestra" }),
     );
     fireEvent.click(screen.getByRole("button", { name: "Revisar mi plan" }));
 
     expect(screen.getByText(/Total de ejemplo:/)).toHaveTextContent(
-      /1\.440\.000.*COP/,
+      /1\.398\.000.*COP/,
     );
     expect(screen.getByText(/Excede el presupuesto por/)).toHaveTextContent(
-      /440\.000.*COP/,
+      /398\.000.*COP/,
+    );
+  });
+
+  it("ajusta los precios de muestra a un presupuesto de 50 millones", () => {
+    render(<PlanificadorViajeDemo />);
+    completarBusqueda("50000000");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Elegir Vuelo nacional de muestra" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Elegir Hospedaje de muestra" }),
+    );
+
+    expect(screen.getByText("$ 15.000.000 COP")).toBeInTheDocument();
+    expect(screen.getByText("$ 10.000.000 COP")).toBeInTheDocument();
+    expect(screen.getByText("Seleccionado:").parentElement).toHaveTextContent(
+      /25\.000\.000.*COP/,
     );
   });
 

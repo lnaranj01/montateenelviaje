@@ -14,7 +14,7 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 
 ## Siguiente iniciativa
 
-Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuelos, hospedaje, carro, tours y artículos esenciales a un presupuesto desde el enlace **Armar viaje según presupuesto (demo)** en el organizador. Puede abrirse sin iniciar sesión; todos sus servicios y precios son ficticios: no consulta disponibilidad, no crea reservas, no envía datos a proveedores ni procesa pagos. Las compras reales requieren integraciones y acceso de socios; consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md).
+Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuelos, hospedaje, carro, tours y artículos esenciales a un presupuesto desde el enlace **Armar viaje según presupuesto (demo)** en el organizador. Los precios de ejemplo cambian según el presupuesto, los viajeros y la duración (por ejemplo, COP 50 millones genera importes de muestra mayores que COP 2 millones). Son cálculos ilustrativos, no cotizaciones: la página no consulta disponibilidad, crea reservas, envía datos a proveedores ni procesa pagos. Las compras reales requieren integraciones y acceso de socios; consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md).
 
 ## Requisitos
 

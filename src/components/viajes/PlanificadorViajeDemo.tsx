@@ -12,12 +12,14 @@ import { duracionDias, finNoAnteriorAInicio } from "@/lib/reglas/fechas";
 type PasoDemo = "busqueda" | "opciones" | "revision" | "finalizada";
 type UnidadOferta = "viajero" | "noche" | "dia";
 
+const MAXIMO_PRESUPUESTO_COP = 1_000_000_000_000;
+
 interface OfertaDemo {
   id: string;
   categoria: string;
   nombre: string;
   descripcion: string;
-  precioUnidad: number;
+  proporcionPresupuestoDiario: number;
   unidad: UnidadOferta;
 }
 
@@ -27,7 +29,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Vuelos",
     nombre: "Vuelo nacional de muestra",
     descripcion: "Ejemplo de vuelo ida y vuelta por viajero.",
-    precioUnidad: 300_000,
+    proporcionPresupuestoDiario: 0.9,
     unidad: "viajero",
   },
   {
@@ -35,7 +37,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Vuelos",
     nombre: "Vuelo flexible de muestra",
     descripcion: "Ejemplo de tarifa flexible por viajero.",
-    precioUnidad: 520_000,
+    proporcionPresupuestoDiario: 1.56,
     unidad: "viajero",
   },
   {
@@ -43,7 +45,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Hospedaje",
     nombre: "Hospedaje de muestra",
     descripcion: "Alojamiento ficticio; tarifa por noche.",
-    precioUnidad: 200_000,
+    proporcionPresupuestoDiario: 0.3,
     unidad: "noche",
   },
   {
@@ -51,7 +53,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Hospedaje",
     nombre: "Hospedaje central de muestra",
     descripcion: "Opción ficticia; tarifa por noche.",
-    precioUnidad: 320_000,
+    proporcionPresupuestoDiario: 0.48,
     unidad: "noche",
   },
   {
@@ -59,7 +61,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Carros",
     nombre: "Carro compacto de muestra",
     descripcion: "Alquiler ficticio; tarifa por día.",
-    precioUnidad: 120_000,
+    proporcionPresupuestoDiario: 0.18,
     unidad: "dia",
   },
   {
@@ -67,7 +69,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Carros",
     nombre: "Carro familiar de muestra",
     descripcion: "Alquiler ficticio; tarifa por día.",
-    precioUnidad: 210_000,
+    proporcionPresupuestoDiario: 0.315,
     unidad: "dia",
   },
   {
@@ -75,7 +77,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Tours y actividades",
     nombre: "Tour cultural de muestra",
     descripcion: "Actividad ficticia; tarifa por viajero.",
-    precioUnidad: 65_000,
+    proporcionPresupuestoDiario: 0.195,
     unidad: "viajero",
   },
   {
@@ -83,7 +85,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Tours y actividades",
     nombre: "Tour de aventura de muestra",
     descripcion: "Actividad ficticia; tarifa por viajero.",
-    precioUnidad: 130_000,
+    proporcionPresupuestoDiario: 0.39,
     unidad: "viajero",
   },
   {
@@ -91,7 +93,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Artículos esenciales",
     nombre: "Kit de viaje de muestra",
     descripcion: "Artículos ficticios; ejemplo por viajero.",
-    precioUnidad: 45_000,
+    proporcionPresupuestoDiario: 0.135,
     unidad: "viajero",
   },
   {
@@ -99,7 +101,7 @@ const ofertasDemo: OfertaDemo[] = [
     categoria: "Artículos esenciales",
     nombre: "Kit completo de muestra",
     descripcion: "Artículos ficticios; ejemplo por viajero.",
-    precioUnidad: 110_000,
+    proporcionPresupuestoDiario: 0.33,
     unidad: "viajero",
   },
 ];
@@ -131,11 +133,22 @@ function unidadesPara(
 
 function precioOferta(
   oferta: OfertaDemo,
+  presupuesto: number,
   noches: number,
   dias: number,
   viajeros: number,
 ): number {
-  return oferta.precioUnidad * unidadesPara(oferta, noches, dias, viajeros);
+  const presupuestoDiarioPorViajero = presupuesto / dias / viajeros;
+  const precioPorViajeroDia =
+    presupuestoDiarioPorViajero * oferta.proporcionPresupuestoDiario;
+  const precioPorUnidad = Math.max(
+    1_000,
+    Math.round(precioPorViajeroDia / 1_000) * 1_000,
+  );
+  const cantidadUnidades = unidadesPara(oferta, noches, dias, viajeros);
+  const cantidadViajeros = oferta.unidad === "viajero" ? 1 : viajeros;
+
+  return precioPorUnidad * cantidadUnidades * cantidadViajeros;
 }
 
 export function PlanificadorViajeDemo() {
@@ -147,6 +160,7 @@ export function PlanificadorViajeDemo() {
   const [presupuesto, setPresupuesto] = useState("");
   const [selecciones, setSelecciones] = useState<Record<string, string>>({});
   const [errorFechas, setErrorFechas] = useState("");
+  const [errorPresupuesto, setErrorPresupuesto] = useState("");
 
   const dias =
     fechaInicio && fechaFin && finNoAnteriorAInicio(fechaInicio, fechaFin)
@@ -159,7 +173,8 @@ export function PlanificadorViajeDemo() {
   );
   const totalEjemplo = ofertasElegidas.reduce(
     (total, oferta) =>
-      total + precioOferta(oferta, noches, dias, Number(viajeros)),
+      total +
+      precioOferta(oferta, presupuestoNumero, noches, dias, Number(viajeros)),
     0,
   );
   const saldoEjemplo = presupuestoNumero - totalEjemplo;
@@ -174,10 +189,22 @@ export function PlanificadorViajeDemo() {
   function buscar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErrorFechas("");
+    setErrorPresupuesto("");
 
     if (!finNoAnteriorAInicio(fechaInicio, fechaFin)) {
       setErrorFechas(
         "La fecha de salida no puede ser anterior a la de llegada.",
+      );
+      return;
+    }
+
+    if (
+      !Number.isSafeInteger(Number(presupuesto)) ||
+      Number(presupuesto) < 1 ||
+      Number(presupuesto) > MAXIMO_PRESUPUESTO_COP
+    ) {
+      setErrorPresupuesto(
+        "Ingresa un presupuesto entero entre $1 y $1.000.000.000.000 COP.",
       );
       return;
     }
@@ -286,10 +313,15 @@ export function PlanificadorViajeDemo() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <Campo
                   etiqueta="Presupuesto total (COP)"
+                  error={errorPresupuesto || undefined}
                   inputMode="numeric"
-                  min={0}
+                  max={MAXIMO_PRESUPUESTO_COP}
+                  min={1}
                   name="presupuesto"
-                  onChange={(evento) => setPresupuesto(evento.target.value)}
+                  onChange={(evento) => {
+                    setPresupuesto(evento.target.value);
+                    setErrorPresupuesto("");
+                  }}
                   placeholder="Ej. 2500000"
                   required
                   step={1}
@@ -332,6 +364,10 @@ export function PlanificadorViajeDemo() {
                   {viajeros === "1" ? "viajero" : "viajeros"} · Presupuesto{" "}
                   {formatearPesos(presupuestoNumero)} COP
                 </p>
+                <p className="mt-2 text-sm text-texto-suave">
+                  Los importes de muestra se ajustan al presupuesto diario por
+                  viajero y a la duración del viaje.
+                </p>
               </div>
 
               {categorias.map((categoria) => {
@@ -358,6 +394,7 @@ export function PlanificadorViajeDemo() {
                       {opciones.map((oferta) => {
                         const precio = precioOferta(
                           oferta,
+                          presupuestoNumero,
                           noches,
                           dias,
                           Number(viajeros),
@@ -382,6 +419,11 @@ export function PlanificadorViajeDemo() {
                               <p className="font-bold">
                                 {formatearPesos(precio)} COP
                               </p>
+                              <span className="text-xs text-texto-suave">
+                                Total de ejemplo para {viajeros}{" "}
+                                {viajeros === "1" ? "viajero" : "viajeros"} y{" "}
+                                {dias} {dias === 1 ? "día" : "días"}
+                              </span>
                               <Boton
                                 aria-label={`${elegida ? "Quitar" : "Elegir"} ${oferta.nombre}`}
                                 aria-pressed={elegida}
@@ -467,7 +509,13 @@ export function PlanificadorViajeDemo() {
                     <span>{oferta.nombre}</span>
                     <strong>
                       {formatearPesos(
-                        precioOferta(oferta, noches, dias, Number(viajeros)),
+                        precioOferta(
+                          oferta,
+                          presupuestoNumero,
+                          noches,
+                          dias,
+                          Number(viajeros),
+                        ),
                       )}{" "}
                       COP
                     </strong>
