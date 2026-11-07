@@ -86,6 +86,30 @@ describe("ListaViajes", () => {
     expect(alEditar).toHaveBeenCalledWith(viajeDemo);
   });
 
+  it("envía filtros a la API y distingue una lista filtrada vacía", async () => {
+    vi.mocked(useDeviceId).mockReturnValue("device-test");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaLista([])));
+
+    render(
+      <ListaViajes
+        alCambiar={vi.fn()}
+        alEditar={vi.fn()}
+        estado="Completado"
+        orden="inicio"
+        revision={0}
+      />,
+    );
+
+    expect(await screen.findByText("Tienes 0 viajes")).toBeInTheDocument();
+    expect(
+      screen.getByText(/No tienes viajes con estado Completado/),
+    ).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/viajes?deviceId=device-test&estado=Completado&orden=inicio",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+  });
+
   it("confirma la eliminación y actualiza la lista y el contador", async () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     const fetchSimulado = vi

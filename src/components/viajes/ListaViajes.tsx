@@ -9,9 +9,12 @@ import { TarjetaViaje } from "@/components/viajes/TarjetaViaje";
 import type { AccionViaje } from "@/components/viajes/TarjetaViaje";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import type { Viaje } from "@/lib/datos/tipos";
+import type { EstadoViaje } from "@/lib/reglas/viaje";
 
 interface ListaViajesProps {
   revision: number;
+  estado?: EstadoViaje | undefined;
+  orden?: "inicio" | "reciente" | undefined;
   alEditar: (viaje: Viaje) => void;
   alCambiar: (accion: AccionViaje, viaje: Viaje) => void;
 }
@@ -86,6 +89,8 @@ function mensajeDeErrorApi(valor: unknown): string | null {
 export function ListaViajes({
   alCambiar,
   alEditar,
+  estado: filtroEstado,
+  orden = "reciente",
   revision,
 }: ListaViajesProps) {
   const deviceId = useDeviceId();
@@ -107,10 +112,18 @@ export function ListaViajes({
 
     async function cargarViajes(idDispositivo: string) {
       try {
-        const respuesta = await fetch(
-          `/api/viajes?deviceId=${encodeURIComponent(idDispositivo)}`,
-          { cache: "no-store", signal: controlador.signal },
-        );
+        const parametros = new URLSearchParams({ deviceId: idDispositivo });
+        if (filtroEstado) {
+          parametros.set("estado", filtroEstado);
+        }
+        if (orden !== "reciente") {
+          parametros.set("orden", orden);
+        }
+
+        const respuesta = await fetch(`/api/viajes?${parametros.toString()}`, {
+          cache: "no-store",
+          signal: controlador.signal,
+        });
         let cuerpo: unknown;
 
         try {
@@ -155,7 +168,7 @@ export function ListaViajes({
 
     void cargarViajes(idDispositivo);
     return () => controlador.abort();
-  }, [deviceId, intento, revision]);
+  }, [deviceId, filtroEstado, intento, orden, revision]);
 
   if (!deviceId || estado === "cargando") {
     return (
@@ -194,10 +207,26 @@ export function ListaViajes({
   return (
     <div className="grid gap-5">
       <ContadorViajes total={total ?? 0} />
+      {(filtroEstado || orden !== "reciente") && (
+        <p className="text-sm text-texto-suave" role="status">
+          Se muestran {viajes.length} de {total ?? 0}{" "}
+          {(total ?? 0) === 1 ? "viaje" : "viajes"}
+          {filtroEstado ? ` con estado ${filtroEstado}` : ""}
+          {orden === "inicio" ? ", ordenados por fecha de inicio." : "."}
+        </p>
+      )}
       {viajes.length === 0 ? (
         <EstadoVacio
-          descripcion="Aún no has registrado viajes. Completa el formulario de arriba para agregar el primero."
-          titulo="Tu próxima aventura empieza aquí"
+          descripcion={
+            filtroEstado
+              ? `No tienes viajes con estado ${filtroEstado}. Puedes cambiar el filtro para ver otros viajes.`
+              : "Aún no has registrado viajes. Completa el formulario de arriba para agregar el primero."
+          }
+          titulo={
+            filtroEstado
+              ? `No hay viajes ${filtroEstado.toLowerCase()}`
+              : "Tu próxima aventura empieza aquí"
+          }
         />
       ) : (
         <ul className="grid list-none gap-4 p-0 md:grid-cols-2">
