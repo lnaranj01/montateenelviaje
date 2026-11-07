@@ -70,7 +70,7 @@ export function PaginaViajesCliente({
             className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-primario px-4 py-2 text-sm font-semibold text-primario transition-colors hover:bg-primario-suave focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento"
             href="/demo-compras"
           >
-            Probar hospedaje (demo)
+            Armar viaje según presupuesto (demo)
           </Link>
         </section>
 

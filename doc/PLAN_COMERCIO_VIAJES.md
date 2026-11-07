@@ -1,6 +1,6 @@
 # Plan de comercio y reservas de viaje
 
-Estado: diseño inicial; todavía no hay búsqueda, ofertas ni compras en la aplicación.
+Estado: diseño de producto con un planificador demostrativo de presupuesto; todavía no hay búsqueda de inventario, ofertas reales ni compras en la aplicación.
 
 ## Objetivo del producto
 
@@ -17,6 +17,7 @@ Este plan extiende el organizador existente sin reemplazar sus viajes, filtros, 
 - **No fingir conversión ni disponibilidad.** Antes de mostrar una tarifa, verificar la moneda de la cotización, el monto final, la vigencia, la tarifa de cambio y los métodos de pago disponibles en el contrato real. Si no se puede cobrar en COP, detener el lanzamiento de ese flujo o informar claramente la moneda que se cobrará y obtener aprobación expresa; no mostrar un equivalente estimado como si fuera el total final.
 - **No almacenar datos de tarjetas.** El cobro usa el método seguro del proveedor autorizado; los secretos y tokens son únicamente del servidor. Los pedidos se asocian a la cuenta autenticada, no solo al `device_id`.
 - **Sin socios ni cuentas de comercio actualmente.** No hay credenciales de afiliado, APIs de inventario, cuentas de vendedor ni configuración de pagos confirmadas. La siguiente tarea es obtener acceso sandbox/contrato; hasta entonces no se pueden probar precios ni compras reales.
+- **Prototipo de presupuesto disponible.** `/demo-compras` permite comparar importes enteramente ficticios para vuelos, hospedaje, carros, tours y artículos esenciales contra el presupuesto indicado. No representa inventario ni una cotización y no puede realizar reservas o compras. La demo no sustituye las integraciones definidas en las fases siguientes.
 
 ## Proveedor de arranque y límites comprobados
 

@@ -1,5 +1,5 @@
-import { CompraHospedajeDemo } from "@/components/viajes/CompraHospedajeDemo";
+import { PlanificadorViajeDemo } from "@/components/viajes/PlanificadorViajeDemo";
 
 export default function PaginaDemoCompras() {
-  return <CompraHospedajeDemo />;
+  return <PlanificadorViajeDemo />;
 }
