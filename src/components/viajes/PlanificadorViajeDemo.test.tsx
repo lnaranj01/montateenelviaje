@@ -173,7 +173,7 @@ describe("PlanificadorViajeDemo", () => {
     });
   });
 
-  it("abre los servicios con el viaje guardado y adapta los precios", async () => {
+  it("pide la ciudad de salida con los datos del viaje precargados", async () => {
     sessionStorage.setItem(
       CLAVE_DATOS_INICIALES_PLANIFICADOR,
       JSON.stringify({
@@ -187,18 +187,39 @@ describe("PlanificadorViajeDemo", () => {
     render(<PlanificadorViajeDemo />);
 
     expect(
-      await screen.findByRole("heading", {
-        name: "Servicios de ejemplo para Cartagena",
-      }),
+      await screen.findByText(/Indica desde qué ciudad sales/i),
     ).toBeInTheDocument();
-    expect(screen.getAllByText(/\$ 2\.000\.000 COP/).length).toBeGreaterThan(0);
-    expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
-    expect(
-      screen.getByText(/el cálculo comienza con 2 viajeros/i),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Ciudad o aeropuerto de origen")).toHaveValue(
+      "",
+    );
+    expect(screen.getByLabelText("Ciudad o aeropuerto de destino")).toHaveValue(
+      "Cartagena",
+    );
+    expect(screen.getByLabelText("Fecha de llegada")).toHaveValue(
+      "2026-12-10",
+    );
+    expect(screen.getByLabelText("Fecha de salida")).toHaveValue("2026-12-12");
+    expect(screen.getByLabelText("Presupuesto total (COP)")).toHaveValue(
+      2000000,
+    );
     expect(
       sessionStorage.getItem(CLAVE_DATOS_INICIALES_PLANIFICADOR),
     ).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de origen"), {
+      target: { value: "Bogotá" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ver mis opciones de viaje" }),
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Servicios de ejemplo para Cartagena",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
+    expect(screen.getAllByText("Bogotá").length).toBeGreaterThan(0);
   });
 
   it("guarda los servicios elegidos para mostrarlos en mis viajes", async () => {

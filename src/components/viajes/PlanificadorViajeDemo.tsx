@@ -52,7 +52,7 @@ export function PlanificadorViajeDemo() {
   const [mensajeGuardado, setMensajeGuardado] = useState("");
   const [errorGuardado, setErrorGuardado] = useState("");
   const [requiereSesion, setRequiereSesion] = useState(false);
-  const [viajePrecargado, setViajePrecargado] = useState(false);
+  const [datosPrecargados, setDatosPrecargados] = useState(false);
   const [errorPrecarga, setErrorPrecarga] = useState("");
 
   useEffect(() => {
@@ -109,13 +109,11 @@ export function PlanificadorViajeDemo() {
     }
 
     startTransition(() => {
-      setOrigen("Por definir");
       setDestino(resultado.data.destino);
       setFechaInicio(resultado.data.fechaInicio);
       setFechaFin(resultado.data.fechaFin);
       setPresupuesto(String(resultado.data.presupuesto));
-      setPaso("opciones");
-      setViajePrecargado(true);
+      setDatosPrecargados(true);
     });
   }, []);
 
@@ -340,6 +338,13 @@ export function PlanificadorViajeDemo() {
 
             {paso === "busqueda" && (
               <form className="mt-7 grid gap-6" onSubmit={buscar}>
+                {datosPrecargados && (
+                  <Aviso tipo="informacion">
+                    Completamos el destino, las fechas y el presupuesto de tu
+                    viaje. Indica desde qué ciudad sales para ver los servicios
+                    de ejemplo.
+                  </Aviso>
+                )}
                 <div>
                   <h2 className="text-2xl font-extrabold tracking-tight text-white">
                     Cuéntanos sobre tu viaje
@@ -435,14 +440,6 @@ export function PlanificadorViajeDemo() {
                 className="mt-6 grid gap-6"
                 aria-labelledby="titulo-servicios"
               >
-                {viajePrecargado && (
-                  <Aviso tipo="informacion">
-                    Cargamos el destino, las fechas y el presupuesto que
-                    guardaste. Los precios se ajustan a ese presupuesto; el
-                    cálculo comienza con 2 viajeros. El origen está por definir
-                    y puedes cambiarlo en los datos del viaje.
-                  </Aviso>
-                )}
                 <div>
                   <h2
                     className="text-2xl font-extrabold tracking-tight text-white"
