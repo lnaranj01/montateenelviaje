@@ -20,6 +20,7 @@ vi.mock("@/lib/dataService", () => ({
 const deviceId = "00000000-0000-4000-8000-000000000001";
 const plan = {
   id: "00000000-0000-4000-8000-000000000003",
+  origen: "Bogotá",
   destino: "Cartagena",
   fechaInicio: "2026-12-10",
   fechaFin: "2026-12-12",
@@ -75,6 +76,7 @@ describe("/api/viajes/planes", () => {
     const respuesta = await POST(
       crearSolicitud({
         deviceId,
+        origen: "Bogotá",
         destino: "Cartagena",
         fechaInicio: "2026-12-10",
         fechaFin: "2026-12-12",
@@ -87,6 +89,7 @@ describe("/api/viajes/planes", () => {
     expect(respuesta.status).toBe(201);
     expect(await respuesta.json()).toEqual({ ok: true, datos: plan });
     expect(funciones.crearPlanGuardado).toHaveBeenCalledWith(deviceId, {
+      origen: "Bogotá",
       destino: "Cartagena",
       fechaInicio: "2026-12-10",
       fechaFin: "2026-12-12",
@@ -113,6 +116,7 @@ describe("/api/viajes/planes", () => {
     const respuesta = await POST(
       crearSolicitud({
         deviceId,
+        origen: "Bogotá",
         destino: "Cartagena",
         fechaInicio: "2026-12-10",
         fechaFin: "2026-12-12",

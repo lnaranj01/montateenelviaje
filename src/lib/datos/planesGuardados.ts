@@ -5,6 +5,7 @@ import type { DatosPlanGuardado, PlanGuardado } from "@/lib/datos/tipos";
 
 interface FilaPlanGuardado {
   id: string;
+  origen: string;
   destino: string;
   fecha_inicio: string;
   fecha_fin: string;
@@ -17,6 +18,7 @@ interface FilaPlanGuardado {
 function mapearPlanGuardado(fila: FilaPlanGuardado): PlanGuardado {
   return {
     id: fila.id,
+    origen: fila.origen,
     destino: fila.destino,
     fechaInicio: fila.fecha_inicio,
     fechaFin: fila.fecha_fin,
@@ -31,7 +33,7 @@ export async function listarPlanesGuardados(
   deviceId: string,
 ): Promise<PlanGuardado[]> {
   const filas = await consultar<FilaPlanGuardado>(
-    `SELECT id, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
+    `SELECT id, origen, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
             servicios, total
      FROM public.planes_guardados
      WHERE device_id = $1
@@ -58,13 +60,14 @@ export async function crearPlanGuardado(
 
   const [fila] = await consultar<FilaPlanGuardado>(
     `INSERT INTO public.planes_guardados (
-       device_id, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
+       device_id, origen, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
        servicios, total
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
-     RETURNING id, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9)
+     RETURNING id, origen, destino, fecha_inicio, fecha_fin, presupuesto, viajeros,
                servicios, total`,
     [
       deviceId,
+      datos.origen.trim(),
       datos.destino.trim(),
       datos.fechaInicio,
       datos.fechaFin,

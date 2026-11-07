@@ -21,6 +21,7 @@ function esPlanGuardado(valor: unknown): valor is PlanGuardado {
   const plan = valor as Record<string, unknown>;
   return (
     typeof plan.id === "string" &&
+    typeof plan.origen === "string" &&
     typeof plan.destino === "string" &&
     typeof plan.fechaInicio === "string" &&
     typeof plan.fechaFin === "string" &&
@@ -206,7 +207,7 @@ export function PlanesGuardados() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-texto">
-                      {plan.destino}
+                      {plan.origen} → {plan.destino}
                     </h3>
                     <p className="mt-1 text-sm text-texto-suave">
                       {plan.fechaInicio} – {plan.fechaFin} · {plan.viajeros}{" "}
@@ -229,6 +230,15 @@ export function PlanesGuardados() {
                           {servicio.categoria}:
                         </span>{" "}
                         {servicio.nombre}
+                        {servicio.categoria === "Vuelos" && (
+                          <span className="mt-1 block text-xs text-texto-suave">
+                            {servicio.numeroEscalas === 0
+                              ? "Vuelo directo de ejemplo"
+                              : servicio.numeroEscalas === 1
+                                ? "Vuelo con 1 escala de ejemplo"
+                                : "Escalas no especificadas en este plan"}
+                          </span>
+                        )}
                       </span>
                       <span className="font-semibold">
                         {formatearPesos(servicio.precio)}

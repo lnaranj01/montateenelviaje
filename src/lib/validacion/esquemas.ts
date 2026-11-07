@@ -37,6 +37,7 @@ export const esquemaDeviceIdCuerpo = z.object({
 export const esquemaPlanGuardadoConDeviceId = z
   .object({
     deviceId: esquemaDeviceId,
+    origen: z.string().trim().min(DESTINO_MIN).max(DESTINO_MAX),
     destino: z.string().trim().min(DESTINO_MIN).max(DESTINO_MAX),
     fechaInicio: z.iso.date(),
     fechaFin: z.iso.date(),

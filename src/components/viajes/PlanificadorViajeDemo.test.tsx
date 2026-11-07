@@ -25,7 +25,10 @@ afterEach(() => {
 });
 
 function completarBusqueda(presupuesto: string) {
-  fireEvent.change(screen.getByLabelText("Destino"), {
+  fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de origen"), {
+    target: { value: "Bogotá" },
+  });
+  fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de destino"), {
     target: { value: "Cartagena" },
   });
   fireEvent.change(screen.getByLabelText("Fecha de llegada"), {
@@ -129,6 +132,21 @@ describe("PlanificadorViajeDemo", () => {
     );
   });
 
+  it("muestra precios para todas las opciones y rutas de vuelo con escalas", () => {
+    render(<PlanificadorViajeDemo />);
+    completarBusqueda("2000000");
+
+    expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
+    expect(screen.getByText("$ 1.040.000 COP")).toBeInTheDocument();
+    expect(screen.queryByText("$ 0 COP")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Bogotá").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Cartagena").length).toBeGreaterThan(0);
+    expect(screen.getByText("Directo (ejemplo)")).toBeInTheDocument();
+    expect(
+      screen.getByText("1 escala (ejemplo; ciudad no confirmada)"),
+    ).toBeInTheDocument();
+  });
+
   it("guarda los servicios elegidos para mostrarlos en mis viajes", async () => {
     const fetchEspiado = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
@@ -159,11 +177,17 @@ describe("PlanificadorViajeDemo", () => {
         body: expect.stringContaining('"servicios":["vuelo-economico"]'),
       }),
     );
+    expect(fetchEspiado.mock.calls[0]?.[1]?.body).toContain(
+      '"origen":"Bogotá"',
+    );
   });
 
   it("rechaza fechas en las que la salida es anterior a la llegada", () => {
     render(<PlanificadorViajeDemo />);
-    fireEvent.change(screen.getByLabelText("Destino"), {
+    fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de origen"), {
+      target: { value: "Bogotá" },
+    });
+    fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de destino"), {
       target: { value: "Cartagena" },
     });
     fireEvent.change(screen.getByLabelText("Fecha de llegada"), {

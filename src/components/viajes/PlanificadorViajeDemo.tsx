@@ -32,6 +32,7 @@ export function PlanificadorViajeDemo() {
   const deviceId = useDeviceId();
   const router = useRouter();
   const [paso, setPaso] = useState<PasoDemo>("busqueda");
+  const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
@@ -55,14 +56,23 @@ export function PlanificadorViajeDemo() {
     (oferta) => selecciones[oferta.categoria] === oferta.id,
   );
   const serviciosElegidos = ofertasElegidas.map((oferta) => oferta.id);
-  const serviciosCalculados =
-    dias > 0 && serviciosElegidos.length > 0
-      ? calcularServiciosPlanViaje(serviciosElegidos, {
+  const datosCalculo =
+    dias > 0 && Number.isSafeInteger(presupuestoNumero) && presupuestoNumero > 0
+      ? {
           presupuesto: presupuestoNumero,
           dias,
           noches,
           viajeros: Number(viajeros),
-        })
+        }
+      : null;
+  const serviciosDisponibles = datosCalculo
+    ? catalogoServiciosViaje.flatMap((oferta) =>
+        calcularServiciosPlanViaje([oferta.id], datosCalculo),
+      )
+    : [];
+  const serviciosCalculados =
+    datosCalculo && serviciosElegidos.length > 0
+      ? calcularServiciosPlanViaje(serviciosElegidos, datosCalculo)
       : [];
   const totalEjemplo = serviciosCalculados.reduce(
     (total, servicio) => total + servicio.precio,
@@ -140,6 +150,7 @@ export function PlanificadorViajeDemo() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           deviceId,
+          origen,
           destino,
           fechaInicio,
           fechaFin,
@@ -263,15 +274,26 @@ export function PlanificadorViajeDemo() {
                     Define lo básico y calcularemos opciones de ejemplo para ti.
                   </p>
                 </div>
-                <Campo
-                  autoComplete="address-level2"
-                  etiqueta="Destino"
-                  name="destino"
-                  onChange={(evento) => setDestino(evento.target.value)}
-                  placeholder="Ej. Cartagena"
-                  required
-                  value={destino}
-                />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Campo
+                    autoComplete="address-level2"
+                    etiqueta="Ciudad o aeropuerto de origen"
+                    name="origen"
+                    onChange={(evento) => setOrigen(evento.target.value)}
+                    placeholder="Ej. Bogotá"
+                    required
+                    value={origen}
+                  />
+                  <Campo
+                    autoComplete="address-level2"
+                    etiqueta="Ciudad o aeropuerto de destino"
+                    name="destino"
+                    onChange={(evento) => setDestino(evento.target.value)}
+                    placeholder="Ej. Cartagena"
+                    required
+                    value={destino}
+                  />
+                </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Campo
                     etiqueta="Fecha de llegada"
@@ -356,6 +378,10 @@ export function PlanificadorViajeDemo() {
                     Los importes de muestra se ajustan al presupuesto diario por
                     viajero y a la duración del viaje.
                   </p>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Las rutas y escalas también son ejemplos; no corresponden a
+                    horarios ni vuelos disponibles.
+                  </p>
                 </div>
 
                 {categorias.map((categoria) => {
@@ -388,10 +414,9 @@ export function PlanificadorViajeDemo() {
                       </h3>
                       <div className="grid gap-3 md:grid-cols-2">
                         {opciones.map((oferta) => {
-                          const precio =
-                            serviciosCalculados.find(
-                              (servicio) => servicio.id === oferta.id,
-                            )?.precio ?? 0;
+                          const precio = serviciosDisponibles.find(
+                            (servicio) => servicio.id === oferta.id,
+                          )?.precio;
                           const elegida = selecciones[categoria] === oferta.id;
 
                           return (
@@ -406,13 +431,39 @@ export function PlanificadorViajeDemo() {
                                 <p className="mt-1 text-sm text-slate-400">
                                   {oferta.descripcion}
                                 </p>
+                                {categoria === "Vuelos" && (
+                                  <div className="mt-3 rounded-xl border border-cyan-100/10 bg-black/10 p-3 text-sm text-slate-200">
+                                    <p>
+                                      <span className="font-semibold text-cyan-100">
+                                        Sale de:
+                                      </span>{" "}
+                                      {origen}
+                                    </p>
+                                    <p className="mt-1">
+                                      <span className="font-semibold text-cyan-100">
+                                        Llega a:
+                                      </span>{" "}
+                                      {destino}
+                                    </p>
+                                    <p className="mt-1">
+                                      <span className="font-semibold text-cyan-100">
+                                        Trayecto:
+                                      </span>{" "}
+                                      {oferta.numeroEscalas === 0
+                                        ? "Directo (ejemplo)"
+                                        : "1 escala (ejemplo; ciudad no confirmada)"}
+                                    </p>
+                                  </div>
+                                )}
                                 <p className="mt-3 inline-flex rounded-full border border-cyan-300/15 bg-cyan-300/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-200/80">
                                   Precio de ejemplo
                                 </p>
                               </div>
                               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-4">
                                 <p className="text-xl font-extrabold tracking-tight text-cyan-100">
-                                  {formatearPesos(precio)} COP
+                                  {precio === undefined
+                                    ? "Precio no disponible"
+                                    : `${formatearPesos(precio)} COP`}
                                 </p>
                                 <span className="w-full text-xs text-slate-500">
                                   Total de ejemplo para {viajeros}{" "}
@@ -510,7 +561,7 @@ export function PlanificadorViajeDemo() {
                   Resumen de tu viaje de ejemplo
                 </h2>
                 <p className="text-sm text-texto-suave">
-                  {destino} · {fechaInicio} – {fechaFin} · {viajeros}{" "}
+                  {origen} → {destino} · {fechaInicio} – {fechaFin} · {viajeros}{" "}
                   {viajeros === "1" ? "viajero" : "viajeros"}
                 </p>
                 <ul className="grid gap-3">
@@ -519,7 +570,17 @@ export function PlanificadorViajeDemo() {
                       className="flex flex-wrap justify-between gap-2 border-b border-borde pb-3"
                       key={oferta.id}
                     >
-                      <span>{oferta.nombre}</span>
+                      <span>
+                        {oferta.nombre}
+                        {oferta.categoria === "Vuelos" && (
+                          <span className="mt-1 block text-sm text-texto-suave">
+                            {origen} → {destino} ·{" "}
+                            {oferta.numeroEscalas === 0
+                              ? "directo (ejemplo)"
+                              : "1 escala de ejemplo"}
+                          </span>
+                        )}
+                      </span>
                       <strong>
                         {formatearPesos(
                           serviciosCalculados.find(

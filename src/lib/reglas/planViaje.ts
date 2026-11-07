@@ -22,6 +22,7 @@ export interface ServicioCatalogoViaje {
   descripcion: string;
   proporcionPresupuestoDiario: number;
   unidad: UnidadServicioViaje;
+  numeroEscalas?: 0 | 1;
 }
 
 export interface ServicioPlanViaje extends ServicioCatalogoViaje {
@@ -43,6 +44,7 @@ export const catalogoServiciosViaje: ServicioCatalogoViaje[] = [
     descripcion: "Ejemplo de vuelo ida y vuelta por viajero.",
     proporcionPresupuestoDiario: 0.9,
     unidad: "viajero",
+    numeroEscalas: 0,
   },
   {
     id: "vuelo-flexible",
@@ -51,6 +53,7 @@ export const catalogoServiciosViaje: ServicioCatalogoViaje[] = [
     descripcion: "Ejemplo de tarifa flexible por viajero.",
     proporcionPresupuestoDiario: 1.56,
     unidad: "viajero",
+    numeroEscalas: 1,
   },
   {
     id: "hospedaje-sencillo",

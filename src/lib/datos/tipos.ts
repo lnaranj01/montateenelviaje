@@ -35,6 +35,7 @@ export interface FiltrosListadoViajes {
 }
 
 export interface DatosPlanGuardado {
+  origen: string;
   destino: string;
   fechaInicio: string;
   fechaFin: string;

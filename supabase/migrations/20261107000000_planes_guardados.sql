@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS public.planes_guardados (
   id            UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   device_id     VARCHAR(64)   NOT NULL,
+  origen        VARCHAR(160)  NOT NULL,
   destino       VARCHAR(160)  NOT NULL,
   fecha_inicio  DATE          NOT NULL,
   fecha_fin     DATE          NOT NULL,
@@ -9,6 +10,8 @@ CREATE TABLE IF NOT EXISTS public.planes_guardados (
   servicios     JSONB         NOT NULL,
   total         BIGINT        NOT NULL,
   created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  CONSTRAINT planes_guardados_origen_ok
+    CHECK (char_length(btrim(origen)) BETWEEN 2 AND 160),
   CONSTRAINT planes_guardados_destino_ok
     CHECK (char_length(btrim(destino)) BETWEEN 2 AND 160),
   CONSTRAINT planes_guardados_fechas_ok
