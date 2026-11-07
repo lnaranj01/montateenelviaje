@@ -1,16 +1,16 @@
 # Estado de ejecución · Organizador de Viajes
 
-| Prompt | Estado | Build | Tests | Fecha de cierre |
-|---|---|---|---|---|
-| P00 Auditoría | completado | Correcto (`npm.cmd run build`) | No ejecutados (P00 no los requiere) | 2026-10-31 |
-| P01 Base de datos | completado | Correcto (`npm.cmd run build`) | Correcto (`npm.cmd run db:verificar`; 0 fallas) | 2026-10-31 |
-| P02 Reglas de negocio | completado | Correcto (`npm.cmd run build`) | Correcto (28 pruebas en 9 archivos; 18 nuevas) | 2026-10-31 |
-| P03 Servidor | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión) | 2026-10-31 |
-| P04 Datos | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
-| P05 API | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31 |
-| P06 Interfaz base y lista | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista) | 2026-10-31 |
-| P07 Formulario, editar, eliminar, completar y aceptación | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (55 pruebas en 16 archivos; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
-| P08 Opcional: filtros y resumen | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (60 pruebas en 18 archivos; aceptación A-15 en Vercel) | 2026-11-07 |
+| Prompt                                                   | Estado     | Build                                                    | Tests                                                                                          | Fecha de cierre |
+| -------------------------------------------------------- | ---------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| P00 Auditoría                                            | completado | Correcto (`npm.cmd run build`)                           | No ejecutados (P00 no los requiere)                                                            | 2026-10-31      |
+| P01 Base de datos                                        | completado | Correcto (`npm.cmd run build`)                           | Correcto (`npm.cmd run db:verificar`; 0 fallas)                                                | 2026-10-31      |
+| P02 Reglas de negocio                                    | completado | Correcto (`npm.cmd run build`)                           | Correcto (28 pruebas en 9 archivos; 18 nuevas)                                                 | 2026-10-31      |
+| P03 Servidor                                             | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (28 pruebas; endpoint 401 sin sesión y 200 con sesión)                                | 2026-10-31      |
+| P04 Datos                                                | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (29 pruebas unitarias; flujo BD 14 OK, 0 fallas)                                      | 2026-10-31      |
+| P05 API                                                  | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31      |
+| P06 Interfaz base y lista                                | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista)                                        | 2026-10-31      |
+| P07 Formulario, editar, eliminar, completar y aceptación | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (55 pruebas en 16 archivos; flujo BD 14 OK, 0 fallas)                                 | 2026-10-31      |
+| P08 Opcional: filtros y resumen                          | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (60 pruebas en 18 archivos; aceptación A-15 en Vercel)                                | 2026-11-07      |
 
 ## Bitácora
 
@@ -136,4 +136,6 @@
 - **Decisión de producto:** iniciar el descubrimiento técnico/comercial por hospedaje y procurar un flujo de reserva integrado donde un socio autorizado lo permita; el proveedor gestiona el inventario y cumplimiento inicial. Vuelos, transporte, actividades y artículos se incorporan en etapas separadas; no se promete un carrito universal.
 - **Documento:** el alcance, fases, moneda, seguridad, criterios de lanzamiento y dependencias están en [doc/PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md). Se consultaron documentos oficiales de Booking.com y Mercado Pago.
 - **Estado real:** solo está definido el plan. El repositorio/entorno no dispone de acceso confirmado a un socio de reservas ni credenciales sandbox/producción. No hay ofertas, reservas o pagos de comercio implementados; no simularlos ni publicar botones que aparenten vender. Próximo paso: tramitar una cuenta de socio y comprobar las capacidades de pago en COP y aceptación internacional en sandbox.
+- **Prototipo local:** se añadió `/demo-compras`, accesible desde el enlace **Probar hospedaje (demo)** de `/viajes` y sin exigir sesión. Permite recorrer búsqueda, opciones de muestra, revisión del precio ilustrativo y pantalla final. Los alojamientos y tarifas son ficticios; no hay disponibilidad, reservas, envío de datos a terceros ni cobros. Se añadieron pruebas del flujo y de validación de fechas.
+- **Verificación del prototipo:** `npm.cmd test` (62 pruebas en 19 archivos), `npm.cmd run type-check` y `npm.cmd run build`: correctos. El recorrido completo se probó en navegador local: búsqueda, selección, revisión del total y pantalla final. La aplicación quedó iniciada localmente en `http://localhost:3000`.
 - **Moneda:** COP es el monto objetivo del cobro; las redes/emisores convierten a la moneda de la tarjeta y sus tasas/comisiones y aceptación varían. No se promete “cualquier moneda”. Si el proveedor no confirma cobro final en COP, no continuar como si el requisito estuviera cumplido.

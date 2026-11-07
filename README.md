@@ -14,7 +14,7 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 
 ## Siguiente iniciativa
 
-Está en planificación añadir búsqueda y reservas de servicios de viaje dentro de la aplicación, comenzando por hospedaje y sujeto a acceso de socio y sandbox. Esta capacidad aún no está disponible. Consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md); no se muestran ofertas ni se procesan compras hasta tener proveedores y permisos aprobados.
+Está disponible `/demo-compras`, un prototipo interactivo para probar el flujo de hospedaje desde el enlace **Probar hospedaje (demo)** en el organizador. Puede abrirse sin iniciar sesión y usa opciones y precios ficticios: no consulta disponibilidad, no crea reservas, no envía datos a proveedores ni procesa pagos. La búsqueda y reserva reales siguen sujetas a acceso de socio y sandbox. Consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md).
 
 ## Requisitos
 
