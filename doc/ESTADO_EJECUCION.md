@@ -129,3 +129,11 @@
 - **Pruebas automatizadas:** `npm.cmd test`: 60 pruebas en 18 archivos correctas. Las pruebas nuevas cubren actualización de URL, solicitud filtrada/ordenada, estado vacío y representación/error del resumen.
 - **Comandos y resultados:** `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado, Prettier enfocado y `git diff --check`: correctos.
 - **Despliegue:** la implementación quedó lista en Vercel; no se modificaron las rutas API ni la lógica de datos existente.
+
+### Iniciativa posterior · Compras y reservas de viaje
+
+- **Solicitud:** permitir buscar y comprar vuelos, hospedaje, transporte, actividades y artículos esenciales desde la aplicación, con mercado inicial en Colombia y monto objetivo en COP para tarjetas nacionales e internacionales.
+- **Decisión de producto:** iniciar el descubrimiento técnico/comercial por hospedaje y procurar un flujo de reserva integrado donde un socio autorizado lo permita; el proveedor gestiona el inventario y cumplimiento inicial. Vuelos, transporte, actividades y artículos se incorporan en etapas separadas; no se promete un carrito universal.
+- **Documento:** el alcance, fases, moneda, seguridad, criterios de lanzamiento y dependencias están en [doc/PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md). Se consultaron documentos oficiales de Booking.com y Mercado Pago.
+- **Estado real:** solo está definido el plan. El repositorio/entorno no dispone de acceso confirmado a un socio de reservas ni credenciales sandbox/producción. No hay ofertas, reservas o pagos de comercio implementados; no simularlos ni publicar botones que aparenten vender. Próximo paso: tramitar una cuenta de socio y comprobar las capacidades de pago en COP y aceptación internacional en sandbox.
+- **Moneda:** COP es el monto objetivo del cobro; las redes/emisores convierten a la moneda de la tarjeta y sus tasas/comisiones y aceptación varían. No se promete “cualquier moneda”. Si el proveedor no confirma cobro final en COP, no continuar como si el requisito estuviera cumplido.

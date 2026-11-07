@@ -199,3 +199,7 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 ## 13. Compilación de base
 
 `npm run build` no pudo invocarse directamente desde PowerShell porque la política de ejecución bloquea `npm.ps1`. El equivalente `npm.cmd run build` terminó correctamente el 31 de octubre de 2026: compilación de Next.js, TypeScript, generación de páginas y optimización sin errores. Se generaron las rutas existentes; no hay rutas de viajes todavía.
+
+## 14. Iniciativa de comercio de viajes
+
+El 7 de noviembre de 2026 se solicitó ampliar el producto con compras de vuelos, hospedaje, transporte, actividades y artículos esenciales. La fase de producto recomienda iniciar por hospedaje con un socio autorizado, buscar una reserva integrada cuando el contrato lo permita y presentar/cobrar en COP, con tarjetas internacionales sujetas a la aceptación y conversión del emisor. Aún no hay socio, credenciales sandbox ni funciones de búsqueda, reserva o pago implementadas. El alcance y las dependencias están en [PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md).

@@ -12,6 +12,10 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 - Persistencia de los registros en PostgreSQL. `localStorage` conserva solamente el identificador UUID del dispositivo.
 - La fecha de fin no puede ser anterior a la fecha de inicio; un viaje de un solo día sí está permitido.
 
+## Siguiente iniciativa
+
+Está en planificación añadir búsqueda y reservas de servicios de viaje dentro de la aplicación, comenzando por hospedaje y sujeto a acceso de socio y sandbox. Esta capacidad aún no está disponible. Consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md); no se muestran ofertas ni se procesan compras hasta tener proveedores y permisos aprobados.
+
 ## Requisitos
 
 - Node.js 20.9 o posterior y npm.

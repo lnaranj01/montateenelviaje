@@ -114,6 +114,8 @@ Todo el plan funcional es el módulo mínimo: es un proyecto acotado y coherente
 
 Son extensiones naturales que el plan menciona como deseables implícitamente (contador) y que enriquecen la demostración. Se construyen solo con la fase 5 cerrada. El "trabajo futuro" del plan (itinerario día por día, compartir, exportar, múltiples cuentas) queda fuera de alcance, igual que en el original.
 
+La iniciativa posterior de compras y reservas de viaje se especifica por separado en [doc/PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md); no forma parte del módulo P00–P08 ya terminado y no debe confundirse con funcionalidad implementada.
+
 ### 3.3 Fuera de alcance
 
 Se mantiene la lista del plan funcional (sección 16): autenticación con múltiples cuentas, itinerario detallado día por día, compartir viajes entre personas, exportar a PDF o Excel, y sincronización entre dispositivos más allá del `device_id`.
