@@ -93,7 +93,7 @@ export function PaginaViajesCliente({
         {mensaje && <Aviso tipo="exito">{mensaje}</Aviso>}
 
         <section aria-label="Lista de viajes" className="grid gap-5">
-          <ResumenViajes deviceRevision={revisionLista} />
+          <ResumenViajes deviceRevision={revisionLista} estado={estado} />
           <FiltrosViajes estado={estado} orden={orden} />
           <ListaViajes
             alCambiar={alCambiar}

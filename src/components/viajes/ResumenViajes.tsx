@@ -6,9 +6,11 @@ import { Tarjeta } from "@/components/ui/Tarjeta";
 import { formatearPesos } from "@/lib/formato";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import type { ResumenViajes as DatosResumenViajes } from "@/lib/datos/tipos";
+import type { EstadoViaje } from "@/lib/reglas/viaje";
 
 interface ResumenViajesProps {
   deviceRevision: number;
+  estado: EstadoViaje | "";
 }
 
 function esEnteroSeguro(valor: unknown): valor is number {
@@ -53,12 +55,18 @@ function mensajeDeErrorApi(valor: unknown): string | null {
   return null;
 }
 
-export function ResumenViajes({ deviceRevision }: ResumenViajesProps) {
+export function ResumenViajes({ deviceRevision, estado }: ResumenViajesProps) {
   const deviceId = useDeviceId();
   const [resumen, setResumen] = useState<DatosResumenViajes | null>(null);
   const [revisionCargada, setRevisionCargada] = useState<number | null>(null);
   const [mensajeError, setMensajeError] = useState("");
   const cargando = revisionCargada !== deviceRevision;
+  const totalFiltrado =
+    estado === "Planeado"
+      ? resumen?.planeados
+      : estado === "Completado"
+        ? resumen?.completados
+        : resumen?.total;
 
   useEffect(() => {
     const idDispositivo = deviceId;
@@ -145,7 +153,7 @@ export function ResumenViajes({ deviceRevision }: ResumenViajesProps) {
           </Aviso>
         )}
         {resumen && !mensajeError && (
-          <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div>
               <dt className="text-sm text-texto-suave">Total de viajes</dt>
               <dd className="mt-1 text-xl font-bold text-texto">
@@ -168,6 +176,14 @@ export function ResumenViajes({ deviceRevision }: ResumenViajesProps) {
               <dt className="text-sm text-texto-suave">Presupuesto total</dt>
               <dd className="mt-1 text-xl font-bold text-primario">
                 {formatearPesos(resumen.presupuestoTotal)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-texto-suave">
+                Viajes en este filtro
+              </dt>
+              <dd className="mt-1 text-xl font-bold text-texto">
+                {totalFiltrado} {totalFiltrado === 1 ? "viaje" : "viajes"}
               </dd>
             </div>
           </dl>

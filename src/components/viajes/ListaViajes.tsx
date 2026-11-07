@@ -224,7 +224,7 @@ export function ListaViajes({
           }
           titulo={
             filtroEstado
-              ? `No hay viajes ${filtroEstado.toLowerCase()}`
+              ? `No hay viajes${filtroEstado === "Completado" ? " completados" : " planeados"}`
               : "Tu próxima aventura empieza aquí"
           }
         />

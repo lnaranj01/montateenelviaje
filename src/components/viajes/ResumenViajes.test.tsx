@@ -33,12 +33,14 @@ describe("ResumenViajes", () => {
       ),
     );
 
-    render(<ResumenViajes deviceRevision={0} />);
+    render(<ResumenViajes deviceRevision={0} estado="Completado" />);
 
     expect(await screen.findByText(/2\.500\.000/)).toBeInTheDocument();
     expect(screen.getByText("Total de viajes")).toBeInTheDocument();
     expect(screen.getByText("Planeados")).toBeInTheDocument();
     expect(screen.getByText("Completados")).toBeInTheDocument();
+    expect(screen.getByText("Viajes en este filtro")).toBeInTheDocument();
+    expect(screen.getByText("1 viaje", { exact: true })).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
@@ -61,7 +63,7 @@ describe("ResumenViajes", () => {
       ),
     );
 
-    render(<ResumenViajes deviceRevision={0} />);
+    render(<ResumenViajes deviceRevision={0} estado="" />);
 
     expect(
       await screen.findByText("No se pudo cargar el resumen."),

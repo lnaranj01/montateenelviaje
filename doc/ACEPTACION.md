@@ -1,6 +1,6 @@
 # Aceptación del organizador de viajes
 
-Ejecutar A-01 a A-14 en el despliegue de Vercel y registrar el resultado y la evidencia. A-15 pertenece a la funcionalidad opcional de P08.
+Ejecutar A-01 a A-15 en el despliegue de Vercel y registrar el resultado y la evidencia.
 
 Ejecución en [producción](https://montateenelviaje.vercel.app). Los registros creados para la prueba se eliminaron al finalizar.
 
@@ -20,6 +20,6 @@ Ejecución en [producción](https://montateenelviaje.vercel.app). Los registros 
 | A-12 | Confirmar la eliminación                                                | El viaje desaparece y el contador queda en 1       | Aprobada           | Medellín desapareció; contador 1 | |
 | A-13 | Cancelar una eliminación                                                | El viaje permanece en la lista                     | Aprobada           | Diálogo cerrado; Cartagena permaneció; contador 1 | |
 | A-14 | Cerrar el navegador y volver a entrar                                   | Los viajes persisten en la base de datos           | Aprobada           | Registro de prueba persistió al abrir `/viajes` en una pestaña nueva; tras limpiar, contador 0 | |
-| A-15 | (Opcional) Filtrar por Completados y ver el resumen                     | La lista y el resumen responden a los filtros      |                    |           |             |
+| A-15 | (Opcional) Filtrar por Completados y ver el resumen                     | La lista y el resumen responden a los filtros      | Aprobada | Producción: el filtro Completado mostró solo “P08 Completado” y el resumen indicó 1 viaje en el filtro; orden por inicio: 05/12, 10/12 y 20/12; resumen global 3 total, 2 planeados, 1 completado y $600.000 (suma manual de $100.000 + $200.000 + $300.000) | Los totales y el presupuesto siguen siendo globales, como define F7; registros de prueba eliminados y contador final 0 |
 
-A-15 se ejecuta únicamente después de implementar P08.
+El resumen presenta todos los viajes del dispositivo aunque la lista tenga un filtro aplicado, según el alcance F7 de [doc/PLAN_VIAJES.md](./PLAN_VIAJES.md).

@@ -10,7 +10,7 @@
 | P05 API | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (42 pruebas en 13 archivos; GET/POST 401 anónimos; CRUD autenticado y validación 422) | 2026-10-31 |
 | P06 Interfaz base y lista | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista) | 2026-10-31 |
 | P07 Formulario, editar, eliminar, completar y aceptación | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (55 pruebas en 16 archivos; flujo BD 14 OK, 0 fallas) | 2026-10-31 |
-| P08 Opcional: filtros y resumen | pendiente | | | |
+| P08 Opcional: filtros y resumen | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (60 pruebas en 18 archivos; aceptación A-15 en Vercel) | 2026-11-07 |
 
 ## Bitácora
 
@@ -119,3 +119,13 @@
 - **Pruebas automatizadas:** `npm.cmd test`: 55 pruebas en 16 archivos correctas, incluidas validación decimal/negativa, errores de API, acciones de tarjeta y teclado/foco del modal.
 - **Comandos y resultados:** `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check`: correctos.
 - **Aceptación en Vercel:** A-01 a A-14 aprobadas en [producción](https://montateenelviaje.vercel.app); resultados y evidencias en [doc/ACEPTACION.md](./ACEPTACION.md). El primer intento detectó `SELF_SIGNED_CERT_IN_CHAIN` porque faltaba `PGSSLROOTCERT` en producción. Se configuró el certificado raíz de Supabase en Vercel y se redeplegó la versión actual, manteniendo `rejectUnauthorized: true`. Se verificaron la lista, las operaciones y la persistencia; al terminar, el contador quedó en 0 y no quedaron registros de prueba. A-15 se reserva para P08.
+
+### P08 · Filtros, orden y resumen
+
+- **Archivos creados:** `FiltrosViajes`, `ResumenViajes`, el contenedor cliente de la página y sus pruebas; `doc/checkpoints/FASE_7_COMPLETADA.md`.
+- **Archivos modificados:** la página `/viajes` ahora lee `searchParams` como Promise y normaliza estado/orden antes de pasar los filtros a la lista; la lista solicita el estado y orden seleccionados, conserva el contador global y explica cuántos resultados muestra; `README.md`, `doc/ACEPTACION.md` y este registro.
+- **Interfaz:** filtros Todos/Planeado/Completado y Más reciente/Fecha de inicio, sincronizados con la URL; resumen con total, planeados, completados y suma de presupuestos en pesos. Los totales son globales por dispositivo, tal como define F7, y el resumen indica cuántos viajes corresponden al filtro actual.
+- **Aceptación en Vercel:** A-15 aprobada en [producción](https://montateenelviaje.vercel.app). Con tres viajes de prueba (dos planeados y uno completado), el filtro Completado dejó visible solo el viaje completado y el resumen indicó un viaje en el filtro; el orden por fecha de inicio mostró 05/12, 10/12 y 20/12. El resumen global mostró total 3, planeados 2, completados 1 y presupuesto $600.000, suma comprobada manualmente. Se eliminaron los tres registros de aceptación; el contador final quedó en 0.
+- **Pruebas automatizadas:** `npm.cmd test`: 60 pruebas en 18 archivos correctas. Las pruebas nuevas cubren actualización de URL, solicitud filtrada/ordenada, estado vacío y representación/error del resumen.
+- **Comandos y resultados:** `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado, Prettier enfocado y `git diff --check`: correctos.
+- **Despliegue:** la implementación quedó lista en Vercel; no se modificaron las rutas API ni la lógica de datos existente.

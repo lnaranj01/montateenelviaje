@@ -8,6 +8,7 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 - Formulario para crear y editar viajes con validación de destino, fechas y presupuesto.
 - Lista con contador, duración, estado y presupuesto presentado en pesos colombianos.
 - Completar, reactivar y eliminar viajes con confirmación.
+- Filtrar por estado, ordenar por fecha de inicio o creación y consultar el resumen de todos los viajes.
 - Persistencia de los registros en PostgreSQL. `localStorage` conserva solamente el identificador UUID del dispositivo.
 - La fecha de fin no puede ser anterior a la fecha de inicio; un viaje de un solo día sí está permitido.
 
