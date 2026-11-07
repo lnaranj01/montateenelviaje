@@ -63,6 +63,38 @@ export const esquemaPlanGuardadoConDeviceId = z
     }
   });
 
+export const esquemaDatosInicialesPlanificador = z
+  .object({
+    origen: z.string().trim().min(DESTINO_MIN).max(DESTINO_MAX).optional(),
+    destino: z.string().trim().min(DESTINO_MIN).max(DESTINO_MAX),
+    fechaInicio: z.iso.date(),
+    fechaFin: z.iso.date(),
+    presupuesto: z.coerce.number().int().min(1).max(1_000_000_000_000),
+    viajeros: z.coerce.number().int().min(1).max(4).optional(),
+    servicios: z
+      .array(z.enum(identificadoresServiciosViaje))
+      .min(1)
+      .max(5)
+      .optional(),
+  })
+  .superRefine((datos, contexto) => {
+    if (!finNoAnteriorAInicio(datos.fechaInicio, datos.fechaFin)) {
+      contexto.addIssue({
+        code: "custom",
+        message: "La fecha de salida no puede ser anterior a la de llegada.",
+        path: ["fechaFin"],
+      });
+    }
+
+    if (datos.servicios && !validarServiciosPlanViaje(datos.servicios)) {
+      contexto.addIssue({
+        code: "custom",
+        message: "Selecciona un solo servicio por categoría.",
+        path: ["servicios"],
+      });
+    }
+  });
+
 export type DeviceId = z.infer<typeof esquemaDeviceId>;
 export type IdViaje = z.infer<typeof esquemaIdViaje>;
 export type DatosViajeValidos = z.infer<typeof esquemaViaje>;
@@ -70,4 +102,7 @@ export type DatosViajeConDeviceId = z.infer<typeof esquemaViajeConDeviceId>;
 export type FiltrosViaje = z.infer<typeof esquemaFiltros>;
 export type PlanGuardadoConDeviceId = z.infer<
   typeof esquemaPlanGuardadoConDeviceId
+>;
+export type DatosInicialesPlanificador = z.infer<
+  typeof esquemaDatosInicialesPlanificador
 >;

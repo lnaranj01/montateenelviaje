@@ -1,5 +1,6 @@
 import { consultar } from "@/lib/db/conexion";
 import { duracionDias } from "@/lib/reglas/fechas";
+import { ErrorDeNegocio } from "@/lib/reglas/errores";
 import { calcularServiciosPlanViaje } from "@/lib/reglas/planViaje";
 import type { DatosPlanGuardado, PlanGuardado } from "@/lib/datos/tipos";
 
@@ -83,4 +84,20 @@ export async function crearPlanGuardado(
   }
 
   return mapearPlanGuardado(fila);
+}
+
+export async function eliminarPlanGuardado(
+  deviceId: string,
+  id: string,
+): Promise<void> {
+  const [fila] = await consultar<{ id: string }>(
+    `DELETE FROM public.planes_guardados
+     WHERE device_id = $1 AND id = $2
+     RETURNING id`,
+    [deviceId, id],
+  );
+
+  if (!fila) {
+    throw new ErrorDeNegocio("PLAN_NO_ENCONTRADO");
+  }
 }

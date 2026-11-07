@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  startTransition,
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { startTransition, useEffect, useState, type FormEvent } from "react";
 import { Aviso } from "@/components/ui/Aviso";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
@@ -16,7 +11,7 @@ import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { formatearPesos } from "@/lib/formato";
 import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 import { duracionDias, finNoAnteriorAInicio } from "@/lib/reglas/fechas";
-import { esquemaViaje } from "@/lib/validacion/esquemas";
+import { esquemaDatosInicialesPlanificador } from "@/lib/validacion/esquemas";
 import {
   calcularServiciosPlanViaje,
   catalogoServiciosViaje,
@@ -47,6 +42,7 @@ export function PlanificadorViajeDemo() {
   const [presupuesto, setPresupuesto] = useState("");
   const [selecciones, setSelecciones] = useState<Record<string, string>>({});
   const [errorFechas, setErrorFechas] = useState("");
+  const [errorOrigen, setErrorOrigen] = useState("");
   const [errorPresupuesto, setErrorPresupuesto] = useState("");
   const [guardandoPlan, setGuardandoPlan] = useState(false);
   const [mensajeGuardado, setMensajeGuardado] = useState("");
@@ -92,15 +88,11 @@ export function PlanificadorViajeDemo() {
       return;
     }
 
-    const resultado = esquemaViaje.safeParse(datosDesconocidos);
+    const resultado =
+      esquemaDatosInicialesPlanificador.safeParse(datosDesconocidos);
     if (
       !resultado.success ||
-      resultado.data.presupuesto < 1 ||
-      resultado.data.presupuesto > MAXIMO_PRESUPUESTO_COP ||
-      !finNoAnteriorAInicio(
-        resultado.data.fechaInicio,
-        resultado.data.fechaFin,
-      )
+      resultado.data.presupuesto > MAXIMO_PRESUPUESTO_COP
     ) {
       mostrarError(
         "Los datos del viaje no son válidos. Ingresa los datos nuevamente.",
@@ -109,11 +101,26 @@ export function PlanificadorViajeDemo() {
     }
 
     startTransition(() => {
+      setOrigen(resultado.data.origen ?? "");
       setDestino(resultado.data.destino);
       setFechaInicio(resultado.data.fechaInicio);
       setFechaFin(resultado.data.fechaFin);
       setPresupuesto(String(resultado.data.presupuesto));
-      setDatosPrecargados(true);
+      setViajeros(String(resultado.data.viajeros ?? 2));
+      setDatosPrecargados(resultado.data.servicios === undefined);
+      if (resultado.data.servicios) {
+        setSelecciones(
+          Object.fromEntries(
+            resultado.data.servicios.map((id) => {
+              const oferta = catalogoServiciosViaje.find(
+                (candidata) => candidata.id === id,
+              );
+              return [oferta?.categoria ?? "", id];
+            }),
+          ),
+        );
+        setPaso("opciones");
+      }
     });
   }, []);
 
@@ -161,7 +168,13 @@ export function PlanificadorViajeDemo() {
   function buscar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErrorFechas("");
+    setErrorOrigen("");
     setErrorPresupuesto("");
+
+    if (!origen.trim()) {
+      setErrorOrigen("Ingresa la ciudad desde donde sales.");
+      return;
+    }
 
     if (!finNoAnteriorAInicio(fechaInicio, fechaFin)) {
       setErrorFechas(
@@ -357,10 +370,16 @@ export function PlanificadorViajeDemo() {
                   <Campo
                     autoComplete="address-level2"
                     etiqueta="Ciudad o aeropuerto de origen"
+                    error={errorOrigen || undefined}
                     name="origen"
-                    onChange={(evento) => setOrigen(evento.target.value)}
+                    onChange={(evento) => {
+                      setOrigen(evento.target.value);
+                      setErrorOrigen("");
+                    }}
+                    minLength={2}
                     placeholder="Ej. Bogotá"
                     required
+                    maxLength={160}
                     value={origen}
                   />
                   <Campo

@@ -195,9 +195,7 @@ describe("PlanificadorViajeDemo", () => {
     expect(screen.getByLabelText("Ciudad o aeropuerto de destino")).toHaveValue(
       "Cartagena",
     );
-    expect(screen.getByLabelText("Fecha de llegada")).toHaveValue(
-      "2026-12-10",
-    );
+    expect(screen.getByLabelText("Fecha de llegada")).toHaveValue("2026-12-10");
     expect(screen.getByLabelText("Fecha de salida")).toHaveValue("2026-12-12");
     expect(screen.getByLabelText("Presupuesto total (COP)")).toHaveValue(
       2000000,
@@ -220,6 +218,36 @@ describe("PlanificadorViajeDemo", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
     expect(screen.getAllByText("Bogotá").length).toBeGreaterThan(0);
+  });
+
+  it("vuelve a abrir un plan guardado con sus servicios seleccionados", async () => {
+    sessionStorage.setItem(
+      CLAVE_DATOS_INICIALES_PLANIFICADOR,
+      JSON.stringify({
+        origen: "Bogotá",
+        destino: "Cartagena",
+        fechaInicio: "2026-12-10",
+        fechaFin: "2026-12-12",
+        presupuesto: 2_000_000,
+        viajeros: 2,
+        servicios: ["vuelo-economico"],
+      }),
+    );
+
+    render(<PlanificadorViajeDemo />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Servicios de ejemplo para Cartagena",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Quitar Vuelo nacional de muestra",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
+    expect(screen.getAllByText(/Bogotá/).length).toBeGreaterThan(0);
   });
 
   it("guarda los servicios elegidos para mostrarlos en mis viajes", async () => {

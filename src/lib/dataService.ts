@@ -157,6 +157,7 @@ export {
 } from "@/lib/datos/viajes";
 export {
   crearPlanGuardado,
+  eliminarPlanGuardado,
   listarPlanesGuardados,
 } from "@/lib/datos/planesGuardados";
 export type {
