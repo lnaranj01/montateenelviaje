@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Aviso } from "@/components/ui/Aviso";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
@@ -15,6 +16,7 @@ import { ErrorDeNegocio } from "@/lib/reglas/errores";
 import { esFechaValida } from "@/lib/reglas/fechas";
 import { validarViaje } from "@/lib/reglas/viaje";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 
 interface ValoresFormulario {
   destino: string;
@@ -121,6 +123,7 @@ export function FormularioViaje({
   viaje,
 }: FormularioViajeProps) {
   const deviceId = useDeviceId();
+  const router = useRouter();
   const [valores, setValores] = useState(() => valoresIniciales(viaje));
   const [tocados, setTocados] = useState<CamposTocados>({});
   const [intentoGuardar, setIntentoGuardar] = useState(false);
@@ -186,7 +189,33 @@ export function FormularioViaje({
         );
       }
 
-      alGuardar(esEdicion ? "editar" : "crear");
+      if (!esEdicion) {
+        try {
+          sessionStorage.setItem(
+            CLAVE_DATOS_INICIALES_PLANIFICADOR,
+            JSON.stringify(datos),
+          );
+        } catch (error) {
+          if (!(error instanceof DOMException)) {
+            throw error;
+          }
+
+          alGuardar("crear");
+          setMensajeError(
+            "El viaje se guardó, pero el navegador no pudo preparar los servicios. Abre «Armar viaje según presupuesto» para continuar.",
+          );
+          setValores(valoresVacios);
+          setTocados({});
+          setIntentoGuardar(false);
+          return;
+        }
+
+        alGuardar("crear");
+        router.push("/demo-compras");
+      } else {
+        alGuardar("editar");
+      }
+
       if (!esEdicion) {
         setValores(valoresVacios);
         setTocados({});
@@ -266,7 +295,7 @@ export function FormularioViaje({
           disabled={!deviceId}
           type="submit"
         >
-          {esEdicion ? "Actualizar viaje" : "Guardar viaje"}
+          {esEdicion ? "Actualizar viaje" : "Guardar y ver servicios"}
         </Boton>
         {esEdicion && (
           <Boton

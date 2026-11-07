@@ -2,14 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 import { Aviso } from "@/components/ui/Aviso";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
 import { Tarjeta } from "@/components/ui/Tarjeta";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { formatearPesos } from "@/lib/formato";
+import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 import { duracionDias, finNoAnteriorAInicio } from "@/lib/reglas/fechas";
+import { esquemaViaje } from "@/lib/validacion/esquemas";
 import {
   calcularServiciosPlanViaje,
   catalogoServiciosViaje,
@@ -45,6 +52,72 @@ export function PlanificadorViajeDemo() {
   const [mensajeGuardado, setMensajeGuardado] = useState("");
   const [errorGuardado, setErrorGuardado] = useState("");
   const [requiereSesion, setRequiereSesion] = useState(false);
+  const [viajePrecargado, setViajePrecargado] = useState(false);
+  const [errorPrecarga, setErrorPrecarga] = useState("");
+
+  useEffect(() => {
+    function mostrarError(mensaje: string) {
+      startTransition(() => setErrorPrecarga(mensaje));
+    }
+
+    let datosGuardados: string | null;
+    try {
+      datosGuardados = sessionStorage.getItem(
+        CLAVE_DATOS_INICIALES_PLANIFICADOR,
+      );
+      if (datosGuardados) {
+        sessionStorage.removeItem(CLAVE_DATOS_INICIALES_PLANIFICADOR);
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException)) {
+        throw error;
+      }
+      mostrarError(
+        "No se pudieron cargar los datos del viaje. Puedes ingresarlos manualmente.",
+      );
+      return;
+    }
+
+    if (!datosGuardados) {
+      return;
+    }
+
+    let datosDesconocidos: unknown;
+    try {
+      datosDesconocidos = JSON.parse(datosGuardados);
+    } catch {
+      mostrarError(
+        "Los datos guardados no se pudieron leer. Ingresa los datos del viaje nuevamente.",
+      );
+      return;
+    }
+
+    const resultado = esquemaViaje.safeParse(datosDesconocidos);
+    if (
+      !resultado.success ||
+      resultado.data.presupuesto < 1 ||
+      resultado.data.presupuesto > MAXIMO_PRESUPUESTO_COP ||
+      !finNoAnteriorAInicio(
+        resultado.data.fechaInicio,
+        resultado.data.fechaFin,
+      )
+    ) {
+      mostrarError(
+        "Los datos del viaje no son válidos. Ingresa los datos nuevamente.",
+      );
+      return;
+    }
+
+    startTransition(() => {
+      setOrigen("Por definir");
+      setDestino(resultado.data.destino);
+      setFechaInicio(resultado.data.fechaInicio);
+      setFechaFin(resultado.data.fechaFin);
+      setPresupuesto(String(resultado.data.presupuesto));
+      setPaso("opciones");
+      setViajePrecargado(true);
+    });
+  }, []);
 
   const dias =
     fechaInicio && fechaFin && finNoAnteriorAInicio(fechaInicio, fechaFin)
@@ -216,6 +289,7 @@ export function PlanificadorViajeDemo() {
             los servicios, precios y totales son ficticios. No hay
             disponibilidad real, reservas ni cobros.
           </Aviso>
+          {errorPrecarga && <Aviso tipo="error">{errorPrecarga}</Aviso>}
 
           <header className="relative overflow-hidden rounded-3xl border border-cyan-300/15 bg-gradient-to-br from-[#0d263b] via-[#0a1c2e] to-[#0b1726] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.28)] sm:p-10">
             <div
@@ -361,6 +435,14 @@ export function PlanificadorViajeDemo() {
                 className="mt-6 grid gap-6"
                 aria-labelledby="titulo-servicios"
               >
+                {viajePrecargado && (
+                  <Aviso tipo="informacion">
+                    Cargamos el destino, las fechas y el presupuesto que
+                    guardaste. Los precios se ajustan a ese presupuesto; el
+                    cálculo comienza con 2 viajeros. El origen está por definir
+                    y puedes cambiarlo en los datos del viaje.
+                  </Aviso>
+                )}
                 <div>
                   <h2
                     className="text-2xl font-extrabold tracking-tight text-white"

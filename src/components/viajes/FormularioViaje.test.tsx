@@ -4,8 +4,14 @@ import { FormularioViaje } from "@/components/viajes/FormularioViaje";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import type { Viaje } from "@/lib/datos/tipos";
 
+const navegacion = vi.hoisted(() => ({ push: vi.fn() }));
+
 vi.mock("@/lib/hooks/useDeviceId", () => ({
   useDeviceId: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => navegacion,
 }));
 
 const viajeDemo: Viaje = {
@@ -37,6 +43,7 @@ function renderFormulario(viaje: Viaje | null = null) {
 describe("FormularioViaje", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    sessionStorage.clear();
     vi.clearAllMocks();
   });
 
@@ -68,7 +75,9 @@ describe("FormularioViaje", () => {
       "true",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Guardar viaje" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guardar y ver servicios" }),
+    );
     expect(fetchSimulado).not.toHaveBeenCalled();
   });
 
@@ -117,9 +126,21 @@ describe("FormularioViaje", () => {
     fireEvent.change(screen.getByLabelText("Presupuesto (COP)"), {
       target: { value: "1500000" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Guardar viaje" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guardar y ver servicios" }),
+    );
 
     await waitFor(() => expect(alGuardar).toHaveBeenCalledWith("crear"));
+    expect(navegacion.push).toHaveBeenCalledWith("/demo-compras");
+    expect(sessionStorage.getItem("organizador-planificador-datos-iniciales"))
+      .toBe(
+        JSON.stringify({
+          destino: "Cartagena",
+          fechaInicio: "2026-12-10",
+          fechaFin: "2026-12-12",
+          presupuesto: 1500000,
+        }),
+      );
     expect(fetchSimulado).toHaveBeenCalledWith(
       "/api/viajes",
       expect.objectContaining({
@@ -162,6 +183,44 @@ describe("FormularioViaje", () => {
         }),
       }),
     );
+  });
+
+  it("no navega al planificador si falla el guardado del viaje", async () => {
+    vi.mocked(useDeviceId).mockReturnValue("device-test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            ok: false,
+            error: { mensaje: "No se pudo guardar el viaje." },
+          }),
+          { status: 500 },
+        ),
+      ),
+    );
+    renderFormulario();
+
+    fireEvent.change(screen.getByLabelText("Destino"), {
+      target: { value: "Cartagena" },
+    });
+    fireEvent.change(screen.getByLabelText("Fecha de inicio"), {
+      target: { value: "2026-12-10" },
+    });
+    fireEvent.change(screen.getByLabelText("Fecha de fin"), {
+      target: { value: "2026-12-12" },
+    });
+    fireEvent.change(screen.getByLabelText("Presupuesto (COP)"), {
+      target: { value: "1500000" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guardar y ver servicios" }),
+    );
+
+    expect(await screen.findByText("No se pudo guardar el viaje.")).toBeInTheDocument();
+    expect(navegacion.push).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem("organizador-planificador-datos-iniciales"))
+      .toBeNull();
   });
 
   it("muestra el mensaje de error del servidor", async () => {

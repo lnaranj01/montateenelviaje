@@ -83,7 +83,8 @@ export function PaginaViajesCliente({
               {viajeEnEdicion ? "Editar viaje" : "Agregar un viaje"}
             </h2>
             <p className="mt-1 text-sm text-texto-suave">
-              Completa los datos de tu próximo destino.
+              Completa los datos de tu próximo destino y continúa a los
+              servicios de ejemplo ajustados a tu presupuesto.
             </p>
           </div>
           <Tarjeta>

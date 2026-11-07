@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlanificadorViajeDemo } from "@/components/viajes/PlanificadorViajeDemo";
+import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 
 const navegacion = vi.hoisted(() => ({ push: vi.fn() }));
 
@@ -21,10 +22,15 @@ vi.mock("next/navigation", () => ({
 }));
 
 afterEach(() => {
+  sessionStorage.clear();
   vi.restoreAllMocks();
 });
 
-function completarBusqueda(presupuesto: string) {
+function completarBusqueda(
+  presupuesto: string,
+  fechaLlegada = "2026-12-10",
+  fechaSalida = "2026-12-12",
+) {
   fireEvent.change(screen.getByLabelText("Ciudad o aeropuerto de origen"), {
     target: { value: "Bogotá" },
   });
@@ -32,10 +38,10 @@ function completarBusqueda(presupuesto: string) {
     target: { value: "Cartagena" },
   });
   fireEvent.change(screen.getByLabelText("Fecha de llegada"), {
-    target: { value: "2026-12-10" },
+    target: { value: fechaLlegada },
   });
   fireEvent.change(screen.getByLabelText("Fecha de salida"), {
-    target: { value: "2026-12-12" },
+    target: { value: fechaSalida },
   });
   fireEvent.change(screen.getByLabelText("Presupuesto total (COP)"), {
     target: { value: presupuesto },
@@ -145,6 +151,54 @@ describe("PlanificadorViajeDemo", () => {
     expect(
       screen.getByText("1 escala (ejemplo; ciudad no confirmada)"),
     ).toBeInTheDocument();
+  });
+
+  it("muestra precios distintos de cero para el viaje reportado", () => {
+    render(<PlanificadorViajeDemo />);
+    completarBusqueda("5000000", "2026-11-08", "2026-11-30");
+
+    [
+      "$ 196.000 COP",
+      "$ 340.000 COP",
+      "$ 1.452.000 COP",
+      "$ 2.288.000 COP",
+      "$ 920.000 COP",
+      "$ 1.564.000 COP",
+      "$ 42.000 COP",
+      "$ 84.000 COP",
+      "$ 30.000 COP",
+      "$ 72.000 COP",
+    ].forEach((precio) => {
+      expect(screen.getByText(precio)).toBeInTheDocument();
+    });
+  });
+
+  it("abre los servicios con el viaje guardado y adapta los precios", async () => {
+    sessionStorage.setItem(
+      CLAVE_DATOS_INICIALES_PLANIFICADOR,
+      JSON.stringify({
+        destino: "Cartagena",
+        fechaInicio: "2026-12-10",
+        fechaFin: "2026-12-12",
+        presupuesto: 2000000,
+      }),
+    );
+
+    render(<PlanificadorViajeDemo />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Servicios de ejemplo para Cartagena",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/\$ 2\.000\.000 COP/).length).toBeGreaterThan(0);
+    expect(screen.getByText("$ 600.000 COP")).toBeInTheDocument();
+    expect(
+      screen.getByText(/el cálculo comienza con 2 viajeros/i),
+    ).toBeInTheDocument();
+    expect(
+      sessionStorage.getItem(CLAVE_DATOS_INICIALES_PLANIFICADOR),
+    ).toBeNull();
   });
 
   it("guarda los servicios elegidos para mostrarlos en mis viajes", async () => {
