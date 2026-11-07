@@ -33,7 +33,7 @@ function completarBusqueda(presupuesto: string) {
   });
   fireEvent.submit(
     screen
-      .getByRole("button", { name: "Ver servicios de ejemplo" })
+      .getByRole("button", { name: "Ver mis opciones de viaje" })
       .closest("form")!,
   );
 }
@@ -63,9 +63,7 @@ describe("PlanificadorViajeDemo", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Revisar mi plan" }));
-    expect(screen.getByText(/Total de ejemplo:/)).toHaveTextContent(
-      /1\.580\.000.*COP/,
-    );
+    expect(screen.getByText(/^Total:/)).toHaveTextContent(/1\.580\.000.*COP/);
     expect(screen.getByText(/Quedarían/)).toHaveTextContent(/420\.000.*COP/);
 
     fireEvent.click(
@@ -101,9 +99,7 @@ describe("PlanificadorViajeDemo", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Revisar mi plan" }));
 
-    expect(screen.getByText(/Total de ejemplo:/)).toHaveTextContent(
-      /1\.398\.000.*COP/,
-    );
+    expect(screen.getByText(/^Total:/)).toHaveTextContent(/1\.398\.000.*COP/);
     expect(screen.getByText(/Excede el presupuesto por/)).toHaveTextContent(
       /398\.000.*COP/,
     );
@@ -122,7 +118,7 @@ describe("PlanificadorViajeDemo", () => {
 
     expect(screen.getByText("$ 15.000.000 COP")).toBeInTheDocument();
     expect(screen.getByText("$ 10.000.000 COP")).toBeInTheDocument();
-    expect(screen.getByText("Seleccionado:").parentElement).toHaveTextContent(
+    expect(screen.getByLabelText("Total seleccionado")).toHaveTextContent(
       /25\.000\.000.*COP/,
     );
   });
@@ -143,7 +139,7 @@ describe("PlanificadorViajeDemo", () => {
     });
     fireEvent.submit(
       screen
-        .getByRole("button", { name: "Ver servicios de ejemplo" })
+        .getByRole("button", { name: "Ver mis opciones de viaje" })
         .closest("form")!,
     );
 
