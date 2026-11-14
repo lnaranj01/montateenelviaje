@@ -189,3 +189,8 @@
 - **Diagnóstico en producción:** Vercel no tiene las variables de Amadeus configuradas. El mensaje de error ahora identifica ambas variables y pide configurar el entorno del servidor; no se pueden obtener ofertas reales hasta agregar credenciales de Amadeus.
 - **Verificación:** `npm.cmd test`: 97 pruebas en 27 archivos; `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check` pasan. ESLint completo todavía reporta un error preexistente en `src/app/login/page.tsx:56` (`react-hooks/set-state-in-effect`); los archivos de la integración pasan el lint enfocado.
 - **Pendiente de despliegue:** se necesitan credenciales de producción de Amadeus para confirmar la cobertura y disponibilidad de vuelos colombianos en vivo. Las credenciales de pruebas no garantizan inventario colombiano.
+
+### Etiqueta de ciudad de salida
+
+- **Interfaz:** el campo de origen ahora se etiqueta únicamente como “Ciudad de salida”.
+- **Verificación:** `npm.cmd test`: 97 pruebas en 27 archivos; `npm.cmd run build`, `npm.cmd run type-check` y ESLint enfocado correctos.

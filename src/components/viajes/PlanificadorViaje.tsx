@@ -610,7 +610,7 @@ export function PlanificadorViaje() {
                 <div className="grid gap-5 sm:grid-cols-2">
                   <AutocompletarAeropuerto
                     id="origen"
-                    etiqueta="Ciudad y aeropuerto de salida"
+                    etiqueta="Ciudad de salida"
                     error={errorOrigen || undefined}
                     aeropuertoSeleccionado={aeropuertoOrigen}
                     alCambiar={(valor, aeropuerto) => {

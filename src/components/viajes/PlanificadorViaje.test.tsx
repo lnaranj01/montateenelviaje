@@ -195,7 +195,7 @@ async function completarBusqueda(
   fechaIda = "2026-12-10",
   fechaRegreso = "2026-12-12",
 ) {
-  await seleccionarAeropuerto("Ciudad y aeropuerto de salida", "Bogotá", "BOG");
+  await seleccionarAeropuerto("Ciudad de salida", "Bogotá", "BOG");
   await seleccionarAeropuerto(
     "Ciudad y aeropuerto de llegada",
     destino,
@@ -302,7 +302,7 @@ describe("PlanificadorViaje", () => {
 
   it("bloquea la consulta si no se selecciona un aeropuerto de llegada", async () => {
     render(<PlanificadorViaje />);
-    await seleccionarAeropuerto("Ciudad y aeropuerto de salida", "Bogotá", "BOG");
+    await seleccionarAeropuerto("Ciudad de salida", "Bogotá", "BOG");
     fireEvent.submit(
       screen.getByRole("button", { name: "Consultar vuelos" }).closest("form")!,
     );
@@ -332,7 +332,7 @@ describe("PlanificadorViaje", () => {
       ),
     );
     render(<PlanificadorViaje />);
-    fireEvent.change(screen.getByLabelText("Ciudad y aeropuerto de salida"), {
+    fireEvent.change(screen.getByLabelText("Ciudad de salida"), {
       target: { value: "Santa Marta" },
     });
 
@@ -341,7 +341,7 @@ describe("PlanificadorViaje", () => {
 
   it("rechaza fechas en las que el regreso es anterior a la ida", async () => {
     render(<PlanificadorViaje />);
-    await seleccionarAeropuerto("Ciudad y aeropuerto de salida", "Bogotá", "BOG");
+    await seleccionarAeropuerto("Ciudad de salida", "Bogotá", "BOG");
     await seleccionarAeropuerto(
       "Ciudad y aeropuerto de llegada",
       "Cartagena",
