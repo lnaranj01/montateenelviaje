@@ -53,11 +53,9 @@ src/
 │   │   ├── auth/{recuperar,restablecer}/route.ts
 │   │   ├── viajes/{route.ts,sesion/route.ts,resumen/route.ts}
 │   │   ├── viajes/[id]/{route.ts,completar/route.ts}
-│   │   ├── correo/prueba/route.ts
 │   │   └── health/route.ts
 │   ├── cuenta/contrasena/page.tsx
 │   ├── login/page.tsx
-│   ├── prueba-correo/{page.tsx, formulario.tsx}
 │   ├── recuperar-contrasena/page.tsx
 │   ├── registro/page.tsx
 │   ├── restablecer-contrasena/{page.tsx, formulario.tsx}

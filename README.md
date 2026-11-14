@@ -43,7 +43,7 @@ Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuel
 
    Completa una sola de las variables de conexión PostgreSQL; no dejes una variable prioritaria vacía si vas a usar otra alternativa. También se aceptan `NEXT_PUBLIC_MONTATEENELVIAJESUPABASE_URL` y `NEXT_PUBLIC_MONTATEENELVIAJESUPABASE_PUBLISHABLE_KEY` para Supabase; para PostgreSQL se puede usar `POSTGRES_URL` o `POSTGRES_PRISMA_URL` en lugar de `POSTGRES_URL_NON_POOLING`. Los scripts de base de datos también aceptan `POSTGRES_HOST`, `POSTGRES_DATABASE`, `POSTGRES_USER` y `POSTGRES_PASSWORD`. `PGSSLROOTCERT` puede apuntar al certificado raíz de la base de datos; la conexión mantiene la validación TLS.
 
-   El panel administrativo requiere `SUPABASE_SERVICE_ROLE_KEY`. El envío de correos es opcional y utiliza `RESEND_API_KEY` y `RESEND_FROM`. El script de desarrollo puede sincronizar `VERCEL_OIDC_TOKEN` desde Vercel; no agregues tokens ni claves al repositorio.
+   El panel administrativo requiere `SUPABASE_SERVICE_ROLE_KEY`. La recuperación por correo necesita el conector de Resend (o `RESEND_API_KEY`) y `RESEND_FROM` con un remitente verificado en Resend; no se usa el remitente de prueba `onboarding@resend.dev`. El script de desarrollo puede sincronizar `VERCEL_OIDC_TOKEN` desde Vercel; no agregues tokens ni claves al repositorio.
 
 3. Aplica las migraciones pendientes de la base de datos y ejecuta la aplicación. La migración `20261107000000_planes_guardados.sql` crea la tabla de planes guardados:
 

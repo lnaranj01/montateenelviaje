@@ -156,3 +156,11 @@
 - **Acciones de planes guardados:** cada tarjeta permite volver al planificador con origen, destino, fechas, presupuesto, viajeros y servicios seleccionados restaurados, o eliminar el plan tras confirmación. La nueva ruta DELETE exige sesión, valida UUID y `device_id`, y elimina únicamente el registro que pertenece a ese dispositivo.
 - **Verificación de reapertura y eliminación:** pruebas de interfaz/API cubren reabrir el plan con sus selecciones, cancelar o confirmar su eliminación, rechazo sin sesión, identificadores inválidos y planes no pertenecientes al dispositivo. `npm.cmd test`: 85 pruebas en 23 archivos; `npm.cmd run type-check`, ESLint enfocado y `npm.cmd run build` correctos.
 - **Compras reales:** estos registros son planes de ejemplo; no representan compras ni reservas y no procesan pagos.
+
+### Recuperación de contraseña: correo real y remitente verificado
+
+- **Seguridad:** la contraseña actual no se puede recuperar ni enviar por correo. El flujo existente envía un enlace de un solo uso para definir una contraseña nueva.
+- **Corrección:** se retiraron la página y la API de correo de prueba. `enviarCorreo` ahora exige `RESEND_FROM` con un remitente verificado; se eliminó el fallback al remitente de prueba `onboarding@resend.dev`. Si falla el proveedor, la API mantiene la respuesta genérica para no revelar si una cuenta existe y registra un diagnóstico sin datos de la cuenta ni del token.
+- **Documentación:** README y la guía de Resend explican el remitente requerido y cómo probar la recuperación real.
+- **Configuración pendiente en Vercel:** agregar la variable `RESEND_FROM` con un remitente de un dominio verificado en Resend en los entornos desplegados. El entorno local no tiene definida esa variable.
+- **Verificación:** las pruebas confirman que el mensaje es el enlace de recuperación, no un correo de prueba, y que el remitente verificado es obligatorio. `npm.cmd test`: 87 pruebas en 23 archivos; `npm.cmd run build`, `npm.cmd run type-check` y ESLint enfocado correctos. El build ya no incluye las rutas de correo de prueba.

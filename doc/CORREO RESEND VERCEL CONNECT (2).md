@@ -9,6 +9,8 @@ El proyecto gana una función de recuperación de contraseña:
 
 El correo se envía con Resend a través del conector que el proyecto ya tiene en Vercel. El trabajo se hace con dos prompts en Copilot: el primero conecta el proyecto con Vercel y prueba el envío de un correo; el segundo construye la recuperación de contraseña.
 
+> **Flujo actual:** la recuperación envía un enlace de un solo uso para crear una contraseña nueva. No se envía la contraseña existente: por seguridad no se puede recuperar ni revelar. Las rutas y la página de correo de prueba fueron retiradas. Configura `RESEND_FROM` en Vercel con un remitente verificado de Resend; no se usa el remitente de prueba `onboarding@resend.dev`.
+
 ## Paso 1. Copiar el código del conector
 
 En Vercel: proyecto → **Connect** → conector de Resend. En la sección **Token APIs** aparece un bloque parecido a este:
@@ -21,7 +23,7 @@ getToken('resend/proyecto-84459365', { subject: { type: "app" } });
 
 Copiar el bloque del proyecto propio. El texto entre comillas cambia en cada proyecto, así que el ejemplo de arriba no sirve para otro.
 
-## Paso 2. Prompt 1: conexión con Vercel y prueba de correo
+## Paso 2. Prompt 1: conexión con Vercel y remitente de recuperación
 
 1. En VS Code, abrir Copilot Chat y seleccionar el modo **Agent**.
 2. Copiar el prompt 1 y pegarlo en el chat.
@@ -48,7 +50,7 @@ Contexto del proyecto
 - Los correos se enviarán con Resend. La API key la entrega Vercel Connect con `getToken`, usando el identificador del conector que aparece en el código de arriba. En local, `getToken` necesita la variable `VERCEL_OIDC_TOKEN` en `.env.local`.
 
 Objetivo
-Conectar el proyecto con Vercel Connect y comprobar el envío de correos con una página de prueba.
+Conectar el proyecto con Vercel Connect y configurar el remitente verificado para los correos de recuperación. No crear una página ni una ruta de correo de prueba.
 
 Antes de empezar
 - Si el bloque del conector todavía dice "PEGA AQUÍ EL CÓDIGO", detente y pídeme el código del conector.
@@ -68,14 +70,10 @@ Tareas (los comandos los ejecutas tú en la terminal)
 6. Ejecuta `node scripts/tokenVercel.mjs` y confirma que `.env.local` conserva las variables de Supabase y ahora tiene `VERCEL_OIDC_TOKEN`.
 7. Crea `lib/correo.ts` con:
    - `obtenerClaveResend()`: devuelve `process.env.RESEND_API_KEY` si existe; si no, el resultado de `getToken` con el identificador y las opciones del código del conector.
-   - `enviarCorreo({ para, asunto, html })`: crea el cliente con `new Resend(clave)` y envía desde `process.env.RESEND_FROM` o, si no existe, desde `onboarding@resend.dev`. Devuelve `{ ok: true, id }` o `{ ok: false, error }` con un mensaje legible, sin lanzar excepciones.
-8. Crea `app/api/correo/prueba/route.ts` con POST que:
-   - responda 404 si `process.env.NODE_ENV === 'production'`;
-   - valide con Zod `para` (email);
-   - envíe con `enviarCorreo` un correo con asunto "Prueba de correo" y un HTML sencillo;
-   - responda JSON con 200, 400 o 500 según el caso, incluyendo el mensaje de error cuando falle.
-9. Crea `app/prueba-correo/page.tsx`: en producción llama a `notFound()`; en desarrollo muestra un campo de email y un botón "Enviar prueba" que llama a la ruta anterior y muestra "Correo enviado" o el mensaje de error.
-10. Si existe `middleware.ts`, agrega `/prueba-correo` y `/api/correo/prueba` a las rutas públicas.
+   - `enviarCorreo({ para, asunto, html })`: requiere `RESEND_FROM` con un remitente verificado, usa ese remitente sin fallback a `onboarding@resend.dev` y devuelve `{ ok: true, id }` o `{ ok: false, error }`.
+8. No crear una ruta, página ni botón para enviar correos de prueba. La ruta de recuperación debe enviar exclusivamente el enlace de un solo uso de `plantillaRecuperacion`.
+9. No incluir la contraseña actual en el correo. Supabase Auth no permite recuperarla; el usuario establece una nueva desde `/restablecer-contrasena`.
+10. Configura `RESEND_FROM` en los entornos de Vercel que despliegan la aplicación, usando el remitente verificado del dominio del proyecto.
 11. Verifica que `.gitignore` incluya `.env*.local` y `.vercel`.
 
 Restricciones
@@ -90,18 +88,14 @@ Restricciones
 
 Al terminar
 - Lista los archivos creados y modificados.
-- Dime que ejecute `npm run dev` y abra `http://localhost:3000/prueba-correo`.
+- Indica que la verificación del correo se hace solicitando una recuperación real y usando el enlace recibido; nunca se envía una contraseña.
 ```
 
-## Paso 3. Probar el correo
+## Paso 3. Configurar el remitente de recuperación
 
-1. Ejecutar `npm run dev` y abrir `http://localhost:3000/prueba-correo`.
-2. Escribir un correo y pulsar **Enviar prueba**.
-3. La página debe mostrar "Correo enviado" y el mensaje debe llegar a la bandeja.
-
-Mientras el remitente sea el de prueba de Resend (`onboarding@resend.dev`), el correo solo llega a la dirección dueña de la cuenta de Resend con la que se creó el conector. La prueba se hace con esa dirección.
-
-No se avanza al prompt 2 hasta que este paso funcione.
+1. En Resend, verifica un dominio remitente autorizado.
+2. Agrega la variable `RESEND_FROM` en los entornos de Vercel donde se despliega la aplicación. No pegues el valor en el repositorio ni en el chat.
+3. Despliega y prueba **Recuperar contraseña** con una cuenta propia. El correo debe incluir el enlace de un solo uso para crear una nueva contraseña, nunca la contraseña anterior.
 
 ## Paso 4. Prompt 2: recuperación de contraseña
 
@@ -164,7 +158,7 @@ Copilot deja el archivo `supabase/restablecimientos_contrasena.sql`. En Supabase
 2. En el login, entrar a "¿Olvidaste tu contraseña?" y escribir el correo de un usuario registrado. Con el remitente de prueba de Resend, debe ser la dirección dueña de la cuenta de Resend.
 3. Abrir el enlace que llega al correo, escribir la nueva contraseña e iniciar sesión con ella.
 
-Al hacer push, Vercel despliega y la recuperación funciona en la versión publicada sin configuración adicional. La página `/prueba-correo` no existe en la versión publicada: solo funciona en local.
+Al hacer push, Vercel despliega. La recuperación requiere que `RESEND_FROM` identifique un remitente verificado de Resend en Vercel.
 
 Casos que deben fallar:
 
@@ -184,6 +178,6 @@ Casos que deben fallar:
 | Supabase dejó de conectar | Copiar el contenido de `.env.respaldo.local` en `.env.local` |
 | Copilot creó un proyecto nuevo en Vercel | Pedirle que borre la carpeta `.vercel` y enlace el proyecto existente; eliminar el proyecto sobrante en el panel de Vercel |
 | La prueba dice que solo se permiten correos a la dirección propia | Usar el correo dueño de la cuenta de Resend |
-| La prueba dice "Correo enviado" pero no llega | Revisar spam |
-| `/prueba-correo` o `/recuperar-contrasena` manda al login | Pedirle a Copilot que agregue esa ruta a las rutas públicas |
+| No llega el enlace de recuperación | Verificar en Resend que el dominio remitente esté verificado, que `RESEND_FROM` esté configurado en Vercel y revisar spam y los registros de Resend |
+| `/recuperar-contrasena` manda al login | Revisar la configuración de rutas públicas en `src/proxy.ts` |
 | El enlace del correo pide iniciar sesión en Vercel | Se probó en un despliegue de Preview. Probar en local o en la versión de producción |
