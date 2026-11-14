@@ -30,7 +30,7 @@ const plan = {
     {
       id: "vuelo-economico",
       categoria: "Vuelos",
-      nombre: "Vuelo nacional de muestra",
+      nombre: "Vuelo sin escalas estimado",
       descripcion: "Ejemplo de vuelo ida y vuelta por viajero.",
       proporcionPresupuestoDiario: 0.9,
       unidad: "viajero",

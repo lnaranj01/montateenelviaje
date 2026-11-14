@@ -22,7 +22,7 @@ export interface ServicioCatalogoViaje {
   descripcion: string;
   proporcionPresupuestoDiario: number;
   unidad: UnidadServicioViaje;
-  numeroEscalas?: 0 | 1;
+  numeroEscalas?: number;
 }
 
 export interface ServicioPlanViaje extends ServicioCatalogoViaje {
@@ -40,8 +40,9 @@ export const catalogoServiciosViaje: ServicioCatalogoViaje[] = [
   {
     id: "vuelo-economico",
     categoria: "Vuelos",
-    nombre: "Vuelo nacional de muestra",
-    descripcion: "Ejemplo de vuelo ida y vuelta por viajero.",
+    nombre: "Vuelo sin escalas estimado",
+    descripcion:
+      "Preferencia de itinerario; ruta, tarifa y disponibilidad no confirmadas.",
     proporcionPresupuestoDiario: 0.9,
     unidad: "viajero",
     numeroEscalas: 0,
@@ -49,8 +50,9 @@ export const catalogoServiciosViaje: ServicioCatalogoViaje[] = [
   {
     id: "vuelo-flexible",
     categoria: "Vuelos",
-    nombre: "Vuelo flexible de muestra",
-    descripcion: "Ejemplo de tarifa flexible por viajero.",
+    nombre: "Vuelo con 1 escala estimada",
+    descripcion:
+      "Conexión ilustrativa; aeropuerto, tarifa y disponibilidad no confirmados.",
     proporcionPresupuestoDiario: 1.56,
     unidad: "viajero",
     numeroEscalas: 1,
@@ -58,64 +60,70 @@ export const catalogoServiciosViaje: ServicioCatalogoViaje[] = [
   {
     id: "hospedaje-sencillo",
     categoria: "Hospedaje",
-    nombre: "Hospedaje de muestra",
-    descripcion: "Alojamiento ficticio; tarifa por noche.",
+    nombre: "Hospedaje esencial estimado",
+    descripcion:
+      "Importe de referencia por noche; no es una tarifa disponible.",
     proporcionPresupuestoDiario: 0.3,
     unidad: "noche",
   },
   {
     id: "hospedaje-central",
     categoria: "Hospedaje",
-    nombre: "Hospedaje central de muestra",
-    descripcion: "Opción ficticia; tarifa por noche.",
+    nombre: "Hospedaje central estimado",
+    descripcion:
+      "Importe de referencia por noche; no es una tarifa disponible.",
     proporcionPresupuestoDiario: 0.48,
     unidad: "noche",
   },
   {
     id: "carro-compacto",
     categoria: "Carros",
-    nombre: "Carro compacto de muestra",
-    descripcion: "Alquiler ficticio; tarifa por día.",
+    nombre: "Carro compacto estimado",
+    descripcion: "Importe de referencia por día; no es una tarifa disponible.",
     proporcionPresupuestoDiario: 0.18,
     unidad: "dia",
   },
   {
     id: "carro-familiar",
     categoria: "Carros",
-    nombre: "Carro familiar de muestra",
-    descripcion: "Alquiler ficticio; tarifa por día.",
+    nombre: "Carro familiar estimado",
+    descripcion: "Importe de referencia por día; no es una tarifa disponible.",
     proporcionPresupuestoDiario: 0.315,
     unidad: "dia",
   },
   {
     id: "tour-cultural",
     categoria: "Tours y actividades",
-    nombre: "Tour cultural de muestra",
-    descripcion: "Actividad ficticia; tarifa por viajero.",
+    nombre: "Tour cultural estimado",
+    descripcion:
+      "Importe de referencia por viajero; no es una oferta disponible.",
     proporcionPresupuestoDiario: 0.195,
     unidad: "viajero",
   },
   {
     id: "tour-aventura",
     categoria: "Tours y actividades",
-    nombre: "Tour de aventura de muestra",
-    descripcion: "Actividad ficticia; tarifa por viajero.",
+    nombre: "Tour de aventura estimado",
+    descripcion:
+      "Importe de referencia por viajero; no es una oferta disponible.",
     proporcionPresupuestoDiario: 0.39,
     unidad: "viajero",
   },
   {
     id: "kit-esencial",
     categoria: "Artículos esenciales",
-    nombre: "Kit de viaje de muestra",
-    descripcion: "Artículos ficticios; ejemplo por viajero.",
+    nombre: "Kit de viaje esencial estimado",
+    descripcion:
+      "Importe de referencia por viajero; no es una oferta disponible.",
     proporcionPresupuestoDiario: 0.135,
     unidad: "viajero",
   },
   {
     id: "kit-completo",
     categoria: "Artículos esenciales",
-    nombre: "Kit completo de muestra",
-    descripcion: "Artículos ficticios; ejemplo por viajero.",
+    nombre: "Kit completo estimado",
+    descripcion:
+      "Importe de referencia por viajero; no es una oferta disponible.",
     proporcionPresupuestoDiario: 0.33,
     unidad: "viajero",
   },

@@ -7,20 +7,33 @@ import { Aviso } from "@/components/ui/Aviso";
 import { Boton } from "@/components/ui/Boton";
 import { Campo } from "@/components/ui/Campo";
 import { Tarjeta } from "@/components/ui/Tarjeta";
+import { AutocompletarAeropuerto } from "@/components/viajes/AutocompletarAeropuerto";
+import { mensajeErrorDeRespuesta } from "@/components/viajes/respuestaApi";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { formatearPesos } from "@/lib/formato";
 import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 import { duracionDias, finNoAnteriorAInicio } from "@/lib/reglas/fechas";
-import { esquemaDatosInicialesPlanificador } from "@/lib/validacion/esquemas";
+import {
+  esquemaDatosInicialesPlanificador,
+  esquemaOpcionVuelo,
+} from "@/lib/validacion/esquemas";
+import {
+  filtrarVuelosPorTipo,
+  type Aeropuerto,
+  type OpcionVuelo,
+  type TipoRutaVuelo,
+} from "@/lib/reglas/vuelos";
 import {
   calcularServiciosPlanViaje,
   catalogoServiciosViaje,
   validarServiciosPlanViaje,
 } from "@/lib/reglas/planViaje";
 
-type PasoDemo = "busqueda" | "opciones" | "revision" | "finalizada";
-type OfertaDemo = (typeof catalogoServiciosViaje)[number];
+type PasoPlanificador = "busqueda" | "opciones" | "revision" | "finalizada";
+type OfertaPlanificada = (typeof catalogoServiciosViaje)[number];
+type TipoRuta = TipoRutaVuelo;
 const MAXIMO_PRESUPUESTO_COP = 1_000_000_000_000;
+const MARCA_AEROPUERTO = " · Aeropuerto: ";
 
 const categorias = [
   "Vuelos",
@@ -30,12 +43,109 @@ const categorias = [
   "Artículos esenciales",
 ];
 
-export function PlanificadorViajeDemo() {
+function leerDestinoGuardado(valor: string) {
+  const indiceAeropuerto = valor.lastIndexOf(MARCA_AEROPUERTO);
+
+  if (indiceAeropuerto < 0) {
+    return { destino: valor, aeropuertoLlegada: "" };
+  }
+
+  return {
+    destino: valor.slice(0, indiceAeropuerto),
+    aeropuertoLlegada: valor
+      .slice(indiceAeropuerto + MARCA_AEROPUERTO.length)
+      .trim(),
+  };
+}
+
+function etiquetaAeropuerto(aeropuerto: Aeropuerto): string {
+  return `${aeropuerto.ciudad} — ${aeropuerto.nombre} (${aeropuerto.codigo})`;
+}
+
+function leerAeropuertoGuardado(
+  ciudad: string,
+  etiqueta: string,
+  incluirCiudad: boolean,
+): Aeropuerto | null {
+  const patron = incluirCiudad
+    ? /^(.*?) — (.*?) \(([A-Z]{3})\)$/
+    : /^(.*?) \(([A-Z]{3})\)$/;
+  const coincidencia = etiqueta.match(patron);
+
+  if (!coincidencia) {
+    return null;
+  }
+
+  const codigo = incluirCiudad ? coincidencia[3] : coincidencia[2];
+  const nombre = incluirCiudad ? coincidencia[2] : coincidencia[1];
+
+  if (!codigo || !nombre) {
+    return null;
+  }
+
+  return {
+    codigo,
+    nombre,
+    ciudad: incluirCiudad ? coincidencia[1]! : ciudad,
+    pais: "",
+    codigoPais: "",
+  };
+}
+
+interface RespuestaOfertasVuelo {
+  ok: true;
+  datos: { ofertas: OpcionVuelo[] };
+}
+
+function esRespuestaOfertasVuelo(
+  valor: unknown,
+): valor is RespuestaOfertasVuelo {
+  if (typeof valor !== "object" || valor === null || !("ok" in valor)) {
+    return false;
+  }
+
+  const respuesta = valor as { ok: unknown; datos?: { ofertas?: unknown } };
+  return (
+    respuesta.ok === true &&
+    Array.isArray(respuesta.datos?.ofertas) &&
+    respuesta.datos.ofertas.every(
+      (oferta) => esquemaOpcionVuelo.safeParse(oferta).success,
+    )
+  );
+}
+
+function nombreOfertaViaje(oferta: OfertaPlanificada): string {
+  if (oferta.categoria !== "Vuelos") {
+    return oferta.nombre;
+  }
+
+  return oferta.numeroEscalas === 0
+    ? "Vuelo sin escalas estimado"
+    : "Vuelo con 1 escala estimada";
+}
+
+function mostrarFechaHora(valor: string): string {
+  return `${valor.slice(0, 10)} · ${valor.slice(11, 16)}`;
+}
+
+function nombreVuelos(segmentos: OpcionVuelo["segmentosIda"]): string {
+  return segmentos
+    .map((segmento) => `${segmento.codigoAerolinea}${segmento.numeroVuelo}`)
+    .join(" · ");
+}
+
+export function PlanificadorViaje() {
   const deviceId = useDeviceId();
   const router = useRouter();
-  const [paso, setPaso] = useState<PasoDemo>("busqueda");
+  const [paso, setPaso] = useState<PasoPlanificador>("busqueda");
   const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
+  const [aeropuertoOrigen, setAeropuertoOrigen] = useState<Aeropuerto | null>(
+    null,
+  );
+  const [aeropuertoLlegada, setAeropuertoLlegada] =
+    useState<Aeropuerto | null>(null);
+  const [tipoRuta, setTipoRuta] = useState<TipoRuta>("nacional");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [viajeros, setViajeros] = useState("2");
@@ -50,6 +160,12 @@ export function PlanificadorViajeDemo() {
   const [requiereSesion, setRequiereSesion] = useState(false);
   const [datosPrecargados, setDatosPrecargados] = useState(false);
   const [errorPrecarga, setErrorPrecarga] = useState("");
+  const [errorAeropuerto, setErrorAeropuerto] = useState("");
+  const [ofertasVuelo, setOfertasVuelo] = useState<OpcionVuelo[]>([]);
+  const [vueloSeleccionado, setVueloSeleccionado] =
+    useState<OpcionVuelo | null>(null);
+  const [buscandoVuelos, setBuscandoVuelos] = useState(false);
+  const [errorVuelos, setErrorVuelos] = useState("");
 
   useEffect(() => {
     function mostrarError(mensaje: string) {
@@ -101,22 +217,55 @@ export function PlanificadorViajeDemo() {
     }
 
     startTransition(() => {
-      setOrigen(resultado.data.origen ?? "");
-      setDestino(resultado.data.destino);
+      const origenGuardado = resultado.data.origen ?? "";
+      setOrigen(origenGuardado);
+      setAeropuertoOrigen(
+        leerAeropuertoGuardado(origenGuardado, origenGuardado, true),
+      );
+      const datosDestino = leerDestinoGuardado(resultado.data.destino);
+      const aeropuertoDestinoGuardado = leerAeropuertoGuardado(
+        datosDestino.destino,
+        datosDestino.aeropuertoLlegada,
+        false,
+      );
+      setDestino(
+        aeropuertoDestinoGuardado
+          ? etiquetaAeropuerto(aeropuertoDestinoGuardado)
+          : datosDestino.destino,
+      );
+      setAeropuertoLlegada(aeropuertoDestinoGuardado);
+      setTipoRuta(
+        resultado.data.vuelo?.tipoRuta === "internacional" ||
+          resultado.data.servicios?.includes("vuelo-flexible")
+          ? "internacional"
+          : "nacional",
+      );
+      if (resultado.data.vuelo) {
+        setOfertasVuelo([resultado.data.vuelo]);
+        setVueloSeleccionado(resultado.data.vuelo);
+      }
       setFechaInicio(resultado.data.fechaInicio);
       setFechaFin(resultado.data.fechaFin);
       setPresupuesto(String(resultado.data.presupuesto));
       setViajeros(String(resultado.data.viajeros ?? 2));
-      setDatosPrecargados(resultado.data.servicios === undefined);
-      if (resultado.data.servicios) {
+      setDatosPrecargados(
+        resultado.data.servicios === undefined && !resultado.data.vuelo,
+      );
+      if (resultado.data.servicios || resultado.data.vuelo) {
         setSelecciones(
           Object.fromEntries(
-            resultado.data.servicios.map((id) => {
+            (resultado.data.servicios ?? [])
+              .filter(
+                (id) =>
+                  !resultado.data.vuelo ||
+                  (id !== "vuelo-economico" && id !== "vuelo-flexible"),
+              )
+              .map((id) => {
               const oferta = catalogoServiciosViaje.find(
                 (candidata) => candidata.id === id,
               );
               return [oferta?.categoria ?? "", id];
-            }),
+              }),
           ),
         );
         setPaso("opciones");
@@ -154,7 +303,7 @@ export function PlanificadorViajeDemo() {
       : [];
   const totalEjemplo = serviciosCalculados.reduce(
     (total, servicio) => total + servicio.precio,
-    0,
+    vueloSeleccionado?.precio ?? 0,
   );
   const saldoEjemplo = presupuestoNumero - totalEjemplo;
   const superaPresupuesto = saldoEjemplo < 0;
@@ -165,20 +314,27 @@ export function PlanificadorViajeDemo() {
         ? 100
         : 0;
 
-  function buscar(evento: FormEvent<HTMLFormElement>) {
+  async function buscar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErrorFechas("");
     setErrorOrigen("");
+    setErrorAeropuerto("");
     setErrorPresupuesto("");
+    setErrorVuelos("");
 
-    if (!origen.trim()) {
-      setErrorOrigen("Ingresa la ciudad desde donde sales.");
+    if (!aeropuertoOrigen) {
+      setErrorOrigen("Selecciona el aeropuerto de salida de la lista.");
+      return;
+    }
+
+    if (!aeropuertoLlegada) {
+      setErrorAeropuerto("Selecciona el aeropuerto de llegada de la lista.");
       return;
     }
 
     if (!finNoAnteriorAInicio(fechaInicio, fechaFin)) {
       setErrorFechas(
-        "La fecha de salida no puede ser anterior a la de llegada.",
+        "La fecha de regreso no puede ser anterior a la fecha de ida.",
       );
       return;
     }
@@ -194,11 +350,78 @@ export function PlanificadorViajeDemo() {
       return;
     }
 
-    setSelecciones({});
-    setPaso("opciones");
+    const parametros = new URLSearchParams({
+      origen: aeropuertoOrigen.codigo,
+      destino: aeropuertoLlegada.codigo,
+      fechaIda: fechaInicio,
+      viajeros,
+      tipoRuta,
+    });
+
+    if (fechaFin > fechaInicio) {
+      parametros.set("fechaRegreso", fechaFin);
+    }
+
+    setBuscandoVuelos(true);
+    setVueloSeleccionado(null);
+
+    try {
+      const respuesta = await fetch(
+        `/api/viajes/vuelos?${parametros.toString()}`,
+        { cache: "no-store" },
+      );
+      if (!respuesta.ok) {
+        throw new Error(
+          await mensajeErrorDeRespuesta(
+            respuesta,
+            "No se pudieron consultar vuelos para esta ruta.",
+          ),
+        );
+      }
+
+      let cuerpo: unknown;
+      try {
+        cuerpo = await respuesta.json();
+      } catch (errorRespuesta) {
+        if (errorRespuesta instanceof SyntaxError) {
+          throw new Error("El servidor devolvió una respuesta inválida.");
+        }
+        throw errorRespuesta;
+      }
+
+      if (!esRespuestaOfertasVuelo(cuerpo)) {
+        throw new Error("El servidor devolvió ofertas de vuelo inválidas.");
+      }
+
+      setOfertasVuelo(
+        filtrarVuelosPorTipo(cuerpo.datos.ofertas, tipoRuta),
+      );
+      setSelecciones((seleccionesActuales) => {
+        const siguientes = { ...seleccionesActuales };
+        delete siguientes.Vuelos;
+        return siguientes;
+      });
+      setPaso("opciones");
+    } catch (error) {
+      setErrorVuelos(
+        error instanceof TypeError
+          ? "No se pudo conectar para consultar vuelos."
+          : error instanceof Error
+            ? error.message
+            : "No se pudieron consultar vuelos para esta ruta.",
+      );
+    } finally {
+      setBuscandoVuelos(false);
+    }
   }
 
-  function alternarOferta(oferta: OfertaDemo) {
+  function alternarVuelo(oferta: OpcionVuelo) {
+    setVueloSeleccionado((actual) =>
+      actual?.id === oferta.id ? null : oferta,
+    );
+  }
+
+  function alternarOferta(oferta: OfertaPlanificada) {
     setSelecciones((actuales) => {
       if (actuales[oferta.categoria] === oferta.id) {
         const siguientes = { ...actuales };
@@ -213,11 +436,28 @@ export function PlanificadorViajeDemo() {
   function reiniciar() {
     setPaso("busqueda");
     setSelecciones({});
+    setOfertasVuelo([]);
+    setVueloSeleccionado(null);
     setErrorFechas("");
+    setErrorVuelos("");
   }
 
   async function guardarPlan() {
-    if (!deviceId || !validarServiciosPlanViaje(serviciosElegidos)) {
+    if (!aeropuertoOrigen || !aeropuertoLlegada) {
+      setErrorGuardado(
+        "Selecciona los aeropuertos de salida y llegada antes de guardar.",
+      );
+      return;
+    }
+
+    const serviciosValidos =
+      serviciosElegidos.length === 0 ||
+      validarServiciosPlanViaje(serviciosElegidos);
+    if (
+      !deviceId ||
+      !serviciosValidos ||
+      (serviciosElegidos.length === 0 && !vueloSeleccionado)
+    ) {
       setErrorGuardado(
         "No se pudo preparar el plan. Selecciona al menos un servicio e inténtalo de nuevo.",
       );
@@ -234,13 +474,14 @@ export function PlanificadorViajeDemo() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           deviceId,
-          origen,
-          destino,
+          origen: etiquetaAeropuerto(aeropuertoOrigen),
+          destino: `${aeropuertoLlegada.ciudad}${MARCA_AEROPUERTO}${aeropuertoLlegada.nombre} (${aeropuertoLlegada.codigo})`,
           fechaInicio,
           fechaFin,
           presupuesto: presupuestoNumero,
           viajeros: Number(viajeros),
           servicios: serviciosElegidos,
+          ...(vueloSeleccionado ? { vuelo: vueloSeleccionado } : {}),
         }),
       });
       const cuerpo: unknown = await respuesta.json();
@@ -296,9 +537,10 @@ export function PlanificadorViajeDemo() {
             className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08] shadow-[0_0_28px_rgba(34,211,238,0.06)]"
             tipo="informacion"
           >
-            <span className="font-bold text-acento">SIMULACIÓN ·</span> Todos
-            los servicios, precios y totales son ficticios. No hay
-            disponibilidad real, reservas ni cobros.
+            <span className="font-bold text-acento">VUELOS ·</span> Los
+            aeropuertos y tarifas se consultan en Amadeus. Los resultados pueden
+            cambiar y no crean reservas ni cobros. Hospedajes, transporte,
+            actividades y artículos siguen siendo estimaciones.
           </Aviso>
           {errorPrecarga && <Aviso tipo="error">{errorPrecarga}</Aviso>}
 
@@ -318,8 +560,8 @@ export function PlanificadorViajeDemo() {
               </span>
             </h1>
             <p className="relative mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              Explora un ejemplo de vuelos, hospedaje, carro, tours y artículos
-              esenciales, y mira cómo afecta cada elección a tu presupuesto.
+              Organiza vuelos, hospedaje, transporte, actividades y artículos
+              esenciales, y compara sus importes estimados con tu presupuesto.
             </p>
           </header>
 
@@ -353,9 +595,8 @@ export function PlanificadorViajeDemo() {
               <form className="mt-7 grid gap-6" onSubmit={buscar}>
                 {datosPrecargados && (
                   <Aviso tipo="informacion">
-                    Completamos el destino, las fechas y el presupuesto de tu
-                    viaje. Indica desde qué ciudad sales para ver los servicios
-                    de ejemplo.
+                    Completamos parte del viaje. Selecciona de nuevo los
+                    aeropuertos para consultar ofertas actualizadas.
                   </Aviso>
                 )}
                 <div>
@@ -363,38 +604,75 @@ export function PlanificadorViajeDemo() {
                     Cuéntanos sobre tu viaje
                   </h2>
                   <p className="mt-2 text-sm text-slate-400">
-                    Define lo básico y calcularemos opciones de ejemplo para ti.
+                    Elige aeropuertos reales y fechas para consultar vuelos.
+                  </p>
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <AutocompletarAeropuerto
+                    id="origen"
+                    etiqueta="Ciudad y aeropuerto de salida"
+                    error={errorOrigen || undefined}
+                    aeropuertoSeleccionado={aeropuertoOrigen}
+                    alCambiar={(valor, aeropuerto) => {
+                      setOrigen(valor);
+                      setAeropuertoOrigen(aeropuerto);
+                      setVueloSeleccionado(null);
+                      setErrorOrigen("");
+                    }}
+                    placeholder="Ej. Bogotá"
+                    tipoRuta={tipoRuta}
+                    valor={origen}
+                  />
+                  <AutocompletarAeropuerto
+                    id="destino"
+                    etiqueta="Ciudad y aeropuerto de llegada"
+                    error={errorAeropuerto || undefined}
+                    aeropuertoSeleccionado={aeropuertoLlegada}
+                    alCambiar={(valor, aeropuerto) => {
+                      setDestino(valor);
+                      setAeropuertoLlegada(aeropuerto);
+                      setVueloSeleccionado(null);
+                      setErrorAeropuerto("");
+                    }}
+                    placeholder="Ej. Cartagena o Madrid"
+                    tipoRuta={tipoRuta}
+                    valor={destino}
+                  />
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <label className="grid max-w-sm gap-2 text-sm font-semibold">
+                    Tipo de ruta
+                    <select
+                      className="min-h-12 rounded-xl border border-cyan-100/10 bg-[#0d2031] px-3 py-2 text-base font-normal text-texto outline-none transition focus-visible:border-acento/70 focus-visible:ring-2 focus-visible:ring-acento/20"
+                      name="tipoRuta"
+                      onChange={(evento) => {
+                        const valor = evento.target.value;
+                        if (valor === "nacional" || valor === "internacional") {
+                          setTipoRuta(valor);
+                          setOrigen("");
+                          setDestino("");
+                          setAeropuertoOrigen(null);
+                          setAeropuertoLlegada(null);
+                          setOfertasVuelo([]);
+                          setVueloSeleccionado(null);
+                          setErrorOrigen("");
+                          setErrorAeropuerto("");
+                        }
+                      }}
+                      value={tipoRuta}
+                    >
+                      <option value="nacional">Nacional (Colombia)</option>
+                      <option value="internacional">Internacional</option>
+                    </select>
+                  </label>
+                  <p className="text-sm text-slate-400 sm:col-span-2">
+                    Las rutas nacionales se buscan únicamente sin escalas y
+                    con aeropuertos de Colombia.
                   </p>
                 </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Campo
-                    autoComplete="address-level2"
-                    etiqueta="Ciudad o aeropuerto de origen"
-                    error={errorOrigen || undefined}
-                    name="origen"
-                    onChange={(evento) => {
-                      setOrigen(evento.target.value);
-                      setErrorOrigen("");
-                    }}
-                    minLength={2}
-                    placeholder="Ej. Bogotá"
-                    required
-                    maxLength={160}
-                    value={origen}
-                  />
-                  <Campo
-                    autoComplete="address-level2"
-                    etiqueta="Ciudad o aeropuerto de destino"
-                    name="destino"
-                    onChange={(evento) => setDestino(evento.target.value)}
-                    placeholder="Ej. Cartagena"
-                    required
-                    value={destino}
-                  />
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Campo
-                    etiqueta="Fecha de llegada"
+                    etiqueta="Fecha de ida"
                     name="fechaInicio"
                     onChange={(evento) => setFechaInicio(evento.target.value)}
                     required
@@ -402,7 +680,7 @@ export function PlanificadorViajeDemo() {
                     value={fechaInicio}
                   />
                   <Campo
-                    etiqueta="Fecha de salida"
+                    etiqueta="Fecha de regreso"
                     error={errorFechas || undefined}
                     min={fechaInicio || undefined}
                     name="fechaFin"
@@ -445,11 +723,13 @@ export function PlanificadorViajeDemo() {
                     </select>
                   </label>
                 </div>
+                {errorVuelos && <Aviso tipo="error">{errorVuelos}</Aviso>}
                 <Boton
                   className="mt-1 min-h-12 w-full rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700 text-base shadow-[0_0_28px_rgba(14,165,233,0.22)] transition hover:from-sky-600 hover:to-cyan-600 sm:w-fit sm:px-7"
+                  disabled={buscandoVuelos}
                   type="submit"
                 >
-                  Ver mis opciones de viaje
+                  {buscandoVuelos ? "Consultando vuelos…" : "Consultar vuelos"}
                 </Boton>
               </form>
             )}
@@ -464,7 +744,8 @@ export function PlanificadorViajeDemo() {
                     className="text-2xl font-extrabold tracking-tight text-white"
                     id="titulo-servicios"
                   >
-                    Servicios de ejemplo para {destino}
+                    Opciones de viaje para{" "}
+                    {aeropuertoLlegada?.ciudad ?? destino}
                   </h2>
                   <p className="mt-2 text-sm text-slate-300">
                     {fechaInicio} – {fechaFin} · {noches}{" "}
@@ -473,16 +754,192 @@ export function PlanificadorViajeDemo() {
                     {formatearPesos(presupuestoNumero)} COP
                   </p>
                   <p className="mt-2 text-sm text-slate-400">
-                    Los importes de muestra se ajustan al presupuesto diario por
-                    viajero y a la duración del viaje.
+                    Las tarifas de vuelo se consultaron en Amadeus. Los demás
+                    servicios se calculan con tu presupuesto y son estimados.
                   </p>
                   <p className="mt-2 text-sm text-slate-400">
-                    Las rutas y escalas también son ejemplos; no corresponden a
-                    horarios ni vuelos disponibles.
+                    Llegada: {aeropuertoLlegada?.nombre} (
+                    {aeropuertoLlegada?.codigo}) · {aeropuertoLlegada?.ciudad}
                   </p>
                 </div>
 
                 {categorias.map((categoria) => {
+                  if (categoria === "Vuelos") {
+                    const ofertasLegadas = catalogoServiciosViaje.filter(
+                      (oferta) =>
+                        oferta.categoria === "Vuelos" &&
+                        (tipoRuta === "internacional" ||
+                          oferta.numeroEscalas === 0),
+                    );
+
+                    return (
+                      <section
+                        aria-labelledby="titulo-vuelos"
+                        className="grid gap-3"
+                        key={categoria}
+                      >
+                        <div>
+                          <h3
+                            className="flex items-center gap-3 text-lg font-bold text-white"
+                            id="titulo-vuelos"
+                          >
+                            <span className="h-px w-5 bg-acento shadow-[0_0_10px_#52ddff]" />
+                            Vuelos consultados en Amadeus
+                          </h3>
+                          <p className="mt-2 text-sm text-slate-400">
+                            Tarifas para {viajeros}{" "}
+                            {viajeros === "1" ? "viajero" : "viajeros"} en COP.
+                            La disponibilidad y el precio pueden cambiar antes
+                            de comprar.
+                          </p>
+                        </div>
+                        {ofertasVuelo.length === 0 && (
+                          <Aviso tipo="informacion">
+                            {tipoRuta === "nacional"
+                              ? "No encontramos vuelos nacionales sin escalas para estas fechas. No mostramos opciones con escalas."
+                              : "No encontramos ofertas de vuelos para esta ruta y estas fechas."}
+                          </Aviso>
+                        )}
+                        <div className="grid gap-3">
+                          {ofertasVuelo.map((oferta) => {
+                            const elegida = vueloSeleccionado?.id === oferta.id;
+                            const vuelosIda = nombreVuelos(oferta.segmentosIda);
+                            const vuelosRegreso = nombreVuelos(
+                              oferta.segmentosRegreso,
+                            );
+                            const itinerarios = [
+                              {
+                                nombre: "Ida",
+                                segmentos: oferta.segmentosIda,
+                              },
+                              {
+                                nombre: "Regreso",
+                                segmentos: oferta.segmentosRegreso,
+                              },
+                            ].filter((itinerario) => itinerario.segmentos.length > 0);
+
+                            return (
+                              <Tarjeta
+                                className={`grid gap-4 rounded-2xl border-white/[0.08] bg-gradient-to-br from-[#0d2133] to-[#0a1928] p-5 transition ${elegida ? "border-cyan-300/55 ring-1 ring-cyan-300/20" : ""}`}
+                                key={oferta.id}
+                              >
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div>
+                                    <h4 className="font-bold text-white">
+                                      {oferta.aerolinea}
+                                    </h4>
+                                    <p className="mt-1 text-sm text-slate-300">
+                                      Ida: {vuelosIda} ·{" "}
+                                      {oferta.escalasIda === 0
+                                        ? "sin escalas"
+                                        : `${oferta.escalasIda} escalas`}
+                                    </p>
+                                    {oferta.segmentosRegreso.length > 0 && (
+                                      <p className="mt-1 text-sm text-slate-300">
+                                        Regreso: {vuelosRegreso} ·{" "}
+                                        {oferta.escalasRegreso === 0
+                                          ? "sin escalas"
+                                          : `${oferta.escalasRegreso} escalas`}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <p className="text-xl font-extrabold text-cyan-100">
+                                    {formatearPesos(oferta.precio)} COP
+                                  </p>
+                                </div>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  {itinerarios.map((itinerario) => (
+                                      <div
+                                        className="rounded-xl border border-cyan-100/10 bg-black/10 p-3"
+                                        key={itinerario.nombre}
+                                      >
+                                        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-cyan-100">
+                                          {itinerario.nombre}
+                                        </p>
+                                        {itinerario.segmentos.map(
+                                          (tramo, indice) => (
+                                            <p
+                                              className="text-sm text-slate-200"
+                                              key={`${tramo.numeroVuelo}-${indice}`}
+                                            >
+                                              {tramo.origenCodigo}{" "}
+                                              {mostrarFechaHora(tramo.salida)}{" "}
+                                              → {tramo.destinoCodigo}{" "}
+                                              {mostrarFechaHora(tramo.llegada)}
+                                              <span className="block text-xs text-slate-400">
+                                                {tramo.aerolinea}{" "}
+                                                {tramo.codigoAerolinea}
+                                                {tramo.numeroVuelo} ·{" "}
+                                                {tramo.duracion}
+                                              </span>
+                                            </p>
+                                          ),
+                                        )}
+                                      </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-3">
+                                  <span className="text-xs text-slate-400">
+                                    Consultado el{" "}
+                                    {oferta.consultadoEn.slice(0, 10)} · Tarifa
+                                    sujeta a cambios; no es una reserva.
+                                  </span>
+                                  <Boton
+                                    aria-label={`${elegida ? "Quitar" : "Elegir"} vuelo ${oferta.aerolinea} ${vuelosIda}`}
+                                    aria-pressed={elegida}
+                                    onClick={() => alternarVuelo(oferta)}
+                                    variante={
+                                      elegida ? "secundario" : "primario"
+                                    }
+                                  >
+                                    {elegida ? "Vuelo elegido" : "Elegir vuelo"}
+                                  </Boton>
+                                </div>
+                              </Tarjeta>
+                            );
+                          })}
+                        </div>
+                        {ofertasVuelo.length === 0 &&
+                          ofertasLegadas
+                            .filter(
+                              (oferta) =>
+                                selecciones.Vuelos === oferta.id,
+                            )
+                            .map((oferta) => (
+                              <Tarjeta
+                                className="grid gap-3 rounded-2xl border-amber-200/20 bg-amber-300/[0.04] p-5"
+                                key={oferta.id}
+                              >
+                                <div>
+                                  <h4 className="font-bold text-white">
+                                    {nombreOfertaViaje(oferta)} · selección
+                                    anterior
+                                  </h4>
+                                  <p className="mt-1 text-sm text-slate-300">
+                                    Este importe es una estimación guardada, no
+                                    una tarifa consultada.
+                                  </p>
+                                  <p className="mt-2 font-bold text-amber-100">
+                                    {formatearPesos(
+                                      serviciosDisponibles.find(
+                                        (servicio) => servicio.id === oferta.id,
+                                      )?.precio ?? 0,
+                                    )}{" "}
+                                    COP
+                                  </p>
+                                </div>
+                                <Boton
+                                  onClick={() => alternarOferta(oferta)}
+                                  variante="secundario"
+                                >
+                                  Quitar estimación
+                                </Boton>
+                              </Tarjeta>
+                            ))}
+                      </section>
+                    );
+                  }
+
                   if (categoria === "Hospedaje" && noches === 0) {
                     return (
                       <div
@@ -516,6 +973,7 @@ export function PlanificadorViajeDemo() {
                             (servicio) => servicio.id === oferta.id,
                           )?.precio;
                           const elegida = selecciones[categoria] === oferta.id;
+                          const nombreOferta = nombreOfertaViaje(oferta);
 
                           return (
                             <Tarjeta
@@ -524,37 +982,13 @@ export function PlanificadorViajeDemo() {
                             >
                               <div>
                                 <h4 className="font-bold text-white">
-                                  {oferta.nombre}
+                                  {nombreOferta}
                                 </h4>
                                 <p className="mt-1 text-sm text-slate-400">
                                   {oferta.descripcion}
                                 </p>
-                                {categoria === "Vuelos" && (
-                                  <div className="mt-3 rounded-xl border border-cyan-100/10 bg-black/10 p-3 text-sm text-slate-200">
-                                    <p>
-                                      <span className="font-semibold text-cyan-100">
-                                        Sale de:
-                                      </span>{" "}
-                                      {origen}
-                                    </p>
-                                    <p className="mt-1">
-                                      <span className="font-semibold text-cyan-100">
-                                        Llega a:
-                                      </span>{" "}
-                                      {destino}
-                                    </p>
-                                    <p className="mt-1">
-                                      <span className="font-semibold text-cyan-100">
-                                        Trayecto:
-                                      </span>{" "}
-                                      {oferta.numeroEscalas === 0
-                                        ? "Directo (ejemplo)"
-                                        : "1 escala (ejemplo; ciudad no confirmada)"}
-                                    </p>
-                                  </div>
-                                )}
                                 <p className="mt-3 inline-flex rounded-full border border-cyan-300/15 bg-cyan-300/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-200/80">
-                                  Precio de ejemplo
+                                  Precio estimado
                                 </p>
                               </div>
                               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-4">
@@ -564,12 +998,12 @@ export function PlanificadorViajeDemo() {
                                     : `${formatearPesos(precio)} COP`}
                                 </p>
                                 <span className="w-full text-xs text-slate-500">
-                                  Total de ejemplo para {viajeros}{" "}
+                                  Total estimado para {viajeros}{" "}
                                   {viajeros === "1" ? "viajero" : "viajeros"} y{" "}
                                   {dias} {dias === 1 ? "día" : "días"}
                                 </span>
                                 <Boton
-                                  aria-label={`${elegida ? "Quitar" : "Elegir"} ${oferta.nombre}`}
+                                  aria-label={`${elegida ? "Quitar" : "Elegir"} ${nombreOferta}`}
                                   aria-pressed={elegida}
                                   className={
                                     elegida
@@ -579,7 +1013,7 @@ export function PlanificadorViajeDemo() {
                                   onClick={() => alternarOferta(oferta)}
                                   variante={elegida ? "secundario" : "primario"}
                                 >
-                                  {elegida ? "Quitar" : "Elegir ejemplo"}
+                                  {elegida ? "Quitar" : "Elegir opción"}
                                 </Boton>
                               </div>
                             </Tarjeta>
@@ -595,7 +1029,8 @@ export function PlanificadorViajeDemo() {
                     <div>
                       <h3 className="font-bold text-white">Tu presupuesto</h3>
                       <p className="mt-1 text-sm text-slate-400">
-                        Seleccionado de {formatearPesos(presupuestoNumero)} COP
+                        Vuelo consultado y servicios de referencia ·{" "}
+                        {formatearPesos(presupuestoNumero)} COP
                       </p>
                     </div>
                     <output
@@ -626,11 +1061,11 @@ export function PlanificadorViajeDemo() {
                     <Aviso tipo="error">
                       Excedes el presupuesto por{" "}
                       {formatearPesos(Math.abs(saldoEjemplo))} COP. Cambia o
-                      quita servicios para ajustar el ejemplo.
+                      quita servicios para ajustarlo.
                     </Aviso>
                   ) : (
                     <p className="text-sm text-texto-suave">
-                      Disponible en este ejemplo:{" "}
+                      Saldo disponible:{" "}
                       <strong>{formatearPesos(saldoEjemplo)} COP</strong>
                     </p>
                   )}
@@ -641,7 +1076,9 @@ export function PlanificadorViajeDemo() {
                     Cambiar datos del viaje
                   </Boton>
                   <Boton
-                    disabled={ofertasElegidas.length === 0}
+                    disabled={
+                      ofertasElegidas.length === 0 && !vueloSeleccionado
+                    }
                     onClick={() => setPaso("revision")}
                   >
                     Revisar mi plan
@@ -656,28 +1093,43 @@ export function PlanificadorViajeDemo() {
                 className="mt-6 grid gap-5"
               >
                 <h2 className="text-xl font-bold" id="titulo-revision">
-                  Resumen de tu viaje de ejemplo
+                  Resumen de tu viaje
                 </h2>
                 <p className="text-sm text-texto-suave">
-                  {origen} → {destino} · {fechaInicio} – {fechaFin} · {viajeros}{" "}
+                  {aeropuertoOrigen?.ciudad} ({aeropuertoOrigen?.codigo}) →{" "}
+                  {aeropuertoLlegada?.ciudad} ({aeropuertoLlegada?.codigo}) ·{" "}
+                  {fechaInicio} – {fechaFin} · {viajeros}{" "}
                   {viajeros === "1" ? "viajero" : "viajeros"}
                 </p>
                 <ul className="grid gap-3">
+                  {vueloSeleccionado && (
+                    <li className="flex flex-wrap justify-between gap-2 border-b border-borde pb-3">
+                      <span>
+                        Vuelo consultado · {vueloSeleccionado.aerolinea}
+                        <span className="mt-1 block text-sm text-texto-suave">
+                          Ida: {nombreVuelos(vueloSeleccionado.segmentosIda)} ·{" "}
+                          {vueloSeleccionado.escalasIda === 0
+                            ? "sin escalas"
+                            : `${vueloSeleccionado.escalasIda} escalas`}
+                          {vueloSeleccionado.segmentosRegreso.length > 0 &&
+                            ` · Regreso: ${nombreVuelos(vueloSeleccionado.segmentosRegreso)}`}
+                          {" · "}
+                          Llegada a {aeropuertoLlegada?.nombre} (
+                          {aeropuertoLlegada?.codigo})
+                        </span>
+                      </span>
+                      <strong>
+                        {formatearPesos(vueloSeleccionado.precio)} COP
+                      </strong>
+                    </li>
+                  )}
                   {ofertasElegidas.map((oferta) => (
                     <li
                       className="flex flex-wrap justify-between gap-2 border-b border-borde pb-3"
                       key={oferta.id}
                     >
                       <span>
-                        {oferta.nombre}
-                        {oferta.categoria === "Vuelos" && (
-                          <span className="mt-1 block text-sm text-texto-suave">
-                            {origen} → {destino} ·{" "}
-                            {oferta.numeroEscalas === 0
-                              ? "directo (ejemplo)"
-                              : "1 escala de ejemplo"}
-                          </span>
-                        )}
+                        {nombreOfertaViaje(oferta)}
                       </span>
                       <strong>
                         {formatearPesos(
@@ -691,7 +1143,7 @@ export function PlanificadorViajeDemo() {
                   ))}
                 </ul>
                 <p className="text-2xl font-black text-cyan-100">
-                  Total: {formatearPesos(totalEjemplo)} COP
+                  Total del plan: {formatearPesos(totalEjemplo)} COP
                 </p>
                 <p>
                   {superaPresupuesto
@@ -702,12 +1154,13 @@ export function PlanificadorViajeDemo() {
                   className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
                   tipo="informacion"
                 >
-                  Este resumen usa precios inventados. No es una cotización ni
-                  una compra, y no se enviaron datos a proveedores.
+                  El vuelo se consultó en Amadeus y su precio puede cambiar. Los
+                  demás importes son estimaciones. No se creó una reserva ni se
+                  hizo una compra.
                 </Aviso>
                 <Aviso tipo="informacion">
                   Puedes guardar esta selección en tus viajes para consultarla
-                  después. Quedará marcada como plan de ejemplo, no como compra.
+                  después. Quedará como plan, no como compra.
                 </Aviso>
                 {errorGuardado && (
                   <Aviso tipo="error">
@@ -750,7 +1203,7 @@ export function PlanificadorViajeDemo() {
                     className="rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700 shadow-[0_0_24px_rgba(14,165,233,0.18)]"
                     onClick={() => setPaso("finalizada")}
                   >
-                    Terminar simulación
+                    Finalizar planificación
                   </Boton>
                 </div>
               </section>
@@ -762,15 +1215,14 @@ export function PlanificadorViajeDemo() {
                 className="mt-6 grid gap-5"
               >
                 <h2 className="text-xl font-bold" id="titulo-finalizada">
-                  Fin de la demostración
+                  Planificación terminada
                 </h2>
                 <Aviso
                   className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
                   tipo="informacion"
                 >
-                  Pudiste armar un presupuesto de ejemplo. No se compraron
-                  servicios, no se crearon reservas y no se realizó ningún
-                  cobro.
+                  No se compraron servicios, no se crearon reservas y no se
+                  realizó ningún cobro.
                 </Aviso>
                 <Boton
                   className="w-fit rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700"

@@ -10,13 +10,13 @@ Aplicación web para organizar viajes por dispositivo. Permite registrar un dest
 - Completar, reactivar y eliminar viajes con confirmación.
 - Filtrar por estado, ordenar por fecha de inicio o creación y consultar el resumen de todos los viajes.
 - Persistencia de los registros en PostgreSQL. `localStorage` conserva solamente el identificador UUID del dispositivo.
-- El planificador demo permite guardar una selección de servicios de ejemplo en PostgreSQL; aparece en **Planes y compras guardados** en `/viajes` y se identifica claramente como un plan, no como una compra o reserva.
-- Guardar un plan requiere iniciar sesión. Sus precios se vuelven a calcular en el servidor; no hay disponibilidad, reservas ni cobros reales.
+- El planificador permite guardar servicios estimados y una instantánea del vuelo consultado; aparece en **Planes y compras guardados** en `/viajes` y se identifica como un plan, no como una compra o reserva.
+- Guardar un plan requiere iniciar sesión. Los precios de los servicios estimados se vuelven a calcular en el servidor; la tarifa del vuelo es una consulta y puede cambiar. No se hacen reservas ni cobros.
 - La fecha de fin no puede ser anterior a la fecha de inicio; un viaje de un solo día sí está permitido.
 
-## Siguiente iniciativa
+## Planificador y vuelos
 
-Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuelos, hospedaje, carro, tours y artículos esenciales a un presupuesto desde el enlace **Armar viaje según presupuesto (demo)** en el organizador. Tiene una interfaz adaptable azul eléctrico. Los precios de ejemplo aparecen para todas las opciones y cambian según el presupuesto, los viajeros y la duración (por ejemplo, COP 50 millones genera importes de muestra mayores que COP 2 millones). En los vuelos se puede indicar origen y destino, y se muestran opciones de ejemplo directas o con una escala. Son cálculos y rutas ilustrativos, no cotizaciones: la página no consulta disponibilidad, crea reservas, envía datos a proveedores ni procesa pagos. Las compras reales requieren integraciones y acceso de socios; consulta el [plan de comercio y reservas](./doc/PLAN_COMERCIO_VIAJES.md).
+`/planificador` consulta aeropuertos y ofertas de vuelos a Amadeus. Las rutas nacionales se buscan y filtran sin escalas; las internacionales muestran los tramos y conexiones devueltos por el proveedor. Las tarifas se expresan en COP, pueden cambiar y no constituyen una reserva. Los datos del vuelo seleccionado se guardan como una instantánea del plan. Hospedaje, transporte, actividades y artículos esenciales siguen siendo estimaciones locales; la aplicación no compra ni reserva servicios.
 
 ## Requisitos
 
@@ -39,11 +39,13 @@ Está disponible `/demo-compras`, un planificador demostrativo para ajustar vuel
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
    POSTGRES_URL_NON_POOLING=
    PGSSLROOTCERT=
+   AMADEUS_CLIENT_ID=
+   AMADEUS_CLIENT_SECRET=
    ```
 
    Completa una sola de las variables de conexión PostgreSQL; no dejes una variable prioritaria vacía si vas a usar otra alternativa. También se aceptan `NEXT_PUBLIC_MONTATEENELVIAJESUPABASE_URL` y `NEXT_PUBLIC_MONTATEENELVIAJESUPABASE_PUBLISHABLE_KEY` para Supabase; para PostgreSQL se puede usar `POSTGRES_URL` o `POSTGRES_PRISMA_URL` en lugar de `POSTGRES_URL_NON_POOLING`. Los scripts de base de datos también aceptan `POSTGRES_HOST`, `POSTGRES_DATABASE`, `POSTGRES_USER` y `POSTGRES_PASSWORD`. `PGSSLROOTCERT` puede apuntar al certificado raíz de la base de datos; la conexión mantiene la validación TLS.
 
-   El panel administrativo requiere `SUPABASE_SERVICE_ROLE_KEY`. La recuperación por correo necesita el conector de Resend (o `RESEND_API_KEY`) y `RESEND_FROM` con un remitente verificado en Resend; no se usa el remitente de prueba `onboarding@resend.dev`. El script de desarrollo puede sincronizar `VERCEL_OIDC_TOKEN` desde Vercel; no agregues tokens ni claves al repositorio.
+   Las búsquedas de vuelos requieren `AMADEUS_CLIENT_ID` y `AMADEUS_CLIENT_SECRET` de Amadeus. La URL opcional `AMADEUS_API_BASE_URL` usa `https://api.amadeus.com` por defecto; para credenciales de pruebas se puede configurar `https://test.api.amadeus.com`. Define las credenciales de producción también en las variables de entorno de Vercel para consultar vuelos colombianos en vivo. Son secretos de servidor: nunca uses el prefijo `NEXT_PUBLIC_` ni los agregues al repositorio. El panel administrativo requiere `SUPABASE_SERVICE_ROLE_KEY`. La recuperación por correo necesita el conector de Resend (o `RESEND_API_KEY`) y `RESEND_FROM` con un remitente verificado en Resend; no se usa el remitente de prueba `onboarding@resend.dev`. El script de desarrollo puede sincronizar `VERCEL_OIDC_TOKEN` desde Vercel; no agregues tokens ni claves al repositorio.
 
 3. Aplica las migraciones pendientes de la base de datos y ejecuta la aplicación. La migración `20261107000000_planes_guardados.sql` crea la tabla de planes guardados:
 
@@ -81,8 +83,8 @@ npm run db:limpiar -- --prueba
 | `npm run db:verificar`                | Verifica el esquema y sus restricciones.                                 |
 | `npm run probar:flujo`                | Prueba el flujo de datos contra PostgreSQL.                              |
 | `npm run db:limpiar -- --prueba`      | Elimina únicamente los registros de prueba `dev-test-*`.                 |
-| `npm run db:demo`                     | Carga cinco viajes bajo el dispositivo demo `dev-demo-0001`.             |
-| `npm run db:limpiar -- --demo`        | Elimina únicamente los registros del dispositivo demo.                   |
+| `npm run db:ejemplos`                 | Carga cinco viajes de ejemplo en un dispositivo aislado.                 |
+| `npm run db:limpiar -- --ejemplos`    | Elimina únicamente los viajes de ejemplo cargados por ese script.        |
 
 ## Estructura principal
 

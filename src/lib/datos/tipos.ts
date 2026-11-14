@@ -2,6 +2,7 @@ import type {
   IdentificadorServicioViaje,
   ServicioPlanViaje,
 } from "@/lib/reglas/planViaje";
+import type { OpcionVuelo } from "@/lib/reglas/vuelos";
 import type { EstadoViaje } from "@/lib/reglas/viaje";
 
 export interface Viaje {
@@ -42,10 +43,15 @@ export interface DatosPlanGuardado {
   presupuesto: number;
   viajeros: number;
   servicios: IdentificadorServicioViaje[];
+  vuelo?: OpcionVuelo | undefined;
+}
+
+export interface ServicioPlanGuardado extends ServicioPlanViaje {
+  vuelo?: OpcionVuelo;
 }
 
 export interface PlanGuardado extends Omit<DatosPlanGuardado, "servicios"> {
   id: string;
-  servicios: ServicioPlanViaje[];
+  servicios: ServicioPlanGuardado[];
   total: number;
 }

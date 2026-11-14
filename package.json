@@ -17,7 +17,7 @@
     "db:verificar": "node scripts/verificar-bd.mjs",
     "db:limpiar": "node scripts/limpiar-prueba.mjs",
     "probar:flujo": "tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/probar-flujo.ts",
-    "db:demo": "tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-demo.ts"
+    "db:ejemplos": "tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-ejemplos.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

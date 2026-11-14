@@ -9,7 +9,7 @@ vi.mock("@/lib/hooks/useDeviceId", () => ({
   useDeviceId: vi.fn(),
 }));
 
-const viajeDemo: Viaje = {
+const viajeDePrueba: Viaje = {
   id: "viaje-test",
   destino: "Cartagena",
   fechaInicio: "2026-12-10",
@@ -67,7 +67,7 @@ describe("ListaViajes", () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(respuestaLista([viajeDemo])),
+      vi.fn().mockResolvedValue(respuestaLista([viajeDePrueba])),
     );
     const alEditar = vi.fn();
 
@@ -83,7 +83,7 @@ describe("ListaViajes", () => {
       screen.getByRole("button", { name: "Completar Cartagena" }),
     ).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "Editar Cartagena" }));
-    expect(alEditar).toHaveBeenCalledWith(viajeDemo);
+    expect(alEditar).toHaveBeenCalledWith(viajeDePrueba);
   });
 
   it("envía filtros a la API y distingue una lista filtrada vacía", async () => {
@@ -114,7 +114,7 @@ describe("ListaViajes", () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     const fetchSimulado = vi
       .fn()
-      .mockResolvedValueOnce(respuestaLista([viajeDemo]))
+      .mockResolvedValueOnce(respuestaLista([viajeDePrueba]))
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ ok: true, datos: { eliminado: true } }), {
           status: 200,
@@ -159,13 +159,13 @@ describe("ListaViajes", () => {
   it("alterna el estado y vuelve a cargar la tarjeta", async () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     const viajeCompletado = {
-      ...viajeDemo,
+      ...viajeDePrueba,
       completado: true,
       estado: "Completado" as const,
     };
     const fetchSimulado = vi
       .fn()
-      .mockResolvedValueOnce(respuestaLista([viajeDemo]))
+      .mockResolvedValueOnce(respuestaLista([viajeDePrueba]))
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ ok: true, datos: viajeCompletado }), {
           status: 200,

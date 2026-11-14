@@ -273,7 +273,7 @@ AL TERMINAR:
 
 ## P04 · Datos: viajes
 
-**Fase:** 4 (primera parte) · **Crea:** `lib/datos/*`, `lib/dataService.ts`, `scripts/limpiar-prueba.mjs`, `scripts/probar-flujo.ts`, `scripts/cargar-demo.ts`
+**Fase:** 4 (primera parte) · **Crea:** `lib/datos/*`, `lib/dataService.ts`, `scripts/limpiar-prueba.mjs`, `scripts/probar-flujo.ts`, `scripts/cargar-ejemplos.ts`
 
 ````text
 Antes de escribir código lee completos: doc/PLAN_VIAJES.md (secciones 5, 6, 6.1, 7.3, 8.5, 8.6 y 14.2), doc/ESTADO_ACTUAL.md y doc/ESTADO_EJECUCION.md. Revisa lib/reglas/, lib/db/conexion.ts y lib/validacion/esquemas.ts.
@@ -295,11 +295,11 @@ Todas las consultas incluyen WHERE device_id = $1 (RN-10).
 
 TAREA 3. lib/dataService.ts como fachada: reexporta las funciones públicas y los tipos. Verifica que ningún archivo fuera de lib/datos importe lib/db/conexion.ts.
 
-TAREA 4. scripts/limpiar-prueba.mjs con "db:limpiar": borra los viajes cuyo device_id empiece por 'dev-test' o 'dev-demo'. Imprime el conteo. Opciones --prueba y --demo.
+TAREA 4. scripts/limpiar-prueba.mjs con "db:limpiar": borra los viajes cuyo device_id empiece por 'dev-test' o 'dev-ejemplo'. Imprime el conteo. Opciones --prueba y --ejemplos.
 
 TAREA 5. Instala tsx (desarrollo). Crea scripts/probar-flujo.ts con los 14 pasos de la sección 14.2 usando solo dataService, con un deviceId de prueba 'dev-test-0001' (y 'dev-test-0002' para el paso 14, el aislamiento entre dispositivos). Imprime OK/FALLA por paso; para los pasos que esperan error, verifica el código; limpia antes y en finally; cierra el pool; código 1 si hay fallas. "probar:flujo": "tsx --env-file=.env.local scripts/probar-flujo.ts" (o la variante con --import tsx). Ejecuta y corrige hasta 0 fallas.
 
-TAREA 6. scripts/cargar-demo.ts con "db:demo": crea ~5 viajes de ejemplo para el device 'dev-demo-0001' (Cartagena, Medellín, Eje Cafetero, San Andrés, Bogotá), con fechas y presupuestos variados y uno o dos marcados como completados. Limpia los demo antes. Imprime una tabla con destino, fechas, presupuesto y estado. Ejecútalo. (Nota: como los viajes se agrupan por device_id, para verlos en la interfaz en P06 usarás el device_id de tu navegador; estos demo son sobre todo para la prueba de datos. Puedes indicarme cómo poner tu device_id real si quieres ver datos en pantalla.)
+TAREA 6. scripts/cargar-ejemplos.ts con "db:ejemplos": crea ~5 viajes de ejemplo para el device 'dev-ejemplo-0001' (Cartagena, Medellín, Eje Cafetero, San Andrés, Bogotá), con fechas y presupuestos variados y uno o dos marcados como completados. Limpia los ejemplos anteriores antes de cargarlos. Imprime una tabla con destino, fechas, presupuesto y estado. Ejecútalo. (Nota: como los viajes se agrupan por device_id, para verlos en la interfaz en P06 usarás el device_id de tu navegador; estos datos son sobre todo para la prueba de datos. Puedes indicarme cómo poner tu device_id real si quieres ver datos en pantalla.)
 
 AL TERMINAR:
 - npm run build y npm test sin errores.

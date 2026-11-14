@@ -1,8 +1,15 @@
 import { consultar } from "@/lib/db/conexion";
 import { duracionDias } from "@/lib/reglas/fechas";
 import { ErrorDeNegocio } from "@/lib/reglas/errores";
-import { calcularServiciosPlanViaje } from "@/lib/reglas/planViaje";
-import type { DatosPlanGuardado, PlanGuardado } from "@/lib/datos/tipos";
+import {
+  calcularServiciosPlanViaje,
+  catalogoServiciosViaje,
+} from "@/lib/reglas/planViaje";
+import type {
+  DatosPlanGuardado,
+  PlanGuardado,
+  ServicioPlanGuardado,
+} from "@/lib/datos/tipos";
 
 interface FilaPlanGuardado {
   id: string;
@@ -51,12 +58,44 @@ export async function crearPlanGuardado(
   datos: DatosPlanGuardado,
 ): Promise<PlanGuardado> {
   const dias = duracionDias(datos.fechaInicio, datos.fechaFin);
-  const servicios = calcularServiciosPlanViaje(datos.servicios, {
-    presupuesto: datos.presupuesto,
-    dias,
-    noches: Math.max(dias - 1, 0),
-    viajeros: datos.viajeros,
-  });
+  const servicios: ServicioPlanGuardado[] =
+    datos.servicios.length > 0
+      ? calcularServiciosPlanViaje(datos.servicios, {
+          presupuesto: datos.presupuesto,
+          dias,
+          noches: Math.max(dias - 1, 0),
+          viajeros: datos.viajeros,
+        })
+      : [];
+
+  if (datos.vuelo) {
+    const servicioVuelo = catalogoServiciosViaje.find(
+      (servicio) => servicio.id === "vuelo-economico",
+    );
+
+    if (!servicioVuelo) {
+      throw new Error("No se encontró el servicio base para guardar el vuelo.");
+    }
+
+    const numerosVuelo = [
+      ...datos.vuelo.segmentosIda,
+      ...datos.vuelo.segmentosRegreso,
+    ]
+      .map((segmento) => `${segmento.codigoAerolinea}${segmento.numeroVuelo}`)
+      .join(" · ");
+
+    servicios.push({
+      ...servicioVuelo,
+      nombre: `${datos.vuelo.aerolinea} · ${numerosVuelo}`,
+      descripcion: `Oferta consultada en Amadeus el ${datos.vuelo.consultadoEn}. La tarifa puede cambiar y no es una reserva.`,
+      numeroEscalas: Math.max(
+        datos.vuelo.escalasIda,
+        datos.vuelo.escalasRegreso ?? 0,
+      ),
+      precio: datos.vuelo.precio,
+      vuelo: datos.vuelo,
+    });
+  }
   const total = servicios.reduce((suma, servicio) => suma + servicio.precio, 0);
 
   const [fila] = await consultar<FilaPlanGuardado>(

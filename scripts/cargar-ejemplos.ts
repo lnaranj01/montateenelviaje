@@ -6,9 +6,9 @@ import {
   listarViajes,
 } from "@/lib/dataService";
 
-const deviceId = "dev-demo-0001";
+const deviceId = "dev-ejemplo-0001";
 
-const viajesDemo = [
+const viajesEjemplo = [
   {
     destino: "Cartagena",
     fechaInicio: "2027-01-10",
@@ -41,14 +41,14 @@ const viajesDemo = [
   },
 ] as const;
 
-async function cargarDemostracion(): Promise<void> {
+async function cargarEjemplos(): Promise<void> {
   try {
     const anteriores = await listarViajes(deviceId);
     await Promise.all(
       anteriores.map((viaje) => eliminarViaje(deviceId, viaje.id)),
     );
 
-    for (const [indice, datos] of viajesDemo.entries()) {
+    for (const [indice, datos] of viajesEjemplo.entries()) {
       const viaje = await crearViaje(deviceId, datos);
 
       if (indice === 1 || indice === 3) {
@@ -66,14 +66,14 @@ async function cargarDemostracion(): Promise<void> {
       })),
     );
   } catch (error) {
-    console.error("No se pudieron cargar los viajes de demostración.", error);
+    console.error("No se pudieron cargar los viajes de ejemplo.", error);
     process.exitCode = 1;
   } finally {
     await cerrarPoolViajes();
   }
 }
 
-void cargarDemostracion().catch((error: unknown) => {
-  console.error("Error inesperado al cargar datos de demostración.", error);
+void cargarEjemplos().catch((error: unknown) => {
+  console.error("Error inesperado al cargar los viajes de ejemplo.", error);
   process.exitCode = 1;
 });

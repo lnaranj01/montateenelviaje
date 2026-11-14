@@ -14,7 +14,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => navegacion,
 }));
 
-const viajeDemo: Viaje = {
+const viajeDePrueba: Viaje = {
   id: "viaje-test",
   destino: "Cartagena",
   fechaInicio: "2026-12-10",
@@ -107,7 +107,7 @@ describe("FormularioViaje", () => {
   it("crea un viaje con presupuesto entero y refresca mediante el callback", async () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     const fetchSimulado = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ ok: true, datos: viajeDemo }), {
+      new Response(JSON.stringify({ ok: true, datos: viajeDePrueba }), {
         status: 201,
       }),
     );
@@ -131,7 +131,7 @@ describe("FormularioViaje", () => {
     );
 
     await waitFor(() => expect(alGuardar).toHaveBeenCalledWith("crear"));
-    expect(navegacion.push).toHaveBeenCalledWith("/demo-compras");
+    expect(navegacion.push).toHaveBeenCalledWith("/planificador");
     expect(sessionStorage.getItem("organizador-planificador-datos-iniciales"))
       .toBe(
         JSON.stringify({
@@ -159,12 +159,12 @@ describe("FormularioViaje", () => {
   it("precarga y actualiza un viaje con PATCH", async () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
     const fetchSimulado = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ ok: true, datos: viajeDemo }), {
+      new Response(JSON.stringify({ ok: true, datos: viajeDePrueba }), {
         status: 200,
       }),
     );
     vi.stubGlobal("fetch", fetchSimulado);
-    renderFormulario(viajeDemo);
+    renderFormulario(viajeDePrueba);
 
     expect(screen.getByLabelText("Destino")).toHaveValue("Cartagena");
     fireEvent.click(screen.getByRole("button", { name: "Actualizar viaje" }));
@@ -237,7 +237,7 @@ describe("FormularioViaje", () => {
         ),
       ),
     );
-    renderFormulario(viajeDemo);
+    renderFormulario(viajeDePrueba);
 
     fireEvent.click(screen.getByRole("button", { name: "Actualizar viaje" }));
 
@@ -247,7 +247,7 @@ describe("FormularioViaje", () => {
 
   it("permite cancelar el modo de edición", () => {
     vi.mocked(useDeviceId).mockReturnValue("device-test");
-    renderFormulario(viajeDemo);
+    renderFormulario(viajeDePrueba);
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(alCancelarEdicion).toHaveBeenCalledOnce();

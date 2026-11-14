@@ -211,7 +211,7 @@ export function FormularioViaje({
         }
 
         alGuardar("crear");
-        router.push("/demo-compras");
+        router.push("/planificador");
       } else {
         alGuardar("editar");
       }

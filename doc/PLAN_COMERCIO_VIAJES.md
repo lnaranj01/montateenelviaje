@@ -1,6 +1,6 @@
 # Plan de comercio y reservas de viaje
 
-Estado: diseño de producto con un planificador demostrativo de presupuesto; todavía no hay búsqueda de inventario, ofertas reales ni compras en la aplicación.
+Estado: el planificador de presupuesto consulta ofertas de vuelos con Amadeus; no hay reservas, emisión de tiquetes, compras ni cobros. El inventario de hospedaje y los demás servicios pagados todavía no están integrados.
 
 ## Objetivo del producto
 
@@ -13,11 +13,11 @@ Este plan extiende el organizador existente sin reemplazar sus viajes, filtros, 
 - **Empezar por hospedaje.** Es una necesidad frecuente y hay un flujo de reserva dentro de la aplicación documentado para el inventario de alojamientos de Booking.com Demand API.
 - **Mantener proveedor y cumplimiento de la reserva.** El proveedor aporta inventario, confirma disponibilidad y procesa la reserva según el flujo y contrato habilitados. La plataforma guarda una referencia de reserva y ayuda a encontrarla; no se convierte al inicio en agencia, aerolínea, hotel ni vendedor de los servicios.
 - **Experiencia integrada, no promesa de una sola compra.** La búsqueda, comparación, revisión final y confirmación se presentan dentro de la aplicación cuando el proveedor lo permite. Cada proveedor puede requerir una confirmación o transacción independiente; no habrá carrito universal en la primera versión.
-- **Precios y monto a cobrar en COP.** La intención es enviar al proveedor un monto final en COP y aceptar tarjetas internacionales compatibles. La red de la tarjeta y el banco emisor convierten ese cargo a la moneda de la cuenta del comprador y pueden aplicar una tasa, demora o comisión. No se debe prometer aceptación de cualquier tarjeta ni una tasa exacta del banco.
+- **Precios y monto a cobrar en COP.** La intención es enviar al proveedor un monto final en COP y aceptar tarjetas internacionales compatibles. La red de la tarjeta y el banco emisor convierten ese cargo a la moneda de la cuenta del comprador y pueden aplicar tasas o comisiones, con un plazo de conversión variable. No se debe prometer aceptación de cualquier tarjeta ni una tasa exacta del banco.
 - **No fingir conversión ni disponibilidad.** Antes de mostrar una tarifa, verificar la moneda de la cotización, el monto final, la vigencia, la tarifa de cambio y los métodos de pago disponibles en el contrato real. Si no se puede cobrar en COP, detener el lanzamiento de ese flujo o informar claramente la moneda que se cobrará y obtener aprobación expresa; no mostrar un equivalente estimado como si fuera el total final.
 - **No almacenar datos de tarjetas.** El cobro usa el método seguro del proveedor autorizado; los secretos y tokens son únicamente del servidor. Los pedidos se asocian a la cuenta autenticada, no solo al `device_id`.
-- **Sin socios ni cuentas de comercio actualmente.** No hay credenciales de afiliado, APIs de inventario, cuentas de vendedor ni configuración de pagos confirmadas. La siguiente tarea es obtener acceso sandbox/contrato; hasta entonces no se pueden probar precios ni compras reales.
-- **Prototipo de presupuesto disponible.** `/demo-compras` calcula importes ficticios para vuelos, hospedaje, carros, tours y artículos esenciales con base en el presupuesto diario por viajero y la duración, y permite comparar su suma con el presupuesto indicado. Al guardar un viaje desde `/viajes`, la aplicación abre el planificador con destino, fechas y presupuesto precargados, y solicita la ciudad de salida antes de mostrar los servicios. Como el organizador todavía no guarda la cantidad de viajeros, la demo usa 2 viajeros por defecto y permite ajustarlos allí. Los planes guardados se pueden reabrir con sus servicios seleccionados para modificarlos o guardar otra copia, o eliminar tras confirmación. Los montos mayores generan ejemplos de precio más altos; no son cotizaciones ni representan inventario, y no se pueden realizar reservas o compras. La demo no sustituye las integraciones definidas en las fases siguientes.
+- **Sin socios de hospedaje ni cuentas de comercio.** No hay credenciales de afiliado, APIs de inventario de alojamiento, cuentas de vendedor ni configuración de pagos confirmadas. La consulta de vuelos usa la API de Amadeus y requiere credenciales de producción para comprobar la cobertura colombiana; no habilita reservas ni compras.
+- **Planificador de presupuesto disponible.** `/planificador` consulta tarifas de vuelos con Amadeus y estima hospedaje, carros, tours y artículos esenciales según el presupuesto diario por viajero y la duración. Al guardar un viaje desde `/viajes`, la aplicación precarga destino, fechas y presupuesto, y pide la ciudad de salida. Los aeropuertos se buscan en el proveedor y se seleccionan por código IATA; las rutas nacionales se buscan y filtran sin escalas, y las internacionales muestran los tramos devueltos por Amadeus. Las tarifas pueden cambiar y no constituyen reservas. Los demás servicios siguen siendo estimaciones. Los planes se pueden reabrir, editar o eliminar tras confirmación.
 
 ## Proveedor de arranque y límites comprobados
 
@@ -27,7 +27,7 @@ Ese acceso no se presume concedido. Primero se debe tramitar con el titular del 
 
 Booking.com Demand API documenta también hospedaje, alquiler de autos, atracciones y transferencias, pero cada categoría y flujo tiene capacidades y disponibilidad propias. Las atracciones documentadas usan búsqueda y redirección; los transfers están en beta. No se habilitarán en la primera versión ni se presentarán como compras dentro de la aplicación.
 
-Vuelos requieren un proveedor y un ciclo de emisión, cambios, cancelación y reembolso independiente. Los artículos esenciales son comercio minorista distinto de inventario de viajes. Ambos quedan para fases posteriores, tras evaluar sus contratos y responsabilidades.
+La consulta de aeropuertos y ofertas de vuelo está integrada con Amadeus. Antes de vender vuelos, se requiere acceso de producción, comprobar cobertura/condiciones de la oferta y definir por separado emisión, equipaje, cambios, cancelación, reembolso y soporte. Los artículos esenciales son comercio minorista distinto de inventario de viajes y quedan para fases posteriores.
 
 ## Fases propuestas
 
@@ -58,7 +58,8 @@ Vuelos requieren un proveedor y un ciclo de emisión, cambios, cancelación y re
 
 ### COM-04 · Vuelos
 
-- Evaluar por separado un agregador de vuelos, su programa de agencia/emisión, acceso a tarifas, ticketing, equipaje, cambios, cancelaciones y soporte.
+- Confirmar en producción la disponibilidad de vuelos colombianos y las condiciones de las tarifas consultadas con Amadeus.
+- Evaluar por separado el programa de agencia/emisión, ticketing, equipaje, cambios, cancelaciones y soporte; la consulta existente no reserva ni emite tiquetes.
 - No crear una reserva aérea como si fuera una compra confirmada hasta recibir confirmación de emisión del proveedor.
 - Hacer que la tarifa vuelva a validarse justo antes del pago y mostrar sus condiciones y moneda final.
 

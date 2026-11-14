@@ -16,7 +16,8 @@ vi.mock("next/navigation", () => ({
 const plan = {
   id: "00000000-0000-4000-8000-000000000010",
   origen: "Bogotá",
-  destino: "Cartagena",
+  destino:
+    "Cartagena · Aeropuerto: Aeropuerto Internacional Rafael Núñez (CTG)",
   fechaInicio: "2026-12-10",
   fechaFin: "2026-12-12",
   presupuesto: 2_000_000,
@@ -26,11 +27,11 @@ const plan = {
     {
       id: "vuelo-economico",
       categoria: "Vuelos",
-      nombre: "Vuelo nacional de muestra",
-      descripcion: "Ejemplo de vuelo.",
+      nombre: "Vuelo sin escalas estimado",
+      descripcion: "Preferencia sin escalas, no confirmada.",
       proporcionPresupuestoDiario: 0.9,
       unidad: "viajero",
-      numeroEscalas: 1,
+      numeroEscalas: 0,
       precio: 600_000,
     },
   ],
@@ -55,14 +56,18 @@ describe("PlanesGuardados", () => {
 
     render(<PlanesGuardados />);
 
-    expect(await screen.findByText("Bogotá → Cartagena")).toBeInTheDocument();
-    expect(screen.getByText("Plan guardado · no comprado")).toBeInTheDocument();
-    expect(screen.getByText("Vuelo nacional de muestra")).toBeInTheDocument();
     expect(
-      screen.getByText("Vuelo con 1 escala de ejemplo"),
+      await screen.findByText(
+        "Bogotá → Cartagena · Aeropuerto: Aeropuerto Internacional Rafael Núñez (CTG)",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Plan guardado · no comprado")).toBeInTheDocument();
+    expect(screen.getByText("Vuelo sin escalas estimado")).toBeInTheDocument();
+    expect(
+      screen.getByText("Ruta sin escalas estimada; no confirmada"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Total de ejemplo:.*1\.580\.000/),
+      screen.getByText(/Total estimado:.*1\.580\.000/),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/No hay reserva, compra ni cobro asociado/),
@@ -71,7 +76,7 @@ describe("PlanesGuardados", () => {
       screen.getByRole("button", { name: "Volver a entrar" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Eliminar plan de Cartagena" }),
+      screen.getByRole("button", { name: /^Eliminar plan de Cartagena/ }),
     ).toBeInTheDocument();
   });
 
@@ -84,7 +89,7 @@ describe("PlanesGuardados", () => {
       await screen.findByRole("button", { name: "Volver a entrar" }),
     );
 
-    expect(navegacion.push).toHaveBeenCalledWith("/demo-compras");
+    expect(navegacion.push).toHaveBeenCalledWith("/planificador");
     expect(
       JSON.parse(
         sessionStorage.getItem("organizador-planificador-datos-iniciales") ??
@@ -92,7 +97,8 @@ describe("PlanesGuardados", () => {
       ),
     ).toEqual({
       origen: "Bogotá",
-      destino: "Cartagena",
+      destino:
+        "Cartagena · Aeropuerto: Aeropuerto Internacional Rafael Núñez (CTG)",
       fechaInicio: "2026-12-10",
       fechaFin: "2026-12-12",
       presupuesto: 2_000_000,
@@ -115,7 +121,7 @@ describe("PlanesGuardados", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Eliminar plan de Cartagena",
+        name: /^Eliminar plan de Cartagena/,
       }),
     );
 
@@ -130,7 +136,7 @@ describe("PlanesGuardados", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Se eliminó el plan para Cartagena."),
+        screen.getByText(/Se eliminó el plan para Cartagena/),
       ).toBeInTheDocument();
     });
     expect(fetchSimulado).toHaveBeenLastCalledWith(

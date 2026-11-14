@@ -2,14 +2,14 @@ import { crearClientePostgres } from "./db-client.mjs";
 
 const opciones = new Map([
   ["--prueba", "dev-test%"],
-  ["--demo", "dev-demo%"],
+  ["--ejemplos", "dev-ejemplo%"],
 ]);
 
 const opcion = process.argv[2];
 const prefijo = opciones.get(opcion);
 
 if (!prefijo || process.argv.length !== 3) {
-  console.error("Uso: npm run db:limpiar -- --prueba|--demo");
+  console.error("Uso: npm run db:limpiar -- --prueba|--ejemplos");
   process.exitCode = 1;
 } else {
   const { cliente, nombreUrl } = await crearClientePostgres();

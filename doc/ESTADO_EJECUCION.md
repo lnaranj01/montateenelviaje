@@ -11,7 +11,7 @@
 | P06 Interfaz base y lista                                | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (45 pruebas en 14 archivos; 3 nuevas de lista)                                        | 2026-10-31      |
 | P07 Formulario, editar, eliminar, completar y aceptación | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (55 pruebas en 16 archivos; flujo BD 14 OK, 0 fallas)                                 | 2026-10-31      |
 | P08 Opcional: filtros y resumen                          | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (60 pruebas en 18 archivos; aceptación A-15 en Vercel)                                | 2026-11-07      |
-| Planes demo guardados                                    | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (74 pruebas en 22 archivos; ESLint enfocado sin advertencias)                         | 2026-11-07      |
+| Planes guardados                                         | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (74 pruebas en 22 archivos; ESLint enfocado sin advertencias)                         | 2026-11-07      |
 
 ## Bitácora
 
@@ -72,20 +72,20 @@
 
 ### P04 · Datos: viajes
 
-- **Archivos creados:** `src/lib/datos/tipos.ts`, `src/lib/datos/viajes.ts`, `scripts/limpiar-prueba.mjs`, `scripts/probar-flujo.ts`, `scripts/cargar-demo.ts`, `scripts/tsconfig.scripts.json`, `scripts/server-only.ts`, `doc/checkpoints/FASE_4_COMPLETADA.md`.
+- **Archivos creados:** `src/lib/datos/tipos.ts`, `src/lib/datos/viajes.ts`, `scripts/limpiar-prueba.mjs`, `scripts/probar-flujo.ts`, `scripts/cargar-ejemplos.ts`, `scripts/tsconfig.scripts.json`, `scripts/server-only.ts`, `doc/checkpoints/FASE_4_COMPLETADA.md`.
 - **Archivos modificados:** `src/lib/dataService.ts` (conserva sus exports de recuperación de contraseña y añade la fachada de viajes), `src/lib/reglas/viaje.ts` (también rechaza destinos mayores a 160 caracteres), `src/lib/db/conexion.ts` (rechaza conversiones BIGINT fuera del rango seguro), `tests/reglas/viaje.test.ts`, `package.json`, `package-lock.json`, `doc/ESTADO_ACTUAL.md`, `doc/ESTADO_EJECUCION.md`.
 - **Capa de datos:** listar (filtro opcional de estado, orden reciente/inicio y límite 500), contar, obtener por dispositivo e id, crear Planeado, editar, eliminar, alternar estado y resumir. Todas las consultas usan parámetros y filtran por `device_id`; el cambio de estado es una actualización atómica.
-- **Scripts:** `db:limpiar` acepta `--prueba` y `--demo`; `probar:flujo` usa exclusivamente `dataService`, limpia ambos dispositivos antes/después y cierra el pool; `db:demo` reemplaza la muestra del dispositivo `dev-demo-0001`.
+- **Scripts actuales:** `db:limpiar` acepta `--prueba` y `--ejemplos`; `probar:flujo` usa exclusivamente `dataService`, limpia ambos dispositivos antes/después y cierra el pool; `db:ejemplos` reemplaza los viajes de ejemplo de un dispositivo aislado.
 - **Comandos y resultados:**
   - `$env:PGSSLROOTCERT='C:\Users\Estudiantes\Downloads\prod-ca-2021.crt'; npm.cmd run probar:flujo`: 14 pasos `OK`, 0 fallas; incluye aislamiento del dispositivo, fechas y validación. Los registros de `dev-test-*` se limpiaron al finalizar.
-  - `npm.cmd run db:demo`: generó e imprimió 5 viajes (Cartagena, Medellín, Eje Cafetero, San Andrés y Bogotá), con Medellín y San Andrés completados.
+  - El cargador de ejemplos generó e imprimió cinco viajes (Cartagena, Medellín, Eje Cafetero, San Andrés y Bogotá), con Medellín y San Andrés completados.
   - `npm.cmd run db:limpiar -- --prueba`: 0 filas de prueba residuales.
   - `npm.cmd run db:verificar`: 0 fallas; tabla, checks, RLS, permisos e integridad correctos; la transacción de verificación terminó en `ROLLBACK`.
   - `npm.cmd test`: 9 archivos, 29 pruebas correctas (incluye el límite de 160 caracteres).
   - `npm.cmd run type-check`: correcto después de finalizar el build.
   - `npm.cmd run build`: correcto.
   - ESLint enfocado y `git diff --check`: correctos.
-- **TLS y muestras:** las pruebas reales usaron el certificado externo por `PGSSLROOTCERT` y mantuvieron `rejectUnauthorized: true`. Los cinco ejemplos permanecen aislados en `dev-demo-0001`; pueden borrarse con `npm.cmd run db:limpiar -- --demo`.
+- **TLS y datos de ejemplo:** las pruebas reales usaron el certificado externo por `PGSSLROOTCERT` y mantuvieron `rejectUnauthorized: true`. Los datos anteriores permanecen aislados en su dispositivo original; el cargador y limpiador actuales usan un identificador nuevo y no alteran esos registros.
 - **Pendientes:** P04 completo. La fase 4 sigue abierta hasta P05 (API).
 
 ### P05 · API de viajes
@@ -137,7 +137,7 @@
 - **Decisión de producto:** iniciar el descubrimiento técnico/comercial por hospedaje y procurar un flujo de reserva integrado donde un socio autorizado lo permita; el proveedor gestiona el inventario y cumplimiento inicial. Vuelos, transporte, actividades y artículos se incorporan en etapas separadas; no se promete un carrito universal.
 - **Documento:** el alcance, fases, moneda, seguridad, criterios de lanzamiento y dependencias están en [doc/PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md). Se consultaron documentos oficiales de Booking.com y Mercado Pago.
 - **Compras reales:** no hay acceso confirmado a socios, inventario ni credenciales sandbox/producción; no están implementadas ofertas, reservas o pagos reales. Próximo paso: tramitar acceso de socios y comprobar capacidades en sandbox antes de integrar, sin presentar ejemplos como ofertas reales.
-- **Prototipo local:** `/demo-compras`, accesible desde el enlace **Armar viaje según presupuesto (demo)** de `/viajes` y sin exigir sesión, permite ingresar destino, fechas, presupuesto y viajeros; elegir ejemplos de vuelos, hospedaje, carro, tours y artículos esenciales; y ver el total, saldo o excedente. Los precios ilustrativos ahora se escalan según el presupuesto diario por viajero y duración; con COP 50 millones se muestran importes de muestra mayores que con COP 2 millones. Los servicios y precios siguen siendo ficticios: no hay disponibilidad, reservas, envío de datos a terceros ni cobros.
+- **Planificador local:** `/planificador`, accesible desde `/viajes` y sin exigir sesión, permite ingresar destino, fechas, presupuesto y viajeros; elegir servicios estimados de vuelos, hospedaje, carro, tours y artículos esenciales; y ver el total, saldo o excedente. Los importes se escalan según el presupuesto diario por viajero y duración. No hay disponibilidad, reservas, envío de datos a terceros ni cobros.
 - **Interfaz:** se renovó el planificador con fondo azul noche, brillos azul/cian fluorescente, pasos y tarjetas con contraste mejorado, controles más claros y adaptación móvil.
 - **Verificación del prototipo:** `npm.cmd test` (64 pruebas en 19 archivos), `npm.cmd run type-check`, `npm.cmd run build`, ESLint y Prettier correctos. El navegador local verificó el diseño en escritorio y móvil sin desbordamiento horizontal; con COP 50 millones, dos viajeros y tres días, los ejemplos muestran COP 15 millones para vuelos y COP 10 millones para hospedaje. No se inicia ninguna operación de compra.
 - **Moneda:** COP es el monto objetivo del cobro; las redes/emisores convierten a la moneda de la tarjeta y sus tasas/comisiones y aceptación varían. No se promete “cualquier moneda”. Si el proveedor no confirma cobro final en COP, no continuar como si el requisito estuviera cumplido.
@@ -151,7 +151,7 @@
 - **Pruebas y compilación:** `npm.cmd test`: 85 pruebas en 23 archivos; `npm.cmd run type-check`, ESLint enfocado, Prettier y `npm.cmd run build` pasaron. `npm.cmd run db:verificar` terminó con 0 fallas; una consulta directa confirmó que el origen es obligatorio, su restricción existe, la migración quedó registrada y RLS continúa activo.
 - **Diagnóstico del error reportado:** pruebas, TypeScript y build no reproducían fallas. La verificación de solo lectura confirmó que `public.planes_guardados` faltaba en la base configurada; luego de aplicar la migración, `npm.cmd run db:verificar` pasó con 0 fallas y terminó con `ROLLBACK` para sus datos de prueba. Se verificaron también la tabla, restricciones, RLS y registro de migración.
 - **Reverificación de precios en cero:** la captura con Cartagena, 8–30 de noviembre, 2 viajeros y $5.000.000 COP no se reprodujo en el código ni en producción: las diez opciones mostraron importes positivos. Se agregó una prueba de regresión para esos datos; `npm.cmd test` pasó con 76 pruebas y `npm.cmd run build` terminó correctamente. La causa de la diferencia en la pestaña del usuario no quedó confirmada; el código local y producción ya incluyen el cálculo individual de cada opción.
-- **Conexión entre viajes y servicios:** al crear un viaje, el formulario conserva el guardado existente y luego abre `/demo-compras` con destino, fechas y presupuesto precargados mediante `sessionStorage` (sin incluirlos en la URL). Antes de mostrar servicios, el planificador solicita la ciudad de salida en su formulario existente. Como el organizador todavía no guarda la cantidad de viajeros, la demo usa 2 por defecto y permite ajustarlos allí; los importes son ficticios, no cotizaciones ni compras reales.
+- **Conexión entre viajes y servicios:** al crear un viaje, el formulario conserva el guardado existente y luego abre `/planificador` con destino, fechas y presupuesto precargados mediante `sessionStorage` (sin incluirlos en la URL). Antes de mostrar servicios, el planificador solicita la ciudad de salida. Como el organizador todavía no guarda la cantidad de viajeros, usa 2 por defecto y permite ajustarlos allí; los importes son estimaciones, no cotizaciones ni compras reales.
 - **Verificación del flujo:** las pruebas confirman que el formulario guarda el viaje antes de navegar, que el planificador precarga los datos, solicita la ciudad de salida antes de mostrar servicios y que un error al guardar no redirige. `npm.cmd test`: 78 pruebas en 22 archivos; `npm.cmd run type-check`, ESLint enfocado y `npm.cmd run build` correctos.
 - **Acciones de planes guardados:** cada tarjeta permite volver al planificador con origen, destino, fechas, presupuesto, viajeros y servicios seleccionados restaurados, o eliminar el plan tras confirmación. La nueva ruta DELETE exige sesión, valida UUID y `device_id`, y elimina únicamente el registro que pertenece a ese dispositivo.
 - **Verificación de reapertura y eliminación:** pruebas de interfaz/API cubren reabrir el plan con sus selecciones, cancelar o confirmar su eliminación, rechazo sin sesión, identificadores inválidos y planes no pertenecientes al dispositivo. `npm.cmd test`: 85 pruebas en 23 archivos; `npm.cmd run type-check`, ESLint enfocado y `npm.cmd run build` correctos.
@@ -164,3 +164,27 @@
 - **Documentación:** README y la guía de Resend explican el remitente requerido y cómo probar la recuperación real.
 - **Configuración pendiente en Vercel:** agregar la variable `RESEND_FROM` con un remitente de un dominio verificado en Resend en los entornos desplegados. El entorno local no tiene definida esa variable.
 - **Verificación:** las pruebas confirman que el mensaje es el enlace de recuperación, no un correo de prueba, y que el remitente verificado es obligatorio. `npm.cmd test`: 87 pruebas en 23 archivos; `npm.cmd run build`, `npm.cmd run type-check` y ESLint enfocado correctos. El build ya no incluye las rutas de correo de prueba.
+
+### Planificador de viaje y aeropuertos de llegada
+
+- **Decisión de producto:** se renombró la experiencia como “Planificador”, se ocultaron las conexiones en rutas nacionales y se añadió la indicación del aeropuerto de llegada. Como todavía no hay proveedor ni inventario de vuelos conectado, se conservaron avisos claros: precios y rutas son estimaciones, no disponibilidad ni cotizaciones.
+- **Interfaz:** la ruta principal es `/planificador`; la ruta anterior redirige. Se solicita la ciudad de destino, se sugieren aeropuertos con código IATA para ciudades frecuentes y se permite editar o escribir otro. La sugerencia no confirma una ruta aérea.
+- **Vuelos:** se agregó la selección de ruta nacional (Colombia) o internacional. La opción nacional solo presenta la preferencia sin escalas; para rutas internacionales se puede elegir una escala estimada. Ambas opciones advierten que rutas, escalas y tarifas requieren confirmación de una aerolínea.
+- **Planes guardados:** el aeropuerto de llegada se conserva junto al destino y se restaura al reabrir el plan. Los identificadores existentes de servicios se mantienen.
+- **Documentación:** README y plan comercial describen la nueva ruta, las sugerencias de aeropuertos y el límite de no tener inventario real.
+- **Verificación:** `npm.cmd test`: 89 pruebas en 23 archivos; `npm.cmd run type-check`, ESLint enfocado y `npm.cmd run build` correctos.
+
+### Limpieza de nombres del planificador
+
+- **Interfaz:** se retiró la ruta anterior y `/planificador` queda como único acceso al planificador. La ruta nacional continúa mostrando solo la opción sin escalas; las pruebas cubren también la opción internacional con conexión.
+- **Scripts:** el cargador se llama `cargar-ejemplos.ts`, usa `dev-ejemplo-0001` y se ejecuta con `npm run db:ejemplos`. El limpiador usa `--ejemplos`; los registros cargados anteriormente en la base no se modificaron.
+- **Código y documentación:** se actualizaron nombres de fixtures, README, inventario del repositorio, plan técnico, prompts y bitácora.
+- **Verificación:** `npm.cmd test`: 89 pruebas en 23 archivos; `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check` correctos.
+
+### Integración de vuelos consultados
+
+- **Proveedor:** Amadeus para autocompletar aeropuertos y consultar tarifas/ofertas en COP. Las rutas nacionales envían la opción sin escalas y se filtran también en el cliente; las rutas internacionales muestran los segmentos y conexiones devueltos.
+- **Interfaz y persistencia:** se elige un aeropuerto de llegada real del proveedor y una oferta, cuyo precio se suma al presupuesto y cuya instantánea se guarda al guardar o reabrir el plan. Hospedaje, transporte, actividades y artículos continúan siendo estimaciones; no se realizan reservas ni cobros.
+- **Configuración:** `AMADEUS_CLIENT_ID` y `AMADEUS_CLIENT_SECRET` se definen en el servidor local y en Vercel. El host de producción es el predeterminado; `AMADEUS_API_BASE_URL` permite usar el host oficial de pruebas. No se copiaron ni publicaron secretos.
+- **Verificación:** `npm.cmd test`: 96 pruebas en 27 archivos; `npm.cmd run build`, `npm.cmd run type-check`, ESLint enfocado y `git diff --check` pasan. ESLint completo todavía reporta un error preexistente en `src/app/login/page.tsx:56` (`react-hooks/set-state-in-effect`); los archivos de la integración pasan el lint enfocado.
+- **Pendiente de despliegue:** se necesitan credenciales de producción de Amadeus para confirmar la cobertura y disponibilidad de vuelos colombianos en vivo. Las credenciales de pruebas no garantizan inventario colombiano.

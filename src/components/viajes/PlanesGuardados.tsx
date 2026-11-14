@@ -10,6 +10,7 @@ import { mensajeErrorDeRespuesta } from "@/components/viajes/respuestaApi";
 import { CLAVE_DATOS_INICIALES_PLANIFICADOR } from "@/lib/config/planificador";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { formatearPesos } from "@/lib/formato";
+import { esquemaOpcionVuelo } from "@/lib/validacion/esquemas";
 import type { PlanGuardado } from "@/lib/datos/tipos";
 
 interface RespuestaPlanes {
@@ -34,19 +35,27 @@ function esPlanGuardado(valor: unknown): valor is PlanGuardado {
     Number.isSafeInteger(plan.total) &&
     Array.isArray(plan.servicios) &&
     plan.servicios.length > 0 &&
-    plan.servicios.every(
-      (servicio) =>
-        typeof servicio === "object" &&
-        servicio !== null &&
-        "id" in servicio &&
-        typeof servicio.id === "string" &&
-        "categoria" in servicio &&
-        typeof servicio.categoria === "string" &&
-        "nombre" in servicio &&
-        typeof servicio.nombre === "string" &&
-        "precio" in servicio &&
-        Number.isSafeInteger(servicio.precio),
-    )
+    plan.servicios.every((servicio) => {
+      if (
+        typeof servicio !== "object" ||
+        servicio === null ||
+        !("id" in servicio) ||
+        typeof servicio.id !== "string" ||
+        !("categoria" in servicio) ||
+        typeof servicio.categoria !== "string" ||
+        !("nombre" in servicio) ||
+        typeof servicio.nombre !== "string" ||
+        !("precio" in servicio) ||
+        !Number.isSafeInteger(servicio.precio)
+      ) {
+        return false;
+      }
+
+      return (
+        !("vuelo" in servicio) ||
+        esquemaOpcionVuelo.safeParse(servicio.vuelo).success
+      );
+    })
   );
 }
 
@@ -159,6 +168,7 @@ export function PlanesGuardados() {
   function volverAEntrar(plan: PlanGuardado) {
     setErrorAccion("");
     setMensajeAccion("");
+    const vuelo = plan.servicios.find((servicio) => servicio.vuelo)?.vuelo;
 
     try {
       sessionStorage.setItem(
@@ -170,7 +180,10 @@ export function PlanesGuardados() {
           fechaFin: plan.fechaFin,
           presupuesto: plan.presupuesto,
           viajeros: plan.viajeros,
-          servicios: plan.servicios.map((servicio) => servicio.id),
+          servicios: plan.servicios
+            .filter((servicio) => !servicio.vuelo)
+            .map((servicio) => servicio.id),
+          ...(vuelo ? { vuelo } : {}),
         }),
       );
     } catch {
@@ -180,7 +193,7 @@ export function PlanesGuardados() {
       return;
     }
 
-    router.push("/demo-compras");
+    router.push("/planificador");
   }
 
   async function confirmarEliminacion() {
@@ -282,7 +295,7 @@ export function PlanesGuardados() {
             Todavía no has guardado planes.
           </p>
           <p className="mt-1 text-sm text-texto-suave">
-            Arma un plan en el simulador y guárdalo para encontrarlo aquí.
+            Arma un plan en el planificador y guárdalo para encontrarlo aquí.
             Guardar un plan no significa que se haya comprado.
           </p>
         </Tarjeta>
@@ -321,11 +334,13 @@ export function PlanesGuardados() {
                         {servicio.nombre}
                         {servicio.categoria === "Vuelos" && (
                           <span className="mt-1 block text-xs text-texto-suave">
-                            {servicio.numeroEscalas === 0
-                              ? "Vuelo directo de ejemplo"
-                              : servicio.numeroEscalas === 1
-                                ? "Vuelo con 1 escala de ejemplo"
-                                : "Escalas no especificadas en este plan"}
+                            {servicio.vuelo
+                              ? `Tarifa consultada en Amadeus el ${servicio.vuelo.consultadoEn.slice(0, 10)}; puede cambiar. ${servicio.vuelo.escalasIda === 0 ? "Ida sin escalas." : `Ida con ${servicio.vuelo.escalasIda} escalas.`}`
+                              : servicio.numeroEscalas === 0
+                                ? "Ruta sin escalas estimada; no confirmada"
+                                : servicio.numeroEscalas === 1
+                                  ? "Ruta con 1 escala estimada; no confirmada"
+                                  : "Escalas no especificadas en este plan"}
                           </span>
                         )}
                       </span>
@@ -341,12 +356,13 @@ export function PlanesGuardados() {
                     Presupuesto: {formatearPesos(plan.presupuesto)}
                   </span>
                   <strong className="text-primario">
-                    Total de ejemplo: {formatearPesos(plan.total)}
+                    Total estimado: {formatearPesos(plan.total)}
                   </strong>
                 </div>
                 <p className="mt-3 text-xs leading-5 text-texto-suave">
-                  Importes ilustrativos. No hay reserva, compra ni cobro
-                  asociado a este plan.
+                  La tarifa de vuelo es una consulta que puede cambiar; los
+                  demás importes son estimaciones. No hay reserva, compra ni
+                  cobro asociado a este plan.
                 </p>
                 <div
                   aria-label={`Acciones para el plan de ${plan.destino}`}

@@ -160,6 +160,10 @@ export {
   eliminarPlanGuardado,
   listarPlanesGuardados,
 } from "@/lib/datos/planesGuardados";
+export {
+  buscarAeropuertos,
+  buscarVuelosAmadeus,
+} from "@/lib/datos/vuelosAmadeus";
 export type {
   DatosPlanGuardado,
   DatosViaje,

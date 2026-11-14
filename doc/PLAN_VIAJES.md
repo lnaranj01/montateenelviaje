@@ -112,7 +112,7 @@ Todo el plan funcional es el módulo mínimo: es un proyecto acotado y coherente
 | F6 | Filtrar y ordenar la lista (por estado, por fecha de inicio) | P08 |
 | F7 | Resumen: número de viajes planeados y completados, y presupuesto total | P08 |
 
-Son extensiones naturales que el plan menciona como deseables implícitamente (contador) y que enriquecen la demostración. Se construyen solo con la fase 5 cerrada. El "trabajo futuro" del plan (itinerario día por día, compartir, exportar, múltiples cuentas) queda fuera de alcance, igual que en el original.
+Son extensiones naturales que el plan menciona como deseables implícitamente (contador) y que enriquecen la experiencia. Se construyen solo con la fase 5 cerrada. El "trabajo futuro" del plan (itinerario día por día, compartir, exportar, múltiples cuentas) queda fuera de alcance, igual que en el original.
 
 La iniciativa posterior de compras y reservas de viaje se especifica por separado en [doc/PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md); no forma parte del módulo P00–P08 ya terminado y no debe confundirse con funcionalidad implementada.
 
@@ -296,7 +296,7 @@ scripts/migrar.mjs                 (solo si no existe mecanismo de migraciones)
 scripts/verificar-bd.mjs
 scripts/probar-flujo.ts
 scripts/limpiar-prueba.mjs
-scripts/cargar-demo.ts
+scripts/cargar-ejemplos.ts
 
 lib/config/viajes.ts
 lib/reglas/errores.ts

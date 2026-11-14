@@ -36,7 +36,7 @@ Versiones declaradas en `package.json`:
 | `db:verificar` | `node scripts/verificar-bd.mjs` |
 | `db:limpiar` | `node scripts/limpiar-prueba.mjs` |
 | `probar:flujo` | `tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/probar-flujo.ts` |
-| `db:demo` | `tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-demo.ts` |
+| `db:ejemplos` | `tsx --tsconfig scripts/tsconfig.scripts.json --env-file=.env.local scripts/cargar-ejemplos.ts` |
 
 `node_modules/` existe. El script `dev` intenta renovar `VERCEL_OIDC_TOKEN` desde Vercel y escribirlo en `.env.local`; para la prueba local de P00 se inició Next directamente. Los scripts de base usan `PGSSLROOTCERT` (si se define) para verificar el certificado TLS de PostgreSQL.
 
@@ -86,7 +86,7 @@ scripts/
 ├── migrar.mjs
 ├── verificar-bd.mjs
 ├── apply-profiles-migration.mjs
-├── cargar-demo.ts
+├── cargar-ejemplos.ts
 ├── limpiar-prueba.mjs
 ├── probar-flujo.ts
 ├── server-only.ts
@@ -182,7 +182,7 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 | `src/app/page.tsx` | Landing protegida en cliente: comprueba usuario, envía al login si no hay sesión, ofrece funciones de la aplicación, cierre de sesión y enlace a `/viajes`; el enlace administrativo depende del rol. |
 | `src/components/viajes` | Navegación autenticada, formulario de crear/editar, contador, tarjetas con completar/reactivar y eliminación confirmada, insignia de estado y lista cliente con carga/error/estado vacío. |
 | `doc/ACEPTACION.md` | Casos A-01 a A-15 documentados; A-01 a A-14 pendientes de ejecución en el despliegue de Vercel y A-15 pendiente de P08. |
-| Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. P04 deja cinco viajes demo aislados bajo `device_id = dev-demo-0001`; `npm run db:limpiar -- --demo` los elimina. |
+| Tabla `public.viajes` | Existe con columnas `id UUID`, `device_id VARCHAR(64)`, `destino VARCHAR(160)`, `fecha_inicio DATE`, `fecha_fin DATE`, `presupuesto INTEGER`, `completado BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`. Tiene las tres restricciones del plan, RLS activo, cero políticas y permisos revocados a `anon`/`authenticated`. El cargador de ejemplos conserva cinco viajes aislados; `npm run db:limpiar -- --ejemplos` elimina los creados con el identificador actual del cargador. |
 
 ## 12. Decisiones derivadas
 
@@ -200,4 +200,4 @@ Vitest `^5.0.0` (`vitest.config.ts`). El proyecto raíz ejecuta pruebas en Node 
 
 ## 14. Iniciativa de comercio de viajes
 
-El 7 de noviembre de 2026 se solicitó ampliar el producto con compras de vuelos, hospedaje, transporte, actividades y artículos esenciales. La fase de producto recomienda iniciar por hospedaje con un socio autorizado, buscar una reserva integrada cuando el contrato lo permita y presentar/cobrar en COP, con tarjetas internacionales sujetas a la aceptación y conversión del emisor. Aún no hay socio, credenciales sandbox ni funciones de búsqueda, reserva o pago implementadas. El alcance y las dependencias están en [PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md).
+El planificador consulta aeropuertos y ofertas de vuelo a Amadeus, filtra las rutas nacionales para que sean directas y permite guardar la oferta como una instantánea del plan. La tarifa puede cambiar y no constituye una reserva: no hay emisión de tiquetes, hospedajes, compras ni cobros implementados. Los demás servicios siguen siendo estimaciones. El plan de producto, los requisitos de acceso y los límites de compra están en [PLAN_COMERCIO_VIAJES.md](./PLAN_COMERCIO_VIAJES.md).
