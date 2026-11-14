@@ -15,7 +15,7 @@ export const MENSAJES: Record<CodigoError, string> = {
   VIAJE_NO_ENCONTRADO: "El viaje no existe.",
   FECHA_FIN_ANTERIOR: "La fecha de fin no puede ser anterior a la de inicio.",
   AMADEUS_NO_CONFIGURADO:
-    "La búsqueda de vuelos todavía no está configurada. Contacta al administrador.",
+    "Faltan AMADEUS_CLIENT_ID y AMADEUS_CLIENT_SECRET. Configúralas en las variables de entorno del servidor y vuelve a desplegar.",
   AMADEUS_NO_DISPONIBLE:
     "No se pudo consultar el proveedor de vuelos. Inténtalo de nuevo más tarde.",
   ERROR_INTERNO: "Ocurrió un error inesperado. Intente de nuevo.",

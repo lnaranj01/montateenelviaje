@@ -315,6 +315,30 @@ describe("PlanificadorViaje", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("explica qué credenciales faltan cuando Amadeus no está configurado", async () => {
+    const mensaje =
+      "Faltan AMADEUS_CLIENT_ID y AMADEUS_CLIENT_SECRET. Configúralas en las variables de entorno del servidor y vuelve a desplegar.";
+    fetchFalso.mockImplementationOnce(async () =>
+      respuestaJson(
+        {
+          ok: false,
+          error: {
+            codigo: "AMADEUS_NO_CONFIGURADO",
+            mensaje,
+            detalles: null,
+          },
+        },
+        503,
+      ),
+    );
+    render(<PlanificadorViaje />);
+    fireEvent.change(screen.getByLabelText("Ciudad y aeropuerto de salida"), {
+      target: { value: "Santa Marta" },
+    });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(mensaje);
+  });
+
   it("rechaza fechas en las que el regreso es anterior a la ida", async () => {
     render(<PlanificadorViaje />);
     await seleccionarAeropuerto("Ciudad y aeropuerto de salida", "Bogotá", "BOG");
