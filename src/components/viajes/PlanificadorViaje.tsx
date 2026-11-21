@@ -882,7 +882,9 @@ export function PlanificadorViaje() {
                                   <span className="text-xs text-slate-400">
                                     Consultado el{" "}
                                     {oferta.consultadoEn.slice(0, 10)} · Tarifa
-                                    sujeta a cambios; no es una reserva.
+                                    {oferta.id.startsWith("ejemplo-")
+                                      ? " ilustrativa; no está confirmada ni es una reserva."
+                                      : " sujeta a cambios; no es una reserva."}
                                   </span>
                                   <Boton
                                     aria-label={`${elegida ? "Quitar" : "Elegir"} vuelo ${oferta.aerolinea} ${vuelosIda}`}

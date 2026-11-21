@@ -236,6 +236,132 @@ function mapearSegmento(
   };
 }
 
+function crearOfertaIlustrativa(
+  datos: {
+    origen: string;
+    destino: string;
+    fechaIda: string;
+    fechaRegreso?: string | undefined;
+    viajeros: number;
+    tipoRuta: TipoRutaVuelo;
+  },
+  opciones: {
+    id: string;
+    aerolinea: string;
+    codigoAerolinea: string;
+    numeroVuelo: string;
+    precioPorPersona: number;
+    escalas: number;
+  },
+): OpcionVuelo {
+  const segmentosIda: SegmentoVuelo[] =
+    opciones.escalas > 0
+      ? [
+          {
+            aerolinea: opciones.aerolinea,
+            codigoAerolinea: opciones.codigoAerolinea,
+            numeroVuelo: opciones.numeroVuelo,
+            origenCodigo: datos.origen,
+            destinoCodigo: "PTY",
+            salida: `${datos.fechaIda}T08:00:00Z`,
+            llegada: `${datos.fechaIda}T11:00:00Z`,
+            duracion: "PT3H",
+          },
+          {
+            aerolinea: opciones.aerolinea,
+            codigoAerolinea: opciones.codigoAerolinea,
+            numeroVuelo: String(Number(opciones.numeroVuelo) + 1),
+            origenCodigo: "PTY",
+            destinoCodigo: datos.destino,
+            salida: `${datos.fechaIda}T12:30:00Z`,
+            llegada: `${datos.fechaIda}T17:30:00Z`,
+            duracion: "PT5H",
+          },
+        ]
+      : [
+          {
+            aerolinea: opciones.aerolinea,
+            codigoAerolinea: opciones.codigoAerolinea,
+            numeroVuelo: opciones.numeroVuelo,
+            origenCodigo: datos.origen,
+            destinoCodigo: datos.destino,
+            salida: `${datos.fechaIda}T08:00:00Z`,
+            llegada: `${datos.fechaIda}T10:30:00Z`,
+            duracion: "PT2H30M",
+          },
+        ];
+
+  const segmentosRegreso: SegmentoVuelo[] = datos.fechaRegreso
+    ? [
+        {
+          aerolinea: opciones.aerolinea,
+          codigoAerolinea: opciones.codigoAerolinea,
+          numeroVuelo: String(Number(opciones.numeroVuelo) + 10),
+          origenCodigo: datos.destino,
+          destinoCodigo: datos.origen,
+          salida: `${datos.fechaRegreso}T16:00:00Z`,
+          llegada: `${datos.fechaRegreso}T18:30:00Z`,
+          duracion: "PT2H30M",
+        },
+      ]
+    : [];
+
+  return {
+    id: opciones.id,
+    tipoRuta: datos.tipoRuta,
+    aerolinea: opciones.aerolinea,
+    segmentosIda,
+    segmentosRegreso,
+    escalasIda: segmentosIda.length - 1,
+    escalasRegreso:
+      segmentosRegreso.length > 0 ? segmentosRegreso.length - 1 : null,
+    precio: opciones.precioPorPersona * datos.viajeros,
+    moneda: "COP",
+    consultadoEn: new Date().toISOString(),
+  };
+}
+
+function crearOfertasIlustrativas(datos: {
+  origen: string;
+  destino: string;
+  fechaIda: string;
+  fechaRegreso?: string | undefined;
+  viajeros: number;
+  tipoRuta: TipoRutaVuelo;
+}): OpcionVuelo[] {
+  if (datos.tipoRuta === "nacional") {
+    return [
+      crearOfertaIlustrativa(datos, {
+        id: "ejemplo-nacional-directo",
+        aerolinea: "Avianca",
+        codigoAerolinea: "AV",
+        numeroVuelo: "123",
+        precioPorPersona: 300_000,
+        escalas: 0,
+      }),
+    ];
+  }
+
+  return [
+    crearOfertaIlustrativa(datos, {
+      id: "ejemplo-internacional-directo",
+      aerolinea: "Avianca",
+      codigoAerolinea: "AV",
+      numeroVuelo: "300",
+      precioPorPersona: 726_000,
+      escalas: 0,
+    }),
+    crearOfertaIlustrativa(datos, {
+      id: "ejemplo-internacional-escala",
+      aerolinea: "Iberia",
+      codigoAerolinea: "IB",
+      numeroVuelo: "200",
+      precioPorPersona: 520_000,
+      escalas: 1,
+    }),
+  ];
+}
+
 export async function buscarVuelosAmadeus(datos: {
   origen: string;
   destino: string;
@@ -244,6 +370,18 @@ export async function buscarVuelosAmadeus(datos: {
   viajeros: number;
   tipoRuta: TipoRutaVuelo;
 }): Promise<OpcionVuelo[]> {
+  try {
+    obtenerConfiguracion();
+  } catch (error) {
+    if (
+      error instanceof ErrorDeNegocio &&
+      error.codigo === "AMADEUS_NO_CONFIGURADO"
+    ) {
+      return crearOfertasIlustrativas(datos);
+    }
+    throw error;
+  }
+
   const parametros = new URLSearchParams({
     originLocationCode: datos.origen,
     destinationLocationCode: datos.destino,
@@ -261,9 +399,24 @@ export async function buscarVuelosAmadeus(datos: {
     parametros.set("nonStop", "true");
   }
 
-  const respuesta = esquemaRespuestaVuelos.safeParse(
-    await consultarAmadeus("/v2/shopping/flight-offers", parametros),
-  );
+  let respuestaProveedor: unknown;
+  try {
+    respuestaProveedor = await consultarAmadeus(
+      "/v2/shopping/flight-offers",
+      parametros,
+    );
+  } catch (error) {
+    if (
+      error instanceof ErrorDeNegocio &&
+      (error.codigo === "AMADEUS_NO_CONFIGURADO" ||
+        error.codigo === "AMADEUS_NO_DISPONIBLE")
+    ) {
+      return crearOfertasIlustrativas(datos);
+    }
+    throw error;
+  }
+
+  const respuesta = esquemaRespuestaVuelos.safeParse(respuestaProveedor);
 
   if (!respuesta.success) {
     console.error("Amadeus devolvió ofertas de vuelos con formato inválido.");

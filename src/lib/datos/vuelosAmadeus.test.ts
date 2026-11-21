@@ -147,4 +147,30 @@ describe("integración de vuelos con Amadeus", () => {
       { codigo: "AMADEUS_NO_CONFIGURADO" },
     );
   });
+
+  it("devuelve vuelos ilustrativos si faltan las credenciales privadas", async () => {
+    vi.stubEnv("AMADEUS_CLIENT_ID", "");
+    vi.stubEnv("AMADEUS_CLIENT_SECRET", "");
+
+    const { buscarVuelosAmadeus } = await import(
+      "@/lib/datos/vuelosAmadeus"
+    );
+    const ofertas = await buscarVuelosAmadeus({
+      origen: "SMR",
+      destino: "CTG",
+      fechaIda: "2026-12-10",
+      fechaRegreso: "2026-12-12",
+      viajeros: 2,
+      tipoRuta: "nacional",
+    });
+
+    expect(ofertas).toHaveLength(1);
+    expect(ofertas[0]).toMatchObject({
+      id: "ejemplo-nacional-directo",
+      tipoRuta: "nacional",
+      escalasIda: 0,
+      precio: 600_000,
+      moneda: "COP",
+    });
+  });
 });

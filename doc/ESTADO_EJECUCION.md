@@ -13,6 +13,7 @@
 | P08 Opcional: filtros y resumen                          | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (60 pruebas en 18 archivos; aceptación A-15 en Vercel)                                | 2026-11-07      |
 | Planes guardados                                         | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (74 pruebas en 22 archivos; ESLint enfocado sin advertencias)                         | 2026-11-07      |
 | Respaldo local de aeropuertos                            | completado | Correcto (`npm.cmd run build`)                           | Correcto (97 pruebas en 27 archivos)                                                            | 2026-11-21      |
+| Respaldo funcional de consulta de vuelos                 | completado | Correcto (`npm.cmd run build`)                           | Correcto (98 pruebas en 27 archivos)                                                            | 2026-11-21      |
 
 ## Bitácora
 
@@ -202,3 +203,10 @@
 - **Cobertura:** incluye ciudades colombianas para rutas nacionales y ciudades principales para rutas internacionales. El usuario puede escribir, ver opciones y seleccionar el aeropuerto.
 - **Interfaz:** el campo continúa exigiendo una selección real del catálogo antes de consultar vuelos.
 - **Verificación:** `npm.cmd test`: 97 pruebas en 27 archivos; `npm.cmd run build` correcto. El respaldo mantiene la página usable, pero las ofertas reales siguen pendientes de configurar las credenciales de Amadeus.
+
+### Consulta funcional sin credenciales de Amadeus
+
+- **Corrección:** al consultar vuelos sin credenciales o si el proveedor no está disponible, el planificador muestra resultados ilustrativos en lugar del mensaje técnico de variables faltantes.
+- **Claridad:** las tarjetas indican que la tarifa es ilustrativa, no está confirmada y no representa una reserva.
+- **Cobertura:** la respuesta nacional incluye un vuelo directo; la internacional incluye opciones directa y con una escala ilustrativa. El precio se calcula por la cantidad de viajeros.
+- **Verificación:** `npm.cmd test`: 98 pruebas en 27 archivos; `npm.cmd run build` correcto.
