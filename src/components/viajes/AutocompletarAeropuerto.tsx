@@ -52,6 +52,42 @@ function etiquetaAeropuerto(aeropuerto: Aeropuerto): string {
   return `${aeropuerto.ciudad} — ${aeropuerto.nombre} (${aeropuerto.codigo})`;
 }
 
+const aeropuertosLocales: Aeropuerto[] = [
+  { codigo: "BOG", nombre: "El Dorado International Airport", ciudad: "Bogotá", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "CTG", nombre: "Rafael Núñez International Airport", ciudad: "Cartagena", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "MDE", nombre: "José María Córdova International Airport", ciudad: "Medellín", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "CLO", nombre: "Alfonso Bonilla Aragón International Airport", ciudad: "Cali", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "BAQ", nombre: "Ernesto Cortissoz International Airport", ciudad: "Barranquilla", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "SMR", nombre: "Simón Bolívar International Airport", ciudad: "Santa Marta", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "ADZ", nombre: "Gustavo Rojas Pinilla International Airport", ciudad: "San Andrés", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "PEI", nombre: "Matecaña International Airport", ciudad: "Pereira", pais: "Colombia", codigoPais: "CO" },
+  { codigo: "MAD", nombre: "Adolfo Suárez Madrid–Barajas Airport", ciudad: "Madrid", pais: "España", codigoPais: "ES" },
+  { codigo: "MIA", nombre: "Miami International Airport", ciudad: "Miami", pais: "Estados Unidos", codigoPais: "US" },
+  { codigo: "JFK", nombre: "John F. Kennedy International Airport", ciudad: "Nueva York", pais: "Estados Unidos", codigoPais: "US" },
+  { codigo: "MEX", nombre: "Benito Juárez International Airport", ciudad: "Ciudad de México", pais: "México", codigoPais: "MX" },
+  { codigo: "LIM", nombre: "Jorge Chávez International Airport", ciudad: "Lima", pais: "Perú", codigoPais: "PE" },
+];
+
+function buscarAeropuertosLocales(
+  consulta: string,
+  tipoRuta: TipoRutaVuelo,
+): Aeropuerto[] {
+  const normalizada = consulta.trim().toLocaleLowerCase("es");
+  return aeropuertosLocales.filter((aeropuerto) => {
+    if (tipoRuta === "nacional" && aeropuerto.codigoPais !== "CO") {
+      return false;
+    }
+    if (tipoRuta === "internacional" && aeropuerto.codigoPais === "CO") {
+      return false;
+    }
+    return (
+      aeropuerto.ciudad.toLocaleLowerCase("es").includes(normalizada) ||
+      aeropuerto.nombre.toLocaleLowerCase("es").includes(normalizada) ||
+      aeropuerto.codigo.toLocaleLowerCase("es").includes(normalizada)
+    );
+  });
+}
+
 export function AutocompletarAeropuerto({
   aeropuertoSeleccionado,
   alCambiar,
@@ -137,6 +173,23 @@ export function AutocompletarAeropuerto({
           });
         } catch (errorConsulta) {
           if (controlador.signal.aborted) {
+            return;
+          }
+
+          const mensaje =
+            errorConsulta instanceof Error ? errorConsulta.message : "";
+          if (
+            errorConsulta instanceof TypeError ||
+            mensaje.includes("AMADEUS_NO_CONFIGURADO") ||
+            mensaje.includes("Faltan AMADEUS")
+          ) {
+            setEstadoBusqueda({
+              consulta,
+              tipoRuta,
+              aeropuertos: buscarAeropuertosLocales(consulta, tipoRuta),
+              cargando: false,
+              error: "",
+            });
             return;
           }
 

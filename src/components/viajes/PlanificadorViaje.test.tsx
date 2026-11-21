@@ -315,7 +315,7 @@ describe("PlanificadorViaje", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("explica qué credenciales faltan cuando Amadeus no está configurado", async () => {
+  it("usa aeropuertos locales cuando Amadeus no está configurado", async () => {
     const mensaje =
       "Faltan AMADEUS_CLIENT_ID y AMADEUS_CLIENT_SECRET. Configúralas en las variables de entorno del servidor y vuelve a desplegar.";
     fetchFalso.mockImplementationOnce(async () =>
@@ -333,10 +333,13 @@ describe("PlanificadorViaje", () => {
     );
     render(<PlanificadorViaje />);
     fireEvent.change(screen.getByLabelText("Ciudad de salida"), {
-      target: { value: "Santa Marta" },
+      target: { value: "Bogotá" },
     });
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(mensaje);
+    expect(
+      await screen.findByRole("option", { name: /Bogotá.*BOG/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("rechaza fechas en las que el regreso es anterior a la ida", async () => {
