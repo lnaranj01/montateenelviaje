@@ -11,6 +11,12 @@ type FormErrors = {
   credentials?: string;
 };
 
+function getPostLoginPath(): '/viajes' | '/admin/usuarios' {
+  return new URLSearchParams(window.location.search).get('next') === '/admin/usuarios'
+    ? '/admin/usuarios'
+    : '/viajes';
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -35,7 +41,7 @@ export default function LoginPage() {
             : 'No se pudo verificar la sesión con Supabase.';
           setErrors({ credentials: message });
         } else if (data.user) {
-          router.replace('/viajes');
+          router.replace(getPostLoginPath());
         }
       })
       .catch(() => {
@@ -99,7 +105,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace('/viajes');
+      router.replace(getPostLoginPath());
     } catch {
       setErrors({ credentials: 'No se pudo conectar con Supabase. Revisa la URL y la clave publishable.' });
     } finally {
@@ -111,9 +117,12 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 text-slate-100 sm:px-6">
       <section className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
         <div className="mb-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+          <Link
+            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300 transition hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+            href="/admin/usuarios"
+          >
             Montate en el viaje
-          </p>
+          </Link>
           <h1 className="text-3xl font-black tracking-tight text-white">Qué bueno verte</h1>
           <p className="mt-2 text-sm text-slate-400">Entra para continuar organizando tu próximo viaje.</p>
         </div>

@@ -15,6 +15,7 @@
 | Respaldo local de aeropuertos                            | completado | Correcto (`npm.cmd run build`)                           | Correcto (97 pruebas en 27 archivos)                                                            | 2026-11-21      |
 | Respaldo funcional de consulta de vuelos                 | completado | Correcto (`npm.cmd run build`)                           | Correcto (98 pruebas en 27 archivos)                                                            | 2026-11-21      |
 | Acceso local desde otros dispositivos                    | completado | Correcto (`npm.cmd run build`)                           | Sesión de navegador local y rutas `/`/`/login` verificadas                                      | 2026-11-26      |
+| Acceso al administrador desde el login                   | completado | Correcto (`npm.cmd run build`)                           | Correcto (100 pruebas en 28 archivos)                                                         | 2026-11-27      |
 
 ## Bitácora
 
@@ -223,3 +224,9 @@
 
 - **Acceso público temporal:** el servidor quedó disponible mediante Cloudflare Quick Tunnel en `https://seed-alumni-powerseller-jones.trycloudflare.com`.
 - **Limitación:** la URL es temporal y depende de que la computadora siga encendida, que el servidor Next.js siga ejecutándose y que el túnel permanezca activo.
+
+### Acceso al administrador desde el login
+
+- **Interfaz:** el nombre del proyecto en `/login` enlaza al administrador de usuarios.
+- **Autenticación:** si no hay sesión, el administrador devuelve al login conservando el destino; al autenticarse se abre `/admin/usuarios`. La verificación de rol administrador se mantiene.
+- **Verificación:** `npm.cmd test`: 100 pruebas en 28 archivos; `npm.cmd run build` correcto.

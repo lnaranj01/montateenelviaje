@@ -7,7 +7,7 @@ export default async function UsersPage() {
   const context = await getAdminContext();
 
   if (!context.ok) {
-    redirect(context.status === 401 ? '/login' : '/');
+    redirect(context.status === 401 ? '/login?next=%2Fadmin%2Fusuarios' : '/');
   }
 
   return (
