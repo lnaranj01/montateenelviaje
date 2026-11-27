@@ -14,6 +14,7 @@
 | Planes guardados                                         | completado | Correcto (`npm.cmd run build`; `npm.cmd run type-check`) | Correcto (74 pruebas en 22 archivos; ESLint enfocado sin advertencias)                         | 2026-11-07      |
 | Respaldo local de aeropuertos                            | completado | Correcto (`npm.cmd run build`)                           | Correcto (97 pruebas en 27 archivos)                                                            | 2026-11-21      |
 | Respaldo funcional de consulta de vuelos                 | completado | Correcto (`npm.cmd run build`)                           | Correcto (98 pruebas en 27 archivos)                                                            | 2026-11-21      |
+| Acceso local desde otros dispositivos                    | completado | Correcto (`npm.cmd run build`)                           | Sesión de navegador local y rutas `/`/`/login` verificadas                                      | 2026-11-26      |
 
 ## Bitácora
 
@@ -210,3 +211,15 @@
 - **Claridad:** las tarjetas indican que la tarifa es ilustrativa, no está confirmada y no representa una reserva.
 - **Cobertura:** la respuesta nacional incluye un vuelo directo; la internacional incluye opciones directa y con una escala ilustrativa. El precio se calcula por la cantidad de viajeros.
 - **Verificación:** `npm.cmd test`: 98 pruebas en 27 archivos; `npm.cmd run build` correcto.
+
+### Acceso desde otros dispositivos
+
+- **Configuración:** Next.js quedó configurado para escuchar en `0.0.0.0`; `next.config.ts` permite el origen IPv4 local `192.168.1.21`.
+- **Entorno:** se restauró `.env.local` desde la configuración generada localmente para Supabase y PostgreSQL. `.env.local` permanece excluido del repositorio.
+- **Verificación:** el servidor respondió HTTP 200 y `/login` cargó desde `http://192.168.1.21:3000/login`.
+- **Uso:** el equipo y los demás dispositivos deben estar en la misma red Wi-Fi; Windows puede solicitar permitir el acceso mediante el firewall la primera vez.
+
+### Acceso público temporal
+
+- **Acceso público temporal:** el servidor quedó disponible mediante Cloudflare Quick Tunnel en `https://seed-alumni-powerseller-jones.trycloudflare.com`.
+- **Limitación:** la URL es temporal y depende de que la computadora siga encendida, que el servidor Next.js siga ejecutándose y que el túnel permanezca activo.
