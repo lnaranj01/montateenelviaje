@@ -519,55 +519,52 @@ export function PlanificadorViaje() {
   }
 
   return (
-    <div className="[--fondo-viajes:#06111f] [--superficie:#0b1c2d] [--texto:#e8f7ff] [--texto-suave:#9bb6c9] [--borde:#1a3a52] [--primario:#08749b] [--primario-suave:#102d40] [--acento:#52ddff]">
+    <div>
       <main className="relative isolate min-h-screen overflow-hidden bg-fondo-viajes px-4 py-8 text-texto sm:px-6 sm:py-12">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_12%_0%,rgba(0,190,255,0.2),transparent_38%),radial-gradient(ellipse_at_90%_35%,rgba(0,110,255,0.13),transparent_36%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_12%_0%,rgba(11,79,108,0.08),transparent_38%),radial-gradient(ellipse_at_90%_35%,rgba(242,161,4,0.06),transparent_36%)]"
         />
-        <div className="relative mx-auto grid w-full max-w-5xl gap-7">
+        <div className="relative mx-auto grid w-full max-w-6xl gap-6">
           <Link
-            className="w-fit rounded-sm text-sm font-semibold text-acento underline decoration-acento/40 underline-offset-4 transition hover:decoration-acento focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acento"
+            className="w-fit rounded-sm text-sm font-semibold text-primario underline decoration-primario/40 underline-offset-4 transition hover:decoration-primario focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acento"
             href="/viajes"
           >
             Volver a mis viajes
           </Link>
 
-          <Aviso
-            className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08] shadow-[0_0_28px_rgba(34,211,238,0.06)]"
-            tipo="informacion"
-          >
-            <span className="font-bold text-acento">VUELOS ·</span> Los
+          <Aviso tipo="informacion">
+            <span className="font-bold text-primario">VUELOS ·</span> Los
             aeropuertos y tarifas se consultan en Amadeus. Los resultados pueden
             cambiar y no crean reservas ni cobros. Hospedajes, transporte,
             actividades y artículos siguen siendo estimaciones.
           </Aviso>
           {errorPrecarga && <Aviso tipo="error">{errorPrecarga}</Aviso>}
 
-          <header className="relative overflow-hidden rounded-3xl border border-cyan-300/15 bg-gradient-to-br from-[#0d263b] via-[#0a1c2e] to-[#0b1726] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.28)] sm:p-10">
+          <header className="relative overflow-hidden rounded-2xl border border-primario/15 bg-gradient-to-br from-primario via-primario to-[#07384d] p-6 text-white shadow-[0_18px_50px_rgba(11,79,108,0.16)] sm:p-10">
             <div
               aria-hidden="true"
-              className="absolute -right-10 -top-20 size-72 rounded-full bg-cyan-400/10 blur-3xl"
+              className="absolute -right-10 -top-20 size-72 rounded-full bg-acento/15 blur-3xl"
             />
-            <p className="relative inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.08] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-acento">
-              <span className="size-1.5 rounded-full bg-acento shadow-[0_0_12px_#52ddff]" />
+            <p className="relative inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-amber-100">
+              <span className="size-1.5 rounded-full bg-acento" />
               Planifica según tu presupuesto
             </p>
             <h1 className="relative mt-5 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-6xl">
               Arma un viaje que{" "}
-              <span className="bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-amber-100 to-amber-300 bg-clip-text text-transparent">
                 se ajuste a ti.
               </span>
             </h1>
-            <p className="relative mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+            <p className="relative mt-5 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
               Organiza vuelos, hospedaje, transporte, actividades y artículos
               esenciales, y compara sus importes estimados con tu presupuesto.
             </p>
           </header>
 
-          <Tarjeta className="border-cyan-300/15 bg-[#091827]/90 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:p-8">
+          <Tarjeta className="shadow-md sm:p-8">
             <div
-              className="flex flex-wrap gap-2 border-b border-white/[0.07] pb-6 text-sm"
+              className="flex flex-wrap gap-2 border-b border-borde pb-6 text-sm"
               aria-label="Pasos"
             >
               {[
@@ -578,11 +575,11 @@ export function PlanificadorViaje() {
               ].map(([id, numero, titulo]) => (
                 <span
                   aria-current={paso === id ? "step" : undefined}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition sm:text-sm ${paso === id ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.08)]" : "border-white/[0.07] bg-white/[0.025] text-slate-400"}`}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition sm:text-sm ${paso === id ? "border-primario/30 bg-primario-suave text-primario" : "border-borde bg-superficie text-texto-suave"}`}
                   key={id}
                 >
                   <span
-                    className={paso === id ? "text-acento" : "text-slate-500"}
+                    className={paso === id ? "text-primario" : "text-texto-suave"}
                   >
                     {numero}
                   </span>
@@ -600,10 +597,10 @@ export function PlanificadorViaje() {
                   </Aviso>
                 )}
                 <div>
-                  <h2 className="text-2xl font-extrabold tracking-tight text-white">
+                  <h2 className="text-2xl font-extrabold tracking-tight text-texto">
                     Cuéntanos sobre tu viaje
                   </h2>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-texto-suave">
                     Elige aeropuertos reales y fechas para consultar vuelos.
                   </p>
                 </div>
@@ -643,7 +640,7 @@ export function PlanificadorViaje() {
                   <label className="grid max-w-sm gap-2 text-sm font-semibold">
                     Tipo de ruta
                     <select
-                      className="min-h-12 rounded-xl border border-cyan-100/10 bg-[#0d2031] px-3 py-2 text-base font-normal text-texto outline-none transition focus-visible:border-acento/70 focus-visible:ring-2 focus-visible:ring-acento/20"
+                      className="min-h-12 rounded-lg border border-borde bg-superficie px-3 py-2 text-base font-normal text-texto outline-none transition focus-visible:border-primario focus-visible:ring-2 focus-visible:ring-primario/20"
                       name="tipoRuta"
                       onChange={(evento) => {
                         const valor = evento.target.value;
@@ -665,7 +662,7 @@ export function PlanificadorViaje() {
                       <option value="internacional">Internacional</option>
                     </select>
                   </label>
-                  <p className="text-sm text-slate-400 sm:col-span-2">
+                  <p className="text-sm text-texto-suave sm:col-span-2">
                     Las rutas nacionales se buscan únicamente sin escalas y
                     con aeropuertos de Colombia.
                   </p>
@@ -711,7 +708,7 @@ export function PlanificadorViaje() {
                   <label className="grid max-w-sm gap-2 text-sm font-semibold">
                     Viajeros
                     <select
-                      className="min-h-12 rounded-xl border border-cyan-100/10 bg-[#0d2031] px-3 py-2 text-base font-normal text-texto outline-none transition focus-visible:border-acento/70 focus-visible:ring-2 focus-visible:ring-acento/20"
+                      className="min-h-12 rounded-lg border border-borde bg-superficie px-3 py-2 text-base font-normal text-texto outline-none transition focus-visible:border-primario focus-visible:ring-2 focus-visible:ring-primario/20"
                       name="viajeros"
                       onChange={(evento) => setViajeros(evento.target.value)}
                       value={viajeros}
@@ -725,7 +722,7 @@ export function PlanificadorViaje() {
                 </div>
                 {errorVuelos && <Aviso tipo="error">{errorVuelos}</Aviso>}
                 <Boton
-                  className="mt-1 min-h-12 w-full rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700 text-base shadow-[0_0_28px_rgba(14,165,233,0.22)] transition hover:from-sky-600 hover:to-cyan-600 sm:w-fit sm:px-7"
+                  className="mt-1 min-h-12 w-full text-base sm:w-fit sm:px-7"
                   disabled={buscandoVuelos}
                   type="submit"
                 >
@@ -741,23 +738,23 @@ export function PlanificadorViaje() {
               >
                 <div>
                   <h2
-                    className="text-2xl font-extrabold tracking-tight text-white"
+                    className="text-2xl font-extrabold tracking-tight text-texto"
                     id="titulo-servicios"
                   >
                     Opciones de viaje para{" "}
                     {aeropuertoLlegada?.ciudad ?? destino}
                   </h2>
-                  <p className="mt-2 text-sm text-slate-300">
+                  <p className="mt-2 text-sm text-texto-suave">
                     {fechaInicio} – {fechaFin} · {noches}{" "}
                     {noches === 1 ? "noche" : "noches"} · {viajeros}{" "}
                     {viajeros === "1" ? "viajero" : "viajeros"} · Presupuesto{" "}
                     {formatearPesos(presupuestoNumero)} COP
                   </p>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-texto-suave">
                     Las tarifas de vuelo se consultaron en Amadeus. Los demás
                     servicios se calculan con tu presupuesto y son estimados.
                   </p>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-texto-suave">
                     Llegada: {aeropuertoLlegada?.nombre} (
                     {aeropuertoLlegada?.codigo}) · {aeropuertoLlegada?.ciudad}
                   </p>
@@ -780,13 +777,13 @@ export function PlanificadorViaje() {
                       >
                         <div>
                           <h3
-                            className="flex items-center gap-3 text-lg font-bold text-white"
+                            className="flex items-center gap-3 text-lg font-bold text-texto"
                             id="titulo-vuelos"
                           >
-                            <span className="h-px w-5 bg-acento shadow-[0_0_10px_#52ddff]" />
+                            <span className="h-px w-5 bg-acento" />
                             Vuelos consultados en Amadeus
                           </h3>
-                          <p className="mt-2 text-sm text-slate-400">
+                          <p className="mt-2 text-sm text-texto-suave">
                             Tarifas para {viajeros}{" "}
                             {viajeros === "1" ? "viajero" : "viajeros"} en COP.
                             La disponibilidad y el precio pueden cambiar antes
@@ -820,22 +817,22 @@ export function PlanificadorViaje() {
 
                             return (
                               <Tarjeta
-                                className={`grid gap-4 rounded-2xl border-white/[0.08] bg-gradient-to-br from-[#0d2133] to-[#0a1928] p-5 transition ${elegida ? "border-cyan-300/55 ring-1 ring-cyan-300/20" : ""}`}
+                                className={`grid gap-4 rounded-xl border border-borde bg-superficie p-5 shadow-sm transition hover:border-primario/30 ${elegida ? "border-primario ring-2 ring-primario/15" : ""}`}
                                 key={oferta.id}
                               >
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div>
-                                    <h4 className="font-bold text-white">
+                                    <h4 className="font-bold text-texto">
                                       {oferta.aerolinea}
                                     </h4>
-                                    <p className="mt-1 text-sm text-slate-300">
+                                    <p className="mt-1 text-sm text-texto-suave">
                                       Ida: {vuelosIda} ·{" "}
                                       {oferta.escalasIda === 0
                                         ? "sin escalas"
                                         : `${oferta.escalasIda} escalas`}
                                     </p>
                                     {oferta.segmentosRegreso.length > 0 && (
-                                      <p className="mt-1 text-sm text-slate-300">
+                                      <p className="mt-1 text-sm text-texto-suave">
                                         Regreso: {vuelosRegreso} ·{" "}
                                         {oferta.escalasRegreso === 0
                                           ? "sin escalas"
@@ -843,30 +840,30 @@ export function PlanificadorViaje() {
                                       </p>
                                     )}
                                   </div>
-                                  <p className="text-xl font-extrabold text-cyan-100">
+                                  <p className="text-xl font-extrabold text-primario">
                                     {formatearPesos(oferta.precio)} COP
                                   </p>
                                 </div>
                                 <div className="grid gap-3 sm:grid-cols-2">
                                   {itinerarios.map((itinerario) => (
                                       <div
-                                        className="rounded-xl border border-cyan-100/10 bg-black/10 p-3"
+                                        className="rounded-lg border border-borde bg-fondo-viajes p-3"
                                         key={itinerario.nombre}
                                       >
-                                        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-cyan-100">
+                                        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-primario">
                                           {itinerario.nombre}
                                         </p>
                                         {itinerario.segmentos.map(
                                           (tramo, indice) => (
                                             <p
-                                              className="text-sm text-slate-200"
+                                              className="text-sm text-texto"
                                               key={`${tramo.numeroVuelo}-${indice}`}
                                             >
                                               {tramo.origenCodigo}{" "}
                                               {mostrarFechaHora(tramo.salida)}{" "}
                                               → {tramo.destinoCodigo}{" "}
                                               {mostrarFechaHora(tramo.llegada)}
-                                              <span className="block text-xs text-slate-400">
+                                              <span className="block text-xs text-texto-suave">
                                                 {tramo.aerolinea}{" "}
                                                 {tramo.codigoAerolinea}
                                                 {tramo.numeroVuelo} ·{" "}
@@ -878,8 +875,8 @@ export function PlanificadorViaje() {
                                       </div>
                                     ))}
                                 </div>
-                                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-3">
-                                  <span className="text-xs text-slate-400">
+                                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-borde pt-3">
+                                  <span className="text-xs text-texto-suave">
                                     Consultado el{" "}
                                     {oferta.consultadoEn.slice(0, 10)} · Tarifa
                                     {oferta.id.startsWith("ejemplo-")
@@ -909,19 +906,19 @@ export function PlanificadorViaje() {
                             )
                             .map((oferta) => (
                               <Tarjeta
-                                className="grid gap-3 rounded-2xl border-amber-200/20 bg-amber-300/[0.04] p-5"
+                                className="grid gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5"
                                 key={oferta.id}
                               >
                                 <div>
-                                  <h4 className="font-bold text-white">
+                                  <h4 className="font-bold text-texto">
                                     {nombreOfertaViaje(oferta)} · selección
                                     anterior
                                   </h4>
-                                  <p className="mt-1 text-sm text-slate-300">
+                                  <p className="mt-1 text-sm text-texto-suave">
                                     Este importe es una estimación guardada, no
                                     una tarifa consultada.
                                   </p>
-                                  <p className="mt-2 font-bold text-amber-100">
+                                  <p className="mt-2 font-bold text-amber-900">
                                     {formatearPesos(
                                       serviciosDisponibles.find(
                                         (servicio) => servicio.id === oferta.id,
@@ -945,10 +942,10 @@ export function PlanificadorViaje() {
                   if (categoria === "Hospedaje" && noches === 0) {
                     return (
                       <div
-                        className="grid gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5"
+                        className="grid gap-3 rounded-xl border border-borde bg-superficie p-5"
                         key={categoria}
                       >
-                        <h3 className="text-lg font-bold text-white">
+                        <h3 className="text-lg font-bold text-texto">
                           {categoria}
                         </h3>
                         <Aviso tipo="informacion">
@@ -965,8 +962,8 @@ export function PlanificadorViaje() {
 
                   return (
                     <div className="grid gap-3" key={categoria}>
-                      <h3 className="flex items-center gap-3 text-lg font-bold text-white">
-                        <span className="h-px w-5 bg-acento shadow-[0_0_10px_#52ddff]" />
+                      <h3 className="flex items-center gap-3 text-lg font-bold text-texto">
+                        <span className="h-px w-5 bg-acento" />
                         {categoria}
                       </h3>
                       <div className="grid gap-3 md:grid-cols-2">
@@ -979,27 +976,27 @@ export function PlanificadorViaje() {
 
                           return (
                             <Tarjeta
-                              className={`grid content-between gap-5 rounded-2xl border-white/[0.08] bg-gradient-to-br from-[#0d2133] to-[#0a1928] p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_16px_44px_rgba(0,170,255,0.1)] ${elegida ? "border-cyan-300/55 ring-1 ring-cyan-300/20" : ""}`}
+                              className={`grid content-between gap-5 rounded-xl border border-borde bg-superficie p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primario/30 hover:shadow-md ${elegida ? "border-primario ring-2 ring-primario/15" : ""}`}
                               key={oferta.id}
                             >
                               <div>
-                                <h4 className="font-bold text-white">
+                                <h4 className="font-bold text-texto">
                                   {nombreOferta}
                                 </h4>
-                                <p className="mt-1 text-sm text-slate-400">
+                                <p className="mt-1 text-sm text-texto-suave">
                                   {oferta.descripcion}
                                 </p>
-                                <p className="mt-3 inline-flex rounded-full border border-cyan-300/15 bg-cyan-300/[0.06] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-200/80">
+                                <p className="mt-3 inline-flex rounded-full border border-primario/15 bg-primario-suave px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-primario">
                                   Precio estimado
                                 </p>
                               </div>
-                              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-4">
-                                <p className="text-xl font-extrabold tracking-tight text-cyan-100">
+                              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-borde pt-4">
+                                <p className="text-xl font-extrabold tracking-tight text-primario">
                                   {precio === undefined
                                     ? "Precio no disponible"
                                     : `${formatearPesos(precio)} COP`}
                                 </p>
-                                <span className="w-full text-xs text-slate-500">
+                                <span className="w-full text-xs text-texto-suave">
                                   Total estimado para {viajeros}{" "}
                                   {viajeros === "1" ? "viajero" : "viajeros"} y{" "}
                                   {dias} {dias === 1 ? "día" : "días"}
@@ -1009,8 +1006,8 @@ export function PlanificadorViaje() {
                                   aria-pressed={elegida}
                                   className={
                                     elegida
-                                      ? "rounded-xl border-cyan-200/20 bg-cyan-950/60 text-cyan-100"
-                                      : "rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-800 to-cyan-800 text-white shadow-[0_0_18px_rgba(14,165,233,0.12)] hover:from-sky-700 hover:to-cyan-700"
+                                      ? "border-primario/30 bg-primario-suave text-primario"
+                                      : "border-transparent bg-primario text-white hover:bg-primario/90"
                                   }
                                   onClick={() => alternarOferta(oferta)}
                                   variante={elegida ? "secundario" : "primario"}
@@ -1026,11 +1023,11 @@ export function PlanificadorViaje() {
                   );
                 })}
 
-                <Tarjeta className="grid gap-4 rounded-2xl border-cyan-300/20 bg-gradient-to-br from-[#0d263b] to-[#0a1928] p-5 shadow-[0_0_38px_rgba(0,180,255,0.07)] sm:p-6">
+                <Tarjeta className="grid gap-4 rounded-xl border-primario/15 bg-gradient-to-br from-white to-slate-50 p-5 sm:p-6">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
-                      <h3 className="font-bold text-white">Tu presupuesto</h3>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <h3 className="font-bold text-texto">Tu presupuesto</h3>
+                      <p className="mt-1 text-sm text-texto-suave">
                         Vuelo consultado y servicios de referencia ·{" "}
                         {formatearPesos(presupuestoNumero)} COP
                       </p>
@@ -1038,10 +1035,10 @@ export function PlanificadorViaje() {
                     <output
                       aria-label="Total seleccionado"
                       aria-live="polite"
-                      className="text-2xl font-black tracking-tight text-cyan-100"
+                      className="text-2xl font-black tracking-tight text-primario"
                     >
                       {formatearPesos(totalEjemplo)}{" "}
-                      <span className="text-sm font-bold text-cyan-200/70">
+                      <span className="text-sm font-bold text-texto-suave">
                         COP
                       </span>
                     </output>
@@ -1051,11 +1048,11 @@ export function PlanificadorViaje() {
                     aria-valuemax={Math.max(presupuestoNumero, 1)}
                     aria-valuemin={0}
                     aria-valuenow={Math.min(totalEjemplo, presupuestoNumero)}
-                    className="h-3 overflow-hidden rounded-full bg-[#06111f]"
+                    className="h-3 overflow-hidden rounded-full bg-primario-suave"
                     role="meter"
                   >
                     <div
-                      className={`h-full rounded-full transition-[width] duration-500 ${superaPresupuesto ? "bg-gradient-to-r from-rose-500 to-red-400" : "bg-gradient-to-r from-sky-500 via-cyan-400 to-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.45)]"}`}
+                      className={`h-full rounded-full transition-[width] duration-500 ${superaPresupuesto ? "bg-gradient-to-r from-rose-600 to-red-500" : "bg-gradient-to-r from-primario to-emerald-500"}`}
                       style={{ width: `${porcentajeUsado}%` }}
                     />
                   </div>
@@ -1144,7 +1141,7 @@ export function PlanificadorViaje() {
                     </li>
                   ))}
                 </ul>
-                <p className="text-2xl font-black text-cyan-100">
+                <p className="text-2xl font-black text-primario">
                   Total del plan: {formatearPesos(totalEjemplo)} COP
                 </p>
                 <p>
@@ -1152,10 +1149,7 @@ export function PlanificadorViaje() {
                     ? `Excede el presupuesto por ${formatearPesos(Math.abs(saldoEjemplo))} COP.`
                     : `Quedarían ${formatearPesos(saldoEjemplo)} COP del presupuesto.`}
                 </p>
-                <Aviso
-                  className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
-                  tipo="informacion"
-                >
+                <Aviso tipo="informacion">
                   El vuelo se consultó en Amadeus y su precio puede cambiar. Los
                   demás importes son estimaciones. No se creó una reserva ni se
                   hizo una compra.
@@ -1168,26 +1162,19 @@ export function PlanificadorViaje() {
                   <Aviso tipo="error">
                     {errorGuardado}{" "}
                     {requiereSesion && (
-                      <Link
-                        className="font-bold underline underline-offset-2"
-                        href="/login"
-                      >
+                      <Link className="font-bold text-primario underline underline-offset-2" href="/login">
                         Inicia sesión y vuelve a armar el plan para guardarlo.
                       </Link>
                     )}
                   </Aviso>
                 )}
                 {mensajeGuardado && (
-                  <Aviso
-                    className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
-                    tipo="informacion"
-                  >
+                  <Aviso tipo="informacion">
                     {mensajeGuardado}
                   </Aviso>
                 )}
                 <div className="flex flex-wrap gap-3">
                   <Boton
-                    className="rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-800 to-cyan-800"
                     disabled={guardandoPlan || !deviceId}
                     onClick={() => void guardarPlan()}
                   >
@@ -1202,7 +1189,6 @@ export function PlanificadorViaje() {
                     Volver a servicios
                   </Boton>
                   <Boton
-                    className="rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700 shadow-[0_0_24px_rgba(14,165,233,0.18)]"
                     onClick={() => setPaso("finalizada")}
                   >
                     Finalizar planificación
@@ -1219,15 +1205,12 @@ export function PlanificadorViaje() {
                 <h2 className="text-xl font-bold" id="titulo-finalizada">
                   Planificación terminada
                 </h2>
-                <Aviso
-                  className="!text-cyan-100 border-cyan-400/25 bg-cyan-400/[0.08]"
-                  tipo="informacion"
-                >
+                <Aviso tipo="informacion">
                   No se compraron servicios, no se crearon reservas y no se
                   realizó ningún cobro.
                 </Aviso>
                 <Boton
-                  className="w-fit rounded-xl border-cyan-200/20 bg-gradient-to-r from-sky-700 to-cyan-700"
+                  className="w-fit"
                   onClick={reiniciar}
                 >
                   Planear otro viaje

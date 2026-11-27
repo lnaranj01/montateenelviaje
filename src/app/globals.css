@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f6f7;
+  --foreground: #1f2933;
   --primario: #0b4f6c;
   --primario-suave: #e3eef2;
   --acento: #f2a104;
@@ -34,15 +34,92 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
+  min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.auth-input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.75rem;
+  background: #f8fafb;
+  padding: 0.75rem 1rem;
+  color: var(--texto);
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.auth-input::placeholder {
+  color: #73808b;
+}
+
+.auth-input:focus-visible {
+  border-color: var(--primario);
+  background: var(--superficie);
+  box-shadow: 0 0 0 4px rgb(11 79 108 / 12%);
+}
+
+.auth-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--texto);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.auth-button {
+  display: inline-flex;
+  min-height: 3rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: var(--primario);
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.auth-button:hover:not(:disabled) {
+  background: #083f57;
+  box-shadow: 0 6px 16px rgb(11 79 108 / 18%);
+}
+
+.auth-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.auth-button:focus-visible {
+  outline: 3px solid rgb(242 161 4 / 70%);
+  outline-offset: 3px;
+}
+
+.auth-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-input,
+  .auth-button {
+    transition: none;
+  }
 }

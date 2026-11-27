@@ -230,3 +230,10 @@
 - **Interfaz:** el nombre del proyecto en `/login` enlaza al administrador de usuarios.
 - **Autenticación:** si no hay sesión, el administrador devuelve al login conservando el destino; al autenticarse se abre `/admin/usuarios`. La verificación de rol administrador se mantiene.
 - **Verificación:** `npm.cmd test`: 100 pruebas en 28 archivos; `npm.cmd run build` correcto.
+
+### Renovación visual de la aplicación
+
+- **Interfaz:** se unificó el diseño de login, registro, recuperación y cambio de contraseña; inicio, administración de usuarios, viajes y planificador. Se aplicó la paleta clara del plan técnico, con superficies, tipografía, navegación, formularios, botones, avisos, tarjetas, estados vacíos y modales consistentes.
+- **Responsive:** se ajustaron las composiciones y controles para pantallas estrechas y escritorio, conservando el flujo y las funciones existentes.
+- **Documentación:** se actualizaron el inventario de estilos y esta bitácora.
+- **Verificación:** `npm.cmd run build` correcto; `npm.cmd test`: 100 pruebas en 28 archivos correctas; `git diff --check` correcto.

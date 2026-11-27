@@ -52,23 +52,28 @@ export function PaginaViajesCliente({
   }
 
   return (
-    <main className="min-h-screen bg-fondo-viajes px-4 py-8 text-texto sm:px-6 sm:py-12">
-      <div className="mx-auto grid w-full max-w-6xl gap-8">
-        <section aria-labelledby="titulo-viajes">
-          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primario">
-            Tus planes, en un solo lugar
-          </p>
-          <h1
-            className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl"
-            id="titulo-viajes"
-          >
-            Tus viajes
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-texto-suave">
-            Organiza tus destinos, fechas y presupuesto en un solo lugar.
-          </p>
+    <main className="min-h-screen bg-fondo-viajes px-4 py-7 text-texto sm:px-6 sm:py-10">
+      <div className="mx-auto grid w-full max-w-6xl gap-7">
+        <section
+          aria-labelledby="titulo-viajes"
+          className="flex flex-col gap-5 rounded-xl border border-borde bg-superficie p-5 shadow-sm sm:flex-row sm:items-end sm:justify-between sm:p-7"
+        >
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primario">
+              Tus planes, en un solo lugar
+            </p>
+            <h1
+              className="mt-2 text-3xl font-black tracking-tight sm:text-4xl"
+              id="titulo-viajes"
+            >
+              Tus viajes
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-texto-suave">
+              Organiza tus destinos, fechas y presupuesto en un solo lugar.
+            </p>
+          </div>
           <Link
-            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-primario px-4 py-2 text-sm font-semibold text-primario transition-colors hover:bg-primario-suave focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-primario px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primario/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento"
             href="/planificador"
           >
             Planear según mi presupuesto

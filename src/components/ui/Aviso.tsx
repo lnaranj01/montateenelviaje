@@ -8,8 +8,8 @@ interface AvisoProps extends HTMLAttributes<HTMLDivElement> {
 
 const clasesPorTipo: Record<TipoAviso, string> = {
   informacion: "border-primario/30 bg-primario-suave text-primario",
-  error: "border-peligro/30 bg-red-50 text-red-900",
-  exito: "border-completado/30 bg-green-50 text-green-900",
+  error: "border-peligro/25 bg-red-50 text-red-900",
+  exito: "border-completado/25 bg-green-50 text-green-900",
 };
 
 export function Aviso({
@@ -21,7 +21,7 @@ export function Aviso({
   return (
     <div
       {...props}
-      className={`rounded-lg border px-4 py-3 text-sm ${clasesPorTipo[tipo]} ${className}`}
+      className={`rounded-lg border px-4 py-3 text-sm leading-6 ${clasesPorTipo[tipo]} ${className}`}
       role={tipo === "error" ? "alert" : "status"}
     >
       {children}

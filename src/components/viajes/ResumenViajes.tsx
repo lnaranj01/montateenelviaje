@@ -153,32 +153,32 @@ export function ResumenViajes({ deviceRevision, estado }: ResumenViajesProps) {
           </Aviso>
         )}
         {resumen && !mensajeError && (
-          <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <div>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-lg bg-fondo-viajes p-3">
               <dt className="text-sm text-texto-suave">Total de viajes</dt>
               <dd className="mt-1 text-xl font-bold text-texto">
                 {resumen.total}
               </dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-fondo-viajes p-3">
               <dt className="text-sm text-texto-suave">Planeados</dt>
               <dd className="mt-1 text-xl font-bold text-texto">
                 {resumen.planeados}
               </dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-fondo-viajes p-3">
               <dt className="text-sm text-texto-suave">Completados</dt>
               <dd className="mt-1 text-xl font-bold text-texto">
                 {resumen.completados}
               </dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-fondo-viajes p-3">
               <dt className="text-sm text-texto-suave">Presupuesto total</dt>
               <dd className="mt-1 text-xl font-bold text-primario">
                 {formatearPesos(resumen.presupuestoTotal)}
               </dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-fondo-viajes p-3">
               <dt className="text-sm text-texto-suave">
                 Viajes en este filtro
               </dt>

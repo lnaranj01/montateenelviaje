@@ -178,8 +178,8 @@ export function ListaViajes({
         className="grid gap-4 md:grid-cols-2"
         role="status"
       >
-        <div className="h-52 animate-pulse rounded-lg border border-borde bg-white" />
-        <div className="hidden h-52 animate-pulse rounded-lg border border-borde bg-white md:block" />
+        <div className="h-52 animate-pulse rounded-lg border border-borde bg-superficie shadow-sm" />
+        <div className="hidden h-52 animate-pulse rounded-lg border border-borde bg-superficie shadow-sm md:block" />
         <span className="sr-only">Cargando tus viajes</span>
       </div>
     );

@@ -9,13 +9,13 @@ interface BotonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const clasesPorVariante: Record<VarianteBoton, string> = {
   primario:
-    "border-transparent bg-primario text-white hover:bg-primario/90 disabled:bg-primario/60",
+    "border-transparent bg-primario text-white shadow-sm shadow-primario/15 hover:bg-primario/90 hover:shadow-md disabled:bg-primario/60",
   secundario:
-    "border-borde bg-superficie text-texto hover:bg-primario-suave disabled:bg-fondo-viajes",
+    "border-borde bg-superficie text-texto hover:border-primario/40 hover:bg-primario-suave disabled:bg-fondo-viajes",
   peligro:
     "border-transparent bg-peligro text-white hover:bg-peligro/90 disabled:bg-peligro/60",
   fantasma:
-    "border-transparent bg-transparent text-current hover:bg-primario-suave/20",
+    "border-transparent bg-transparent text-current hover:bg-primario-suave",
 };
 
 export function Boton({
@@ -31,7 +31,7 @@ export function Boton({
     <button
       {...props}
       aria-busy={cargando || undefined}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento disabled:cursor-not-allowed disabled:opacity-60 ${clasesPorVariante[variante]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-all duration-150 active:translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento disabled:cursor-not-allowed disabled:opacity-60 ${clasesPorVariante[variante]} ${className}`}
       disabled={disabled || cargando}
       type={type}
     >

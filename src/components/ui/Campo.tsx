@@ -37,7 +37,7 @@ export function Campo({
         {...props}
         aria-describedby={descripciones || undefined}
         aria-invalid={Boolean(error) || undefined}
-        className={`min-h-11 rounded-lg border border-borde bg-superficie px-3 py-2 text-base text-texto outline-none placeholder:text-texto-suave focus-visible:border-primario focus-visible:ring-2 focus-visible:ring-primario/20 ${error ? "border-peligro" : ""} ${className}`}
+        className={`min-h-11 rounded-lg border border-borde bg-superficie px-3 py-2 text-base text-texto outline-none placeholder:text-texto-suave transition-colors focus-visible:border-primario focus-visible:ring-2 focus-visible:ring-primario/20 ${error ? "border-peligro" : ""} ${className}`}
         id={idCampo}
       />
       {ayuda && (

@@ -53,19 +53,97 @@ function etiquetaAeropuerto(aeropuerto: Aeropuerto): string {
 }
 
 const aeropuertosLocales: Aeropuerto[] = [
-  { codigo: "BOG", nombre: "El Dorado International Airport", ciudad: "Bogotá", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "CTG", nombre: "Rafael Núñez International Airport", ciudad: "Cartagena", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "MDE", nombre: "José María Córdova International Airport", ciudad: "Medellín", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "CLO", nombre: "Alfonso Bonilla Aragón International Airport", ciudad: "Cali", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "BAQ", nombre: "Ernesto Cortissoz International Airport", ciudad: "Barranquilla", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "SMR", nombre: "Simón Bolívar International Airport", ciudad: "Santa Marta", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "ADZ", nombre: "Gustavo Rojas Pinilla International Airport", ciudad: "San Andrés", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "PEI", nombre: "Matecaña International Airport", ciudad: "Pereira", pais: "Colombia", codigoPais: "CO" },
-  { codigo: "MAD", nombre: "Adolfo Suárez Madrid–Barajas Airport", ciudad: "Madrid", pais: "España", codigoPais: "ES" },
-  { codigo: "MIA", nombre: "Miami International Airport", ciudad: "Miami", pais: "Estados Unidos", codigoPais: "US" },
-  { codigo: "JFK", nombre: "John F. Kennedy International Airport", ciudad: "Nueva York", pais: "Estados Unidos", codigoPais: "US" },
-  { codigo: "MEX", nombre: "Benito Juárez International Airport", ciudad: "Ciudad de México", pais: "México", codigoPais: "MX" },
-  { codigo: "LIM", nombre: "Jorge Chávez International Airport", ciudad: "Lima", pais: "Perú", codigoPais: "PE" },
+  {
+    codigo: "BOG",
+    nombre: "El Dorado International Airport",
+    ciudad: "Bogotá",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "CTG",
+    nombre: "Rafael Núñez International Airport",
+    ciudad: "Cartagena",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "MDE",
+    nombre: "José María Córdova International Airport",
+    ciudad: "Medellín",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "CLO",
+    nombre: "Alfonso Bonilla Aragón International Airport",
+    ciudad: "Cali",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "BAQ",
+    nombre: "Ernesto Cortissoz International Airport",
+    ciudad: "Barranquilla",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "SMR",
+    nombre: "Simón Bolívar International Airport",
+    ciudad: "Santa Marta",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "ADZ",
+    nombre: "Gustavo Rojas Pinilla International Airport",
+    ciudad: "San Andrés",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "PEI",
+    nombre: "Matecaña International Airport",
+    ciudad: "Pereira",
+    pais: "Colombia",
+    codigoPais: "CO",
+  },
+  {
+    codigo: "MAD",
+    nombre: "Adolfo Suárez Madrid–Barajas Airport",
+    ciudad: "Madrid",
+    pais: "España",
+    codigoPais: "ES",
+  },
+  {
+    codigo: "MIA",
+    nombre: "Miami International Airport",
+    ciudad: "Miami",
+    pais: "Estados Unidos",
+    codigoPais: "US",
+  },
+  {
+    codigo: "JFK",
+    nombre: "John F. Kennedy International Airport",
+    ciudad: "Nueva York",
+    pais: "Estados Unidos",
+    codigoPais: "US",
+  },
+  {
+    codigo: "MEX",
+    nombre: "Benito Juárez International Airport",
+    ciudad: "Ciudad de México",
+    pais: "México",
+    codigoPais: "MX",
+  },
+  {
+    codigo: "LIM",
+    nombre: "Jorge Chávez International Airport",
+    ciudad: "Lima",
+    pais: "Perú",
+    codigoPais: "PE",
+  },
 ];
 
 function buscarAeropuertosLocales(
@@ -263,14 +341,14 @@ export function AutocompletarAeropuerto({
         )}
       {aeropuertos.length > 0 && (
         <ul
-          className="grid list-none gap-1 rounded-xl border border-cyan-100/15 bg-[#0d2031] p-2 shadow-xl"
+          className="grid list-none gap-1 rounded-xl border border-borde bg-superficie p-2 shadow-xl"
           id={`${id}-opciones`}
           role="listbox"
         >
           {aeropuertos.map((aeropuerto) => (
             <li key={aeropuerto.codigo} role="presentation">
               <button
-                className="w-full rounded-lg px-3 py-2 text-left text-sm text-texto transition hover:bg-cyan-300/10 focus-visible:outline-2 focus-visible:outline-acento"
+                className="w-full rounded-lg px-3 py-2 text-left text-sm text-texto transition hover:bg-primario-suave focus-visible:outline-2 focus-visible:outline-acento"
                 onClick={() =>
                   alCambiar(etiquetaAeropuerto(aeropuerto), aeropuerto)
                 }

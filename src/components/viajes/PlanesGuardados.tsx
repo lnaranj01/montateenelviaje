@@ -305,7 +305,7 @@ export function PlanesGuardados() {
         <ul className="grid list-none gap-4 p-0 md:grid-cols-2">
           {planes.map((plan) => (
             <li key={plan.id}>
-              <Tarjeta className="h-full rounded-2xl border-cyan-900/15 bg-gradient-to-br from-white to-slate-50">
+              <Tarjeta className="h-full rounded-xl border-primario/15 bg-gradient-to-br from-white to-slate-50">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-texto">
@@ -316,7 +316,7 @@ export function PlanesGuardados() {
                       {plan.viajeros === 1 ? "viajero" : "viajeros"}
                     </p>
                   </div>
-                  <span className="rounded-full border border-cyan-700/15 bg-cyan-700/[0.06] px-3 py-1 text-xs font-bold text-primario">
+                  <span className="rounded-full border border-primario/15 bg-primario/[0.06] px-3 py-1 text-xs font-bold text-primario">
                     Plan guardado · no comprado
                   </span>
                 </div>

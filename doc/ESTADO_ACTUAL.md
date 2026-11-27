@@ -163,8 +163,8 @@ Hay tres URLs PostgreSQL. Aunque la variable `POSTGRES_URL_NON_POOLING` se llame
 ## 9. Estilos
 
 - Tailwind CSS `^4`; `src/app/globals.css` importa `tailwindcss` y define `--color-background` y `--color-foreground` en `@theme inline`.
-- Fuentes: Geist y Geist Mono mediante `next/font/google` en `src/app/layout.tsx`; el `body` también declara Arial/Helvetica en CSS.
-- Tokens actuales: claro `#ffffff`/`#171717`; en modo oscuro `#0a0a0a`/`#ededed`. No están declarados los tokens de la paleta de viajes del plan.
+- Fuentes: Geist y Geist Mono mediante `next/font/google` en `src/app/layout.tsx`; el cuerpo utiliza Geist con Arial/Helvetica como respaldo.
+- La interfaz usa una paleta clara unificada conforme al plan: fondo `#f4f6f7`, superficies blancas, texto `#1f2933`, azul océano `#0b4f6c` y acento dorado `#f2a104`. Formularios de autenticación comparten `src/components/ui/AutenticacionShell.tsx`; controles reutilizan tokens de `globals.css`.
 - No se encontró una librería de íconos declarada en `package.json`.
 
 ## 10. Pruebas

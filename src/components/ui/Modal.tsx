@@ -68,7 +68,7 @@ export function Modal({ abierto, alCerrar, children, titulo }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-slate-950/60 p-4"
+      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-sm"
       onMouseDown={(evento) => {
         if (evento.target === evento.currentTarget) {
           alCerrar();
@@ -78,7 +78,7 @@ export function Modal({ abierto, alCerrar, children, titulo }: ModalProps) {
       <div
         aria-labelledby={tituloId}
         aria-modal="true"
-        className="w-full max-w-lg rounded-lg bg-superficie p-6 text-texto shadow-2xl"
+        className="w-full max-w-lg rounded-xl border border-borde bg-superficie p-6 text-texto shadow-2xl"
         ref={dialogoRef}
         role="dialog"
         tabIndex={-1}

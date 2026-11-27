@@ -7,10 +7,10 @@ interface InsigniaProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const clasesPorTono: Record<TonoInsignia, string> = {
-  neutro: "bg-slate-100 text-slate-800",
-  planeado: "bg-slate-100 text-slate-800",
-  completado: "bg-green-100 text-green-900",
-  acento: "bg-amber-100 text-amber-950",
+  neutro: "border border-borde bg-fondo-viajes text-texto-suave",
+  planeado: "border border-borde bg-fondo-viajes text-planeado",
+  completado: "border border-completado/20 bg-green-50 text-green-900",
+  acento: "border border-acento/30 bg-amber-50 text-amber-950",
 };
 
 export function Insignia({
